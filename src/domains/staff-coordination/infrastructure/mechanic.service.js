@@ -6,5 +6,11 @@ export const MechanicService = {
     },
     create(data) {
         return http.post('/mechanics', data);
+    },
+    update(id, data) {
+        return http.put(`/mechanics/${id}`, data);
+    },
+    delete(id) {
+        return http.delete(`/mechanics/${id}`);
     }
 };
