@@ -14,6 +14,22 @@
           <p><strong>Descripción:</strong> {{ order.description }}</p>
           <p><strong>Fecha Ingreso:</strong> {{ order.startDate }}</p>
           <p><strong>Fecha Estimada:</strong> {{ order.estimatedDate }}</p>
+          <div v-if="vehicle" class="detail-vehicle-card">
+            <img
+                :src="vehicle.image"
+                :alt="vehicle.brand"
+                class="detail-vehicle-image"
+            />
+
+            <div>
+              <h3>
+                {{ vehicle.brand }}
+                {{ vehicle.model }}
+              </h3>
+
+              <p>{{ vehicle.plate }}</p>
+            </div>
+          </div>
         </div>
         <div class="col-12 md:col-6 flex flex-column align-items-end justify-content-center">
           <label class="font-bold mb-2">Precio Total (S/.)</label>
@@ -81,6 +97,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useWorkOrderStore } from '../application/work-order.store';
 import { useTaskStore } from '../application/task.store';
 import { useMechanicStore } from '../../staff-coordination/application/mechanic.store';
+import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
 
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
@@ -95,12 +112,21 @@ const router = useRouter();
 const workOrderStore = useWorkOrderStore();
 const taskStore = useTaskStore();
 const mechanicStore = useMechanicStore();
+const vehicleStore = useVehicleStore();
 
 const orderId = route.params.id;
 
 
 const order = computed(() => {
   return workOrderStore.workOrders.find(wo => String(wo.id) === String(orderId));
+});
+
+const vehicle = computed(() => {
+  if (!order.value) return null;
+
+  return vehicleStore.vehicles.find(
+      v => String(v.id) === String(order.value.vehicleId)
+  );
 });
 
 const localPrice = ref(0);
@@ -111,7 +137,8 @@ onMounted(async () => {
 
   const promises = [
     taskStore.fetchTasksByOrder(orderId),
-    mechanicStore.fetchMechanics()
+    mechanicStore.fetchMechanics(),
+    vehicleStore.fetchVehicles()
   ];
 
   if (workOrderStore.workOrders.length === 0) {
@@ -163,3 +190,23 @@ const updateTaskStatus = async (task) => {
   await taskStore.updateTaskStatus(task.id, task.status);
 };
 </script>
+<style scoped>
+
+.detail-vehicle-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 20px;
+  background: #f8fafc;
+}
+
+.detail-vehicle-image {
+  width: 120px;
+  height: 90px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+</style>
