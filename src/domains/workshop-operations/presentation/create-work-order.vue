@@ -1,187 +1,162 @@
 <template>
-  <div class="container">
-    <div class="flex align-items-center mb-4">
-      <Button icon="pi pi-arrow-left" text @click="goBack" class="mr-3" />
-      <h1 class="m-0">Registrar Nueva Orden de Trabajo</h1>
+  <div class="dashboard-container">
+    <h1 class="mb-4">{{ t('dashboard.title') }}</h1>
+
+    <div class="grid mb-4">
+      <div class="col-12 md:col-6 lg:col-3">
+        <Card class="kpi-card shadow-1 border-left-blue">
+          <template #content>
+            <div class="flex justify-content-between">
+              <div>
+                <span class="block text-500 font-medium mb-3">{{ t('dashboard.vehiclesInWorkshop') }}</span>
+                <div class="text-900 font-bold text-3xl">{{ vehiclesInWorkshop }}</div>
+              </div>
+              <div class="kpi-icon bg-blue-100"><i class="pi pi-car text-blue-500 text-xl"></i></div>
+            </div>
+          </template>
+        </Card>
+      </div>
+      <div class="col-12 md:col-6 lg:col-3">
+        <Card class="kpi-card shadow-1 border-left-orange">
+          <template #content>
+            <div class="flex justify-content-between">
+              <div>
+                <span class="block text-500 font-medium mb-3">{{ t('dashboard.activeOrders') }}</span>
+                <div class="text-900 font-bold text-3xl">{{ activeOrders }}</div>
+              </div>
+              <div class="kpi-icon bg-orange-100"><i class="pi pi-file-edit text-orange-500 text-xl"></i></div>
+            </div>
+          </template>
+        </Card>
+      </div>
+      <div class="col-12 md:col-6 lg:col-3">
+        <Card class="kpi-card shadow-1 border-left-teal">
+          <template #content>
+            <div class="flex justify-content-between">
+              <div>
+                <span class="block text-500 font-medium mb-3">{{ t('dashboard.pendingTasks') }}</span>
+                <div class="text-900 font-bold text-3xl">{{ pendingTasks }}</div>
+              </div>
+              <div class="kpi-icon bg-teal-100"><i class="pi pi-check-square text-teal-500 text-xl"></i></div>
+            </div>
+          </template>
+        </Card>
+      </div>
+      <div class="col-12 md:col-6 lg:col-3">
+        <Card class="kpi-card shadow-1 border-left-green">
+          <template #content>
+            <div class="flex justify-content-between">
+              <div>
+                <span class="block text-500 font-medium mb-3">{{ t('dashboard.projectedIncome') }}</span>
+                <div class="text-900 font-bold text-3xl">S/. {{ projectedIncome }}</div>
+              </div>
+              <div class="kpi-icon bg-green-100"><i class="pi pi-money-bill text-green-500 text-xl"></i></div>
+            </div>
+          </template>
+        </Card>
+      </div>
     </div>
 
     <div class="grid">
-      <div class="col-12 md:col-5">
-        <div class="card p-4 bg-white border-round shadow-1 h-full">
-          <h3>Datos Generales</h3>
-
-          <div class="field mb-3">
-            <label>Vehículo</label>
-            <Dropdown
-                v-model="newWO.vehicleId"
-                :options="vehicleStore.vehicles"
-                optionLabel="plate"
-                optionValue="id"
-                placeholder="Seleccionar Placa"
-                filter class="w-full"
-                @change="onVehicleChange"
-            />
-          </div>
-
-          <div class="field mb-3" v-if="selectedCustomerName">
-            <label>Cliente Dueño</label>
-            <InputText :value="selectedCustomerName" disabled class="w-full" />
-          </div>
-
-          <div class="field mb-3">
-            <label>Descripción del Problema</label>
-            <Textarea v-model="newWO.description" rows="3" class="w-full" />
-          </div>
-
-          <div class="formgrid grid">
-            <div class="field col">
-              <label>Fecha Estimada</label>
-              <Calendar v-model="newWO.estimatedDate" dateFormat="yy-mm-dd" showIcon class="w-full" />
-            </div>
-            <div class="field col">
-              <label>Precio Total (S/.)</label>
-              <InputText v-model.number="newWO.price" type="number" class="w-full" />
-            </div>
+      <div class="col-12 lg:col-7">
+        <div class="card p-4 bg-white border-round shadow-1 h-full flex flex-column">
+          <h3>{{ t('dashboard.fleetStatus') }}</h3>
+          <p class="text-500 text-sm mt-0 mb-4">{{ t('dashboard.fleetSubtitle') }}</p>
+          <div class="flex-1 flex justify-content-center align-items-center" style="max-height:300px;position:relative">
+            <Chart type="doughnut" :data="chartData" :options="chartOptions" class="w-full" style="max-height:300px" />
           </div>
         </div>
       </div>
 
-      <div class="col-12 md:col-7">
+      <div class="col-12 lg:col-5">
+        <div class="card p-4 bg-white border-round shadow-1 mb-4">
+          <h3 class="m-0 mb-3">{{ t('dashboard.quickActions') }}</h3>
+          <div class="grid">
+            <div class="col-12 md:col-4">
+              <Button :label="t('dashboard.newCustomer')" icon="pi pi-user-plus" severity="secondary" outlined class="w-full" @click="router.push('/customers')" />
+            </div>
+            <div class="col-12 md:col-4">
+              <Button :label="t('dashboard.newVehicle')" icon="pi pi-car" severity="secondary" outlined class="w-full" @click="router.push('/vehicles')" />
+            </div>
+            <div class="col-12 md:col-4">
+              <Button :label="t('dashboard.newOrder')" icon="pi pi-file-edit" class="w-full" @click="router.push('/work-orders/new')" />
+            </div>
+          </div>
+        </div>
+
         <div class="card p-4 bg-white border-round shadow-1 h-full">
           <div class="flex justify-content-between align-items-center mb-3">
-            <h3>Tareas Asignadas</h3>
-            <Button label="Añadir Tarea" icon="pi pi-plus" size="small" @click="addTaskRow" severity="secondary" />
+            <h3 class="m-0">{{ t('dashboard.recentActivity') }}</h3>
+            <Button :label="t('dashboard.viewAll')" text size="small" @click="router.push('/work-orders')" />
           </div>
-
-          <DataTable :value="tasks" responsiveLayout="scroll" class="p-datatable-sm">
-            <Column header="Descripción">
+          <DataTable :value="recentOrders" class="p-datatable-sm" responsiveLayout="scroll">
+            <Column field="trackingCode" :header="t('workOrders.colCode')"></Column>
+            <Column field="status" :header="t('workOrders.colStatus')">
               <template #body="slotProps">
-                <InputText v-model="slotProps.data.description" placeholder="Ej: Cambio de aceite" class="w-full" />
-              </template>
-            </Column>
-            <Column header="Mecánico Asignado">
-              <template #body="slotProps">
-                <Dropdown
-                    v-model="slotProps.data.mechanicId"
-                    :options="mechanicStore.mechanics"
-                    optionLabel="fullName"
-                    optionValue="id"
-                    placeholder="Seleccionar"
-                    class="w-full"
-                />
-              </template>
-            </Column>
-            <Column header="">
-              <template #body="slotProps">
-                <Button icon="pi pi-trash" severity="danger" text rounded @click="removeTaskRow(slotProps.index)" />
+                <Tag :value="slotProps.data.status" :severity="slotProps.data.status === 'Finalizado' ? 'success' : 'info'" />
               </template>
             </Column>
           </DataTable>
-
-          <div v-if="tasks.length === 0" class="text-center p-3 text-500">
-            No has agregado tareas. Añade al menos una.
-          </div>
         </div>
       </div>
-    </div>
-
-    <div class="flex justify-content-end mt-4">
-      <Button label="Cancelar" icon="pi pi-times" text severity="secondary" class="mr-2" @click="goBack" />
-      <Button label="Guardar Orden Completa" icon="pi pi-save" @click="saveFullWorkOrder" :loading="isSaving" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
 import { useWorkOrderStore } from '../application/work-order.store';
 import { useTaskStore } from '../application/task.store';
-import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
-import { useCustomerStore } from '../../customer-management/application/customer.store';
-import { useMechanicStore } from '../../staff-coordination/application/mechanic.store';
-
+import Card from 'primevue/card';
 import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
-import Textarea from 'primevue/textarea';
-import Dropdown from 'primevue/dropdown';
-import Calendar from 'primevue/calendar';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import Chart from 'primevue/chart';
+import Tag from 'primevue/tag';
 
+const { t } = useI18n();
 const router = useRouter();
+const vehicleStore = useVehicleStore();
 const workOrderStore = useWorkOrderStore();
 const taskStore = useTaskStore();
-const vehicleStore = useVehicleStore();
-const customerStore = useCustomerStore();
-const mechanicStore = useMechanicStore();
 
-const isSaving = ref(false);
-const selectedCustomerName = ref('');
-const newWO = ref({ vehicleId: null, customerId: null, description: '', estimatedDate: null, price: 0 });
-const tasks = ref([]);
+const vehiclesInWorkshop = computed(() => vehicleStore.vehicles.filter(v => v.status === 'En Taller').length);
+const activeOrders = computed(() => workOrderStore.workOrders.filter(wo => wo.status === 'En Proceso').length);
+const pendingTasks = computed(() => taskStore.tasks.filter(t => t.status !== 'Completada').length);
+const projectedIncome = computed(() => workOrderStore.workOrders.filter(wo => wo.status === 'En Proceso').reduce((acc, wo) => acc + (parseFloat(wo.price) || 0), 0));
+const recentOrders = computed(() => [...workOrderStore.workOrders].reverse().slice(0, 5));
+
+const chartData = ref(null);
+const chartOptions = ref({ maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '60%' });
+
+const setChartData = () => {
+  const statusCounts = { 'En Taller': 0, 'Listo': 0 };
+  vehicleStore.vehicles.forEach(v => {
+    if (v.status !== 'Entregado') {
+      if (statusCounts[v.status] !== undefined) statusCounts[v.status]++;
+      else statusCounts[v.status] = 1;
+    }
+  });
+  chartData.value = {
+    labels: Object.keys(statusCounts),
+    datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#f59e0b', '#10b981'], hoverBackgroundColor: ['#fbbf24', '#34d399'] }]
+  };
+};
 
 onMounted(async () => {
-  await Promise.all([
-    vehicleStore.fetchVehicles(),
-    customerStore.fetchCustomers(),
-    mechanicStore.fetchMechanics()
-  ]);
+  await Promise.all([vehicleStore.fetchVehicles(), workOrderStore.fetchWorkOrders(), taskStore.fetchAllTasks()]);
+  setChartData();
 });
-
-const goBack = () => router.push('/work-orders');
-
-const onVehicleChange = () => {
-  const vehicle = vehicleStore.vehicles.find(v => String(v.id) === String(newWO.value.vehicleId));
-  if (vehicle) {
-    newWO.value.customerId = vehicle.customerId;
-    const customer = customerStore.customers.find(c => String(c.id) === String(vehicle.customerId));
-    selectedCustomerName.value = customer ? customer.fullName : 'No encontrado';
-  }
-};
-
-const addTaskRow = () => {
-  tasks.value.push({ description: '', mechanicId: null, status: 'Pendiente' });
-};
-
-const removeTaskRow = (index) => {
-  tasks.value.splice(index, 1);
-};
-
-const saveFullWorkOrder = async () => {
-  if (!newWO.value.vehicleId || tasks.value.length === 0) {
-    alert("Debes seleccionar un vehículo y añadir al menos una tarea.");
-    return;
-  }
-
-  isSaving.value = true;
-  try {
-
-    const formattedDate = newWO.value.estimatedDate instanceof Date
-        ? newWO.value.estimatedDate.toISOString().split('T')[0]
-        : newWO.value.estimatedDate;
-
-    const payloadWO = { ...newWO.value, estimatedDate: formattedDate, status: 'En Proceso' };
-
-
-    const createdOrder = await workOrderStore.addWorkOrder(payloadWO);
-
-
-    for (let task of tasks.value) {
-      if (task.description) {
-        await taskStore.addTask({
-          ...task,
-          workOrderId: createdOrder.id
-        });
-      }
-    }
-
-
-    router.push('/work-orders');
-  } catch (error) {
-    console.error("Error al guardar la orden completa:", error);
-  } finally {
-    isSaving.value = false;
-  }
-};
 </script>
+
+<style scoped>
+.kpi-card { border-radius: 12px; }
+.kpi-icon { display: flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; }
+.border-left-blue { border-left: 5px solid #3b82f6; }
+.border-left-orange { border-left: 5px solid #f59e0b; }
+.border-left-teal { border-left: 5px solid #14b8a6; }
+.border-left-green { border-left: 5px solid #10b981; }
+</style>

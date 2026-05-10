@@ -1,9 +1,9 @@
 <template>
   <div class="customer-list-container">
     <div class="header-actions">
-      <h1>Directorio de Clientes</h1>
+      <h1>{{t('customers.title')}}</h1>
       <Button
-          label="Nuevo Cliente"
+          :label="t('customers.addButton')"
           icon="pi pi-plus"
           severity="success"
           @click="openNewCustomerDialog"
@@ -18,11 +18,11 @@
         responsiveLayout="scroll"
         class="p-datatable-sm"
     >
-      <Column field="fullName" header="Nombre Completo"></Column>
-      <Column field="dni" header="DNI"></Column>
-      <Column field="email" header="Correo"></Column>
-      <Column field="phone" header="Teléfono"></Column>
-      <Column header="Acciones">
+      <Column field="fullName" :header="t('customers.colName')"></Column>
+      <Column field="dni" :header="t('customers.colDni')"></Column>
+      <Column field="email" :header="t('customers.colEmail')"></Column>
+      <Column field="phone" :header="t('customers.colPhone')"></Column>
+      <Column :header="t('customers.colActions')">
         <template #body="slotProps">
           <Button icon="pi pi-pencil" severity="info" text rounded @click="editCustomer(slotProps.data)" />
         </template>
@@ -31,31 +31,31 @@
 
     <Dialog
         v-model:visible="customerDialog"
-        header="Registrar Nuevo Cliente"
+        header="newCustomer.id ? t('customers.dialogTitleEdit') : t('customers.dialogTitleNew')"
         :modal="true"
         class="p-fluid"
         :style="{ width: '450px' }"
     >
       <div class="field">
-        <label for="name">Nombre Completo</label>
+        <label for="name">{{t('customers.labelName')}}</label>
         <InputText id="name" v-model.trim="newCustomer.fullName" required autofocus />
       </div>
       <div class="field">
-        <label for="dni">DNI</label>
+        <label for="dni">{{t('customers.labelDni')}}</label>
         <InputText id="dni" v-model.trim="newCustomer.dni" required />
       </div>
       <div class="field">
-        <label for="email">Correo Electrónico</label>
+        <label for="email">{{t('customers.labelEmail')}}</label>
         <InputText id="email" v-model.trim="newCustomer.email" />
       </div>
       <div class="field">
-        <label for="phone">Teléfono de Contacto</label>
+        <label for="phone">{{t('customers.labelPhone')}}</label>
         <InputText id="phone" v-model.trim="newCustomer.phone" />
       </div>
 
       <template #footer>
-        <Button label="Cancelar" icon="pi pi-times" text @click="hideDialog" />
-        <Button label="Guardar" icon="pi pi-check" @click="saveCustomer" />
+        <Button :label="t('common.cancel')" icon="pi pi-times" text @click="hideDialog" />
+        <Button :label="t('common.save')" icon="pi pi-check" @click="saveCustomer" />
       </template>
     </Dialog>
   </div>
@@ -63,6 +63,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import {useI18n} from 'vue-i18n';
 import { useCustomerStore } from '../application/customer.store';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
@@ -72,7 +73,7 @@ import Dialog from 'primevue/dialog';
 
 const customerStore = useCustomerStore();
 const customerDialog = ref(false);
-
+const {t} = useI18n();
 const newCustomer = ref({
   fullName: '',
   dni: '',

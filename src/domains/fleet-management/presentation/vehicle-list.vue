@@ -1,89 +1,89 @@
 <template>
   <div class="container">
     <div class="flex justify-content-between align-items-center mb-4">
-      <h1>Flota de Vehículos</h1>
-      <Button label="Registrar Vehículo" icon="pi pi-plus" severity="primary" @click="openNew" />
+      <h1>{{t('vehicles.title')}}</h1>
+      <Button :label="t('vehicles.addButton')" icon="pi pi-plus" severity="primary" @click="openNew" />
     </div>
 
     <DataTable :value="vehicleStore.vehicles" :loading="vehicleStore.loading" dataKey="id" responsiveLayout="scroll">
-      <Column field="plate" header="Placa"></Column>
-      <Column field="brand" header="Marca"></Column>
-      <Column field="model" header="Modelo"></Column>
-      <Column field="year" header="Año"></Column>
-      <Column field="color" header="Color"></Column>
+      <Column field="plate" :header="t('vehicles.colPlate')"></Column>
+      <Column field="brand" :header="t('vehicles.colBrand')"></Column>
+      <Column field="model" :header="t('vehicles.colModel')"></Column>
+      <Column field="year" :header="t('vehicles.colYear')"></Column>
+      <Column field="color" :header="t('vehicles.colColor')"></Column>
 
-      <Column header="Dueño">
+      <Column :header="t('vehicles.colOwner')">
         <template #body="slotProps">
           {{ getCustomerName(slotProps.data.customerId) }}
         </template>
       </Column>
-      <Column field="status" header="Estado">
+      <Column field="status" :header="t('vehicles.colStatus')">
         <template #body="slotProps">
           <Tag :value="slotProps.data.status" :severity="getSeverity(slotProps.data.status)" />
         </template>
       </Column>
-      <Column header="Acciones">
+      <Column :header="t('vehicles.colActions')">
         <template #body="slotProps">
           <Button icon="pi pi-pencil" severity="info" text rounded @click="editVehicle(slotProps.data)" />
         </template>
       </Column>
     </DataTable>
 
-    <Dialog v-model:visible="vehicleDialog" :header="vehicle.id ? 'Editar Vehículo' : 'Nuevo Vehículo'" :modal="true" class="p-fluid">
+    <Dialog v-model:visible="vehicleDialog" :header="vehicle.id ? t('vehicles.dialogTitleEdit') : t('vehicles.dialogTitleNew')" :modal="true" class="p-fluid">
       <div class="field">
-        <label for="customer">Cliente (Dueño)</label>
+        <label for="customer">{{t('vehicles.labelCustomer')}}</label>
         <Dropdown
             id="customer"
             v-model="vehicle.customerId"
             :options="customerStore.customers"
             optionLabel="fullName"
             optionValue="id"
-            placeholder="Busca un cliente..."
+            :placeholder="t('common.searchCustomer')"
             filter
         />
       </div>
 
       <div class="formgrid grid">
         <div class="field col">
-          <label for="plate">Placa</label>
+          <label for="plate">{{ t('vehicles.labelPlate') }}</label>
           <InputText id="plate" v-model.trim="vehicle.plate" required />
         </div>
         <div class="field col">
-          <label for="status">Estado</label>
+          <label for="status">{{t('vehicles.labelStatus')}}</label>
           <Dropdown
               id="status"
               v-model="vehicle.status"
               :options="['En Taller', 'Listo', 'Entregado']"
-              placeholder="Estado"
+              :placeholder="t('common.selectStatus')"
           />
         </div>
       </div>
 
       <div class="formgrid grid">
         <div class="field col">
-          <label for="brand">Marca</label>
+          <label for="brand">{{t('vehicles.labelBrand')}}</label>
           <InputText id="brand" v-model.trim="vehicle.brand" />
         </div>
         <div class="field col">
-          <label for="model">Modelo</label>
+          <label for="model">{{t('vehicles.labelModel')}}</label>
           <InputText id="model" v-model.trim="vehicle.model" />
         </div>
       </div>
 
       <div class="formgrid grid">
         <div class="field col">
-          <label for="year">Año</label>
+          <label for="year">{{t('vehicles.labelYear')}}</label>
           <InputText id="year" v-model.trim="vehicle.year" placeholder="Ej: 2024" />
         </div>
         <div class="field col">
-          <label for="color">Color</label>
+          <label for="color">{{t('vehicles.labelColor')}}</label>
           <InputText id="color" v-model.trim="vehicle.color" placeholder="Ej: Rojo" />
         </div>
       </div>
 
       <template #footer>
-        <Button label="Cancelar" icon="pi pi-times" text @click="hideDialog" />
-        <Button label="Guardar" icon="pi pi-check" @click="saveVehicle" />
+        <Button :label="t('common.cancel')" icon="pi pi-times" text @click="hideDialog" />
+        <Button :label="t('common.save')" icon="pi pi-check" @click="saveVehicle" />
       </template>
     </Dialog>
   </div>
@@ -93,6 +93,7 @@
 import { ref, onMounted } from 'vue';
 import { useVehicleStore } from '../application/vehicle.store';
 import { useCustomerStore } from '../../customer-management/application/customer.store';
+import {useI18n} from 'vue-i18n';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -101,6 +102,7 @@ import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import Tag from 'primevue/tag';
 
+const {t} = useI18n();
 const vehicleStore = useVehicleStore();
 const customerStore = useCustomerStore();
 const vehicleDialog = ref(false);
