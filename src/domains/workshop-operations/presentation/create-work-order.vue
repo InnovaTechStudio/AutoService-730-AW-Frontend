@@ -21,6 +21,22 @@
                 filter class="w-full"
                 @change="onVehicleChange"
             />
+            <div v-if="selectedVehicle" class="vehicle-preview-card">
+              <img
+                  :src="selectedVehicle.image"
+                  :alt="selectedVehicle.brand"
+                  class="vehicle-preview-image"
+              />
+
+              <div class="vehicle-preview-info">
+                <h4>
+                  {{ selectedVehicle.brand }}
+                  {{ selectedVehicle.model }}
+                </h4>
+
+                <p>{{ selectedVehicle.plate }}</p>
+              </div>
+            </div>
           </div>
 
           <div class="field mb-3" v-if="selectedCustomerName">
@@ -69,6 +85,7 @@
                     placeholder="Seleccionar"
                     class="w-full"
                 />
+
               </template>
             </Column>
             <Column header="">
@@ -118,6 +135,7 @@ const mechanicStore = useMechanicStore();
 
 const isSaving = ref(false);
 const selectedCustomerName = ref('');
+const selectedVehicle = ref(null);
 const newWO = ref({ vehicleId: null, customerId: null, description: '', estimatedDate: null, price: 0 });
 const tasks = ref([]);
 
@@ -132,11 +150,22 @@ onMounted(async () => {
 const goBack = () => router.push('/work-orders');
 
 const onVehicleChange = () => {
-  const vehicle = vehicleStore.vehicles.find(v => String(v.id) === String(newWO.value.vehicleId));
+  const vehicle = vehicleStore.vehicles.find(
+      v => String(v.id) === String(newWO.value.vehicleId)
+  );
+
+  selectedVehicle.value = vehicle || null;
+
   if (vehicle) {
     newWO.value.customerId = vehicle.customerId;
-    const customer = customerStore.customers.find(c => String(c.id) === String(vehicle.customerId));
-    selectedCustomerName.value = customer ? customer.fullName : 'No encontrado';
+
+    const customer = customerStore.customers.find(
+        c => String(c.id) === String(vehicle.customerId)
+    );
+
+    selectedCustomerName.value = customer
+        ? customer.fullName
+        : 'No encontrado';
   }
 };
 
@@ -185,3 +214,33 @@ const saveFullWorkOrder = async () => {
   }
 };
 </script>
+
+<style scoped>
+.vehicle-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.vehicle-preview-image {
+  width: 90px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.vehicle-preview-info h4 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.vehicle-preview-info p {
+  margin-top: 0.3rem;
+  color: #64748b;
+}
+</style>
