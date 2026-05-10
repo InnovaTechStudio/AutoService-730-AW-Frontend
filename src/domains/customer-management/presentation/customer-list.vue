@@ -31,7 +31,7 @@
 
     <Dialog
         v-model:visible="customerDialog"
-        header="newCustomer.id ? t('customers.dialogTitleEdit') : t('customers.dialogTitleNew')"
+        :header="newCustomer.id ? t('customers.dialogTitleEdit') : t('customers.dialogTitleNew')"
         :modal="true"
         class="p-fluid"
         :style="{ width: '450px' }"
