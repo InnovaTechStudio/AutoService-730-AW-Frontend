@@ -109,8 +109,10 @@ const openNew = () => {
     model: '',
     year: '',
     color: '',
+    image: '',
     customerId: null
   };
+
   vehicleDialog.value = true;
 };
 
@@ -134,6 +136,19 @@ const saveVehicle = async () => {
     vehicleDialog.value = false;
     vehicle.value = {};
   }
+};
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    vehicle.value.image = reader.result;
+  };
+
+  reader.readAsDataURL(file);
 };
 </script>
 
@@ -259,6 +274,29 @@ const saveVehicle = async () => {
         </div>
       </div>
 
+      <div class="field">
+        <label for="image">Imagen del vehículo</label>
+
+        <InputText
+            id="image"
+            v-model.trim="vehicle.image"
+            placeholder="https://..."
+        />
+        <input
+            type="file"
+            accept="image/*"
+            @change="handleImageUpload"
+        />
+
+
+        <img
+            v-if="vehicle.image"
+            :src="vehicle.image"
+            alt="Vista previa"
+            class="vehicle-preview"
+        />
+      </div>
+
       <template #footer>
         <Button label="Cancelar" icon="pi pi-times" text @click="hideDialog" />
         <Button label="Guardar" icon="pi pi-check" @click="saveVehicle" />
@@ -369,7 +407,14 @@ const saveVehicle = async () => {
 .vehicle-dialog {
   width: min(620px, 92vw);
 }
-
+.vehicle-preview {
+  width: 100%;
+  height: 190px;
+  margin-top: 1rem;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+}
 @media (max-width: 1100px) {
   .vehicles-grid {
     grid-template-columns: 1fr;

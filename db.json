@@ -178,6 +178,28 @@
       "color": "Blanco",
       "status": "En Taller",
       "customerId": "C-8"
+    },
+    {
+      "id": "XmRKijIuwGQ",
+      "plate": "AAA-BBB",
+      "brand": "Toyota",
+      "model": "Corolla",
+      "year": "2022",
+      "color": "Gris",
+      "status": "En Taller",
+      "customerId": "C-7",
+      "workshopId": "WS-1"
+    },
+    {
+      "id": "hzjnkV5AM2o",
+      "plate": "EEEEE-AAAAA",
+      "brand": "lamborgini",
+      "model": "lamborgini",
+      "year": "2021",
+      "color": "amariilo",
+      "status": "Listo",
+      "customerId": "C-1",
+      "workshopId": "WS-1"
     }
   ],
   "mechanics": [
