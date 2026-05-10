@@ -150,6 +150,19 @@ const handleImageUpload = (event) => {
 
   reader.readAsDataURL(file);
 };
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    vehicle.value.image = reader.result;
+  };
+
+  reader.readAsDataURL(file);
+};
 </script>
 
 <template>
@@ -287,7 +300,6 @@ const handleImageUpload = (event) => {
             accept="image/*"
             @change="handleImageUpload"
         />
-
 
         <img
             v-if="vehicle.image"
