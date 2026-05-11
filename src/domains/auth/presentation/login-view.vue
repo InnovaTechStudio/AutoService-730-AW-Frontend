@@ -10,7 +10,12 @@
     <div class="form-section">
       <div class="login-box">
         <div class="login-header">
-          <h2>Bienvenido</h2>
+          <div class="title-row">
+            <img src="/AutoService-logo.jpg" alt="AutoService Logo" class="logo">
+
+            <h2>Bienvenido</h2>
+          </div>
+
           <span class="badge">Modo Admin</span>
           <p>Ingresa tus credenciales para continuar</p>
         </div>
@@ -72,6 +77,12 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+.logo {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  margin-bottom: 0; /* IMPORTANTE */
+}
 
 .login-layout {
   display: flex;
@@ -83,7 +94,16 @@ const handleLogin = async () => {
 }
 
 /* ========= HERO ========= */
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
 
+.title-row h2 {
+  margin: 0;
+}
 .hero-section {
   flex: 1;
   position: relative;

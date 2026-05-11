@@ -25,8 +25,7 @@
             :class="{ active: selectedMethod === 'Yape' }"
             @click="selectedMethod = 'Yape'"
         >
-          <img src="https://www.google.com/imgres?q=logo%20de%20yape&imgurl=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F0%2F08%2FIcono_de_la_aplicaci%25C3%25B3n_Yape.png&imgrefurl=https%3A%2F%2Fes.wikipedia.org%2Fwiki%2FArchivo%3AIcono_de_la_aplicaci%25C3%25B3n_Yape.png&docid=8YV1h935tTrtwM&tbnid=LDk8sviteauQjM&vet=12ahUKEwj99t6fzLCUAxXArpUCHVkhIRAQnPAOegQIGBAB..i&w=512&h=512&hcb=2&ved=2ahUKEwj99t6fzLCUAxXArpUCHVkhIRAQnPAOegQIGBAB" alt="Yape" />
-          <span>Yape</span>
+          <img src="https://img.logo.dev/name/Yape?token=pk_N7BjeKbxQY2n_ta1Keni5Q&retina=true" alt="Yape"/>          <span>Yape</span>
         </div>
 
         <div
@@ -35,9 +34,7 @@
             @click="selectedMethod = 'Plin'"
         >
           <img
-              src="https://upload.wikimedia.org/wikipedia/commons/0/07/Plin_logo.png"
-              alt="Plin"
-          />
+              src="https://thf.bing.com/th/id/OIP.CE4sOegvUrcoWtMDwQfGDQHaHa?w=179&h=180&c=7&r=0&o=7&cb=thfc1&pid=1.7&rm=3" alt="BCP"/>
           <span>Plin</span>
         </div>
 
@@ -46,10 +43,8 @@
             :class="{ active: selectedMethod === 'Tarjeta' }"
             @click="selectedMethod = 'Tarjeta'"
         >
-          <img
-              src="https://logowik.com/content/uploads/images/bcp-banco-de-credito-del-peru9082.jpg"
-              alt="BCP"
-          />
+          <img src="https://img.logo.dev/name/Bcp?token=pk_N7BjeKbxQY2n_ta1Keni5Q&retina=true" alt="Plin" />
+
           <span>Tarjeta</span>
         </div>
 
@@ -153,7 +148,7 @@ const processPayment = () => {
 
 .payment-total{
   text-align:center;
-  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color:white;
   padding:1.5rem;
   border-radius:18px;

@@ -616,7 +616,7 @@ const updateTaskStatus = async (task) => {
 
 .price-card {
   height: 100%;
-  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);  display: flex;
   color: white;
   border-radius: 24px;
   padding: 2rem;
