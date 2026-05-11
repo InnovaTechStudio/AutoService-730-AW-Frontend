@@ -6,18 +6,19 @@ import App from './App.vue';
 import router from './router';
 import 'primeicons/primeicons.css';
 import './style.css';
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
 
 const app = createApp(App);
 
 app.use(createPinia());
 app.use(router);
-app.use(PrimeVue, {
-    theme: {
-        preset: Aura,
-        options: {
+app.use(PrimeVue, {theme: {preset: Aura, options: {
             darkModeSelector: '.my-app-dark',
         }
     }
 });
+app.component('Dialog', Dialog);
+app.component('Button', Button);
 
 app.mount('#app');

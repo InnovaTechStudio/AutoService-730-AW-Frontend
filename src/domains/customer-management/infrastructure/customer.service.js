@@ -12,5 +12,8 @@ export const CustomerService = {
     },
     update(id, data) {
         return http.put(`/customers/${id}`, data);
+    },
+    delete(id) {
+        return http.delete(`/customers/${id}`);
     }
 };

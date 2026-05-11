@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const publicHttp = axios.create({
+    //baseURL: import.meta.env.VITE_API_URL,
     baseURL: 'http://localhost:3000',
     headers: { 'Content-type': 'application/json' }
 });
@@ -16,7 +17,6 @@ export const TrackingService = {
             return Array.isArray(data) ? data : (data.data || []);
         }
     },
-
     async getVehicle(vehicleId) {
         const response = await publicHttp.get(`/vehicles/${vehicleId}`);
         return response.data;

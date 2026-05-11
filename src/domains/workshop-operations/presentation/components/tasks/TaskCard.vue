@@ -13,6 +13,12 @@ defineEmits(['status-change', 'edit', 'delete', 'go-order']);
 
 <template>
   <article class="task-card">
+    <img
+        v-if="task.photo"
+        :src="task.photo"
+        alt="Task"
+        class="task-image"
+    />
     <div class="task-top">
       <div>
         <Tag :value="task.workOrderCode" severity="secondary" rounded />
@@ -138,5 +144,12 @@ p i {
 
 .icon-button {
   border-radius: 14px;
+}
+.task-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 18px;
+  margin-bottom: 1rem;
 }
 </style>

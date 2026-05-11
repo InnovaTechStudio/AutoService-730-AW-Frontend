@@ -25,6 +25,7 @@ const selectedMechanicId = ref(null);
 const statusOptions = ['Pendiente', 'En Proceso', 'Completada'];
 const priorityOptions = ['Baja', 'Media', 'Alta', 'Crítica'];
 
+
 onMounted(() => {
   loadAllData();
 });
@@ -76,7 +77,8 @@ const tasksView = computed(() =>
       status: task.status || 'Pendiente',
       severity: getSeverity(task.status),
       priority: task.priority || 'Media',
-      estimatedTime: task.estimatedTime || 2
+      estimatedTime: task.estimatedTime || 2,
+      photo: task.photo
     }))
 );
 
