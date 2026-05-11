@@ -26,15 +26,12 @@ export const TrackingService = {
             return Array.isArray(data) ? data : (data.data || []);
         }
     },
-<<<<<<< HEAD
-=======
 
     /**
      * Fetches the vehicle details linked to a work order.
      * @param {string} vehicleId - The ID of the vehicle
      * @returns {Promise<Object>} Vehicle data object
      */
->>>>>>> 30a4abe (feat(customer-trust): implement dynamic vehicle image syncing and dark mode UI)
     async getVehicle(vehicleId) {
         const response = await publicHttp.get(`/vehicles/${vehicleId}`);
         return response.data;
@@ -49,7 +46,6 @@ export const TrackingService = {
         try {
             const response = await publicHttp.get(`/tasks?workOrderId=${workOrderId}`);
 
-
             let tasksArray = [];
 
             if (Array.isArray(response.data)) {
@@ -61,7 +57,6 @@ export const TrackingService = {
             } else {
                 return [];
             }
-
 
             return tasksArray.filter(task => String(task.workOrderId) === String(workOrderId));
 
