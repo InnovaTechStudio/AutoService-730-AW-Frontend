@@ -28,6 +28,12 @@ const router = createRouter({
                 { path: '', name: 'dashboard', component: () => import('../domains/workshop-operations/presentation/dashboard.vue') },
                 { path: 'customers', name: 'customers', component: () => import('../domains/customer-management/presentation/pages/customer-management.page.vue') },
                 { path: 'vehicles', name: 'vehicles', component : () => import('../domains/fleet-management/presentation/vehicle-list.vue')},
+                {
+                    path: 'vehicles/:id',
+                    name: 'vehicle-detail',
+                    component: () => import('../domains/fleet-management/presentation/vehicle-detail.vue'),
+                    props: true
+                },
                 { path: 'work-orders', name: 'work-orders', component: () => import('../domains/workshop-operations/presentation/work-order-list.vue')},
                 { path: 'work-orders/new', name: 'create-work-order', component: () => import('../domains/workshop-operations/presentation/create-work-order.vue')},
                 { path: 'work-orders/:id', name: 'work-order-details', component: () => import('../domains/workshop-operations/presentation/work-order-detail.vue'), props: true},

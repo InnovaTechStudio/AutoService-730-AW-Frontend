@@ -37,9 +37,9 @@ defineEmits(['view-detail']);
     </div>
 
     <div class="order-footer">
-      <div v-if="order.isRisk" class="risk-badge">
-        <i class="pi pi-exclamation-triangle"></i>
-        Riesgo de retraso
+      <div :class="['delay-badge', `delay-badge--${order.riskLevel}`]">
+        <i :class="order.riskIcon"></i>
+        {{ order.riskLabel }}
       </div>
 
       <Button
@@ -135,16 +135,34 @@ p {
   margin-top: 1.2rem;
 }
 
-.risk-badge {
+.delay-badge {
   display: inline-flex;
   gap: 0.4rem;
   align-items: center;
-  padding: 0.45rem 0.7rem;
+  padding: 0.45rem 0.75rem;
   border-radius: 999px;
-  background: #fff7ed;
-  color: #c2410c;
   font-size: 0.85rem;
   font-weight: 800;
+}
+
+.delay-badge--on-track {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.delay-badge--at-risk {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.delay-badge--delayed {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.delay-badge--completed {
+  background: #eef2ff;
+  color: #0b1680;
 }
 
 .detail-button {

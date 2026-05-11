@@ -132,6 +132,124 @@
 
     </Card>
 
+    <!-- QA CHECKLIST -->
+
+    <div class="qa-header">
+
+      <div>
+        <h2>Checklist de Validación</h2>
+        <p>Control final antes de entrega del vehículo</p>
+      </div>
+
+      <Tag
+          :value="qaCompleted ? 'QA Aprobado' : 'QA Pendiente'"
+          :severity="qaCompleted ? 'success' : 'warning'"
+          class="qa-status-tag"
+      />
+
+    </div>
+
+    <Card class="qa-card">
+
+      <template #content>
+
+        <div class="qa-grid">
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.tasksCompleted"
+                binary
+                inputId="tasksCompleted"
+            />
+
+            <label for="tasksCompleted">
+              Todas las tareas completadas
+            </label>
+          </div>
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.sparePartsChecked"
+                binary
+                inputId="sparePartsChecked"
+            />
+
+            <label for="sparePartsChecked">
+              Repuestos verificados
+            </label>
+          </div>
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.diagnosisValidated"
+                binary
+                inputId="diagnosisValidated"
+            />
+
+            <label for="diagnosisValidated">
+              Diagnóstico validado
+            </label>
+          </div>
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.cleaningDone"
+                binary
+                inputId="cleaningDone"
+            />
+
+            <label for="cleaningDone">
+              Limpieza realizada
+            </label>
+          </div>
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.finalTestDone"
+                binary
+                inputId="finalTestDone"
+            />
+
+            <label for="finalTestDone">
+              Prueba final realizada
+            </label>
+          </div>
+
+        </div>
+
+        <div class="qa-footer">
+
+          <div class="qa-summary">
+            <i
+                :class="qaCompleted
+            ? 'pi pi-check-circle'
+            : 'pi pi-exclamation-circle'"
+            ></i>
+
+            <span>
+          {{
+            qaCompleted
+                ? 'El vehículo está listo para entrega'
+                : 'Faltan validaciones antes de entregar'
+          }}
+        </span>
+          </div>
+
+          <Button
+              :label="qaCompleted
+          ? 'Ready for Delivery'
+          : 'Pending Validation'"
+              :severity="qaCompleted ? 'success' : 'warning'"
+              :disabled="!qaCompleted"
+              icon="pi pi-verified"
+          />
+
+        </div>
+
+      </template>
+
+    </Card>
+
     <!-- TAREAS -->
     <div class="tasks-header">
 
@@ -264,6 +382,7 @@ import { useWorkOrderStore } from '../application/work-order.store';
 import { useTaskStore } from '../application/task.store';
 import { useMechanicStore } from '../../staff-coordination/application/mechanic.store';
 import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
+import Checkbox from 'primevue/checkbox';
 
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
@@ -302,7 +421,13 @@ const vehicle = computed(() => {
 const localPrice = ref(0);
 const taskDialog = ref(false);
 const newTask = ref({});
-
+const qaChecklist = ref({
+  tasksCompleted: false,
+  sparePartsChecked: false,
+  diagnosisValidated: false,
+  cleaningDone: false,
+  finalTestDone: false
+});
 onMounted(async () => {
 
   const promises = [
@@ -326,6 +451,11 @@ onMounted(async () => {
 
 watch(order, (newVal) => {
   if (newVal) localPrice.value = newVal.price || 0;
+
+});
+
+const qaCompleted = computed(() => {
+  return Object.values(qaChecklist.value).every(value => value === true);
 });
 
 const getMechanicName = (id) => {
@@ -603,6 +733,87 @@ const updateTaskStatus = async (task) => {
   }
 
 }
+/* QA */
 
+.qa-header {
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qa-status-tag {
+  font-size: 0.95rem;
+  padding: 0.6rem 1rem;
+}
+
+.qa-card {
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  border: none;
+}
+
+.qa-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.qa-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.qa-item label {
+  font-weight: 600;
+  color: #334155;
+}
+
+.qa-footer {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.qa-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.qa-summary i {
+  font-size: 1.2rem;
+  color: #16a34a;
+}
+
+@media screen and (max-width: 768px) {
+
+  .qa-header {
+    flex-direction: column;
+    align-items: start;
+    gap: 1rem;
+  }
+
+  .qa-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .qa-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+}
 </style>
 

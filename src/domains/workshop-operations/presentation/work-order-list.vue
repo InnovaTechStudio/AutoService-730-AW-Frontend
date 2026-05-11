@@ -89,7 +89,9 @@ const ordersView = computed(() =>
       status: order.status || 'Pendiente',
       severity: getSeverity(order.status),
       price: order.price || 0,
-      isRisk: isRiskOrder(order)
+      riskLevel: getRiskLevel(order),
+      riskLabel: getRiskLabel(order),
+      riskIcon: getRiskIcon(order)
     }))
 );
 
@@ -127,6 +129,54 @@ const completedOrders = computed(() =>
 
 const viewDetail = (order) => {
   router.push(`/work-orders/${order.id}`);
+};
+const getDaysUntilDelivery = (estimatedDate) => {
+  if (!estimatedDate) return null;
+
+  const today = new Date();
+  const deliveryDate = new Date(estimatedDate);
+
+  today.setHours(0, 0, 0, 0);
+  deliveryDate.setHours(0, 0, 0, 0);
+
+  return Math.ceil((deliveryDate - today) / (1000 * 60 * 60 * 24));
+};
+
+const getRiskLevel = (order) => {
+  const progress = calculateProgress(order.id);
+  const daysLeft = getDaysUntilDelivery(order.estimatedDate);
+
+  if (['Finalizado', 'Completado', 'Listo'].includes(order.status)) {
+    return 'completed';
+  }
+
+  if (daysLeft !== null && daysLeft < 0) {
+    return 'delayed';
+  }
+
+  if (daysLeft !== null && daysLeft <= 1 && progress < 70) {
+    return 'at-risk';
+  }
+
+  return 'on-track';
+};
+
+const getRiskLabel = (order) => {
+  const level = getRiskLevel(order);
+
+  if (level === 'completed') return 'Completada';
+  if (level === 'delayed') return 'Retrasada';
+  if (level === 'at-risk') return 'En riesgo';
+  return 'A tiempo';
+};
+
+const getRiskIcon = (order) => {
+  const level = getRiskLevel(order);
+
+  if (level === 'completed') return 'pi pi-check-circle';
+  if (level === 'delayed') return 'pi pi-times-circle';
+  if (level === 'at-risk') return 'pi pi-exclamation-triangle';
+  return 'pi pi-clock';
 };
 </script>
 
