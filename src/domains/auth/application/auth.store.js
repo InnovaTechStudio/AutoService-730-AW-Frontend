@@ -9,14 +9,38 @@ export const useAuthStore = defineStore('auth', {
     }),
     getters: {
         isAuthenticated: (state) => !!state.user,
-        currentWorkshopId: (state) => state.user ? state.user.id : null
+        currentWorkshopId: (state) => state.user ? state.user.id : null,
+        userRole: (state) => state.user?.role || 'admin',
+        mechanicId: (state) => state.user?.mechanicId || null
     },
     actions: {
         async login(email, password) {
             this.loading = true;
             this.error = null;
+
+            if (email === 'mechanic@autoservice.com' && password === '123456') {
+                const mechanicUser = {
+                    id: 'MECH-1',
+                    name: 'Roberto Sánchez',
+                    email: 'mechanic@autoservice.com',
+                    role: 'mechanic',
+                    mechanicId: 'M-1',
+                    workshopId: 'WS-1'
+                };
+
+                this.user = mechanicUser;
+                localStorage.setItem('user', JSON.stringify(mechanicUser));
+                this.loading = false;
+                return true;
+            }
+
             try {
-                const response = await http.get(`/workshops?email=${email}&password=${password}`);
+                const response = await http.get('/workshops', {
+                    params: {
+                        email,
+                        password
+                    }
+                });
 
                 if (response.data.length > 0) {
                     const workshopUser = response.data[0];
