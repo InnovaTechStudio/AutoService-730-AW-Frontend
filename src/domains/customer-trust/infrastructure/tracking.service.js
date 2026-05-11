@@ -6,7 +6,16 @@ const publicHttp = axios.create({
     headers: { 'Content-type': 'application/json' }
 });
 
+/**
+ * Service to handle customer tracking operations.
+ * Connects to the local mock backend to fetch work orders, vehicles, and tasks.
+ */
 export const TrackingService = {
+    /**
+     * Fetches a work order either by its database ID or its user-friendly tracking code.
+     * @param {string} trackingCode - The ID or tracking code (e.g., 'AS-1003C')
+     * @returns {Promise<Array>} Array containing the matched work order(s)
+     */
     async getOrderByCode(trackingCode) {
         try {
             const response = await publicHttp.get(`/work-orders/${trackingCode}`);
@@ -17,11 +26,25 @@ export const TrackingService = {
             return Array.isArray(data) ? data : (data.data || []);
         }
     },
+<<<<<<< HEAD
+=======
+
+    /**
+     * Fetches the vehicle details linked to a work order.
+     * @param {string} vehicleId - The ID of the vehicle
+     * @returns {Promise<Object>} Vehicle data object
+     */
+>>>>>>> 30a4abe (feat(customer-trust): implement dynamic vehicle image syncing and dark mode UI)
     async getVehicle(vehicleId) {
         const response = await publicHttp.get(`/vehicles/${vehicleId}`);
         return response.data;
     },
 
+    /**
+     * Fetches all tasks associated with a specific work order to build the timeline.
+     * @param {string} workOrderId - The ID of the root work order
+     * @returns {Promise<Array>} Array of filtered task objects
+     */
     async getTasks(workOrderId) {
         try {
             const response = await publicHttp.get(`/tasks?workOrderId=${workOrderId}`);
@@ -43,7 +66,7 @@ export const TrackingService = {
             return tasksArray.filter(task => String(task.workOrderId) === String(workOrderId));
 
         } catch (error) {
-            console.error("Error obteniendo tareas:", error);
+            console.error("Error fetching tasks:", error);
             return [];
         }
     }
