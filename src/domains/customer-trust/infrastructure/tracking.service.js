@@ -1,18 +1,20 @@
 import axios from 'axios';
 
 const publicHttp = axios.create({
-    //baseURL: import.meta.env.VITE_API_URL,
-    baseURL: 'localhost:3000',
+    baseURL: 'http://localhost:3000',
     headers: { 'Content-type': 'application/json' }
 });
 
 export const TrackingService = {
     async getOrderByCode(trackingCode) {
-        const response = await publicHttp.get(`/work-orders?trackingCode=${trackingCode}`);
-        const data = response.data;
-
-
-        return Array.isArray(data) ? data : (data.data || []);
+        try {
+            const response = await publicHttp.get(`/work-orders/${trackingCode}`);
+            return [response.data];
+        } catch (error) {
+            const response = await publicHttp.get(`/work-orders?trackingCode=${trackingCode}`);
+            const data = response.data;
+            return Array.isArray(data) ? data : (data.data || []);
+        }
     },
 
     async getVehicle(vehicleId) {
