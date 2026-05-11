@@ -62,7 +62,11 @@ const handleLogin = async () => {
 
   if (success) {
 
-    router.push('/');
+    if (authStore.user?.role === 'mechanic') {
+      router.push('/mechanic');
+    } else {
+      router.push('/');
+    }
   }
 };
 </script>

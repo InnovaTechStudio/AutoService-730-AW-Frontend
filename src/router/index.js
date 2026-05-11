@@ -15,6 +15,12 @@ const router = createRouter({
             component: () => import('../domains/customer-trust/presentation/tracking-view.vue')
         },
         {
+            path: '/mechanic',
+            name: 'mechanic-dashboard',
+            component: () => import('../domains/mechanic/presentation/mechanic-dashboard.vue'),
+            meta: { requiresAuth: true, role: 'mechanic' }
+        },
+        {
             path: '/',
             component: () => import('../shared/presentation/admin-layout.vue'),
             meta: { requiresAuth: true },
@@ -38,8 +44,15 @@ router.beforeEach((to, from, next) => {
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
         next('/login');
     }
-    else if (to.path === '/login' && authStore.isAuthenticated) {
+    else if (to.meta.role && authStore.userRole !== to.meta.role) {
         next('/');
+    }
+    else if (to.path === '/login' && authStore.isAuthenticated) {
+        if (authStore.userRole === 'mechanic') {
+            next('/mechanic');
+        } else {
+            next('/');
+        }
     }
     else {
         next();

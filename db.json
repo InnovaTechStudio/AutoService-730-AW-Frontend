@@ -4,14 +4,28 @@
       "id": "WS-1",
       "name": "AutoTaller Surco",
       "email": "admin@autotaller.com",
-      "password": "admin"
+      "password": "admin",
+      "role": "admin"
     },
     {
       "id": "WS-2",
       "name": "Taller Los Rápidos",
       "email": "admin@rapidos.com",
-      "password": "admin"
+      "password": "admin",
+      "role": "admin"
+    },
+
+    {
+      "id": "MECH-1",
+      "name": "Roberto Sánchez",
+      "email": "mechanic@autoservice.com",
+      "password": "123456",
+      "role": "mechanic",
+      "mechanicId": "M-1",
+      "workshopId": "WS-1"
     }
+
+
   ],
   "customers": [
     {
