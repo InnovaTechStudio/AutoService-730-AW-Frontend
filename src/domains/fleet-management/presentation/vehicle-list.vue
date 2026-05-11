@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useVehicleStore } from '../application/vehicle.store';
 import { useCustomerStore } from '../../customer-management/application/customer.store';
+import { useRouter } from 'vue-router';
 
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -13,6 +14,7 @@ import VehicleCard from './components/VehicleCard.vue';
 
 const vehicleStore = useVehicleStore();
 const customerStore = useCustomerStore();
+const router = useRouter();
 
 const vehicleDialog = ref(false);
 const vehicle = ref({});
@@ -152,6 +154,9 @@ const handleImageUpload = (event) => {
   reader.readAsDataURL(file);
 };
 
+const viewVehicleDetail = (selectedVehicle) => {
+  router.push(`/vehicles/${selectedVehicle.id}`);
+};
 </script>
 
 <template>
@@ -207,6 +212,7 @@ const handleImageUpload = (event) => {
           :key="item.id"
           :vehicle="item"
           @edit="editVehicle"
+          @view-detail="viewVehicleDetail"
       />
     </div>
 

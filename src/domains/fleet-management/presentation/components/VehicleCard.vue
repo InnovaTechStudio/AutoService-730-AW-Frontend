@@ -7,7 +7,7 @@ defineProps({
   vehicle: Object
 });
 
-defineEmits(['edit']);
+defineEmits(['edit', 'view-detail']);
 </script>
 
 <template>
@@ -53,6 +53,7 @@ defineEmits(['edit']);
           icon-pos="right"
           outlined
           class="details-button"
+          @click="$emit('view-detail', vehicle.raw)"
       />
     </div>
   </article>
