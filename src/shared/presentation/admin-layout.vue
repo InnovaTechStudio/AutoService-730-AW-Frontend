@@ -4,8 +4,16 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="logo-area">
-        <h2>AutoService</h2>
-        <span class="subtitle">Panel de Control</span>
+        <img
+            src="/AutoService-logo.jpg"
+            alt="AutoService Logo"
+            class="logo"
+        />
+
+        <div class="logo-text">
+          <h2>AutoService</h2>
+          <span class="subtitle">Panel Administrador</span>
+        </div>
       </div>
 
       <nav class="menu">
@@ -105,18 +113,45 @@ const handleLogout = () => {
   overflow: hidden;
 }
 
-/* SIDEBAR */
 .sidebar {
   width: 260px;
-  background: #0f172a;
+  background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
   color: white;
   display: flex;
   flex-direction: column;
 }
 
+
 .logo-area {
-  padding: 1.8rem 1.5rem;
+  padding: 1.5rem;
   border-bottom: 1px solid #1e293b;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-area h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: #94a3b8;
 }
 
 .logo-area h2 {

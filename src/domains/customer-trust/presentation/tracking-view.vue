@@ -1,98 +1,7 @@
-<template>
-  <div class="tracking-layout">
-    <div class="tracking-header">
-      <div class="icon-circle">
-        <i class="pi pi-car"></i>
-      </div>
-      <h1>Rastrea tu Vehículo</h1>
-      <p>Ingresa el código de servicio que te proporcionó el taller para monitorear el progreso en tiempo real.</p>
-    </div>
-
-    <div class="tracking-content">
-      <!-- Search Card Section -->
-      <div class="card search-box">
-        <label for="code" class="search-label">Código de Servicio</label>
-        <div class="search-input-wrapper">
-          <InputText
-              id="code"
-              v-model="trackingCode"
-              placeholder="Ej: AS-1001A"
-              @keyup.enter="searchOrder"
-              class="code-input"
-          />
-        </div>
-        <div class="btn-container">
-          <Button icon="pi pi-search" label="Buscar Servicio" @click="searchOrder" :loading="isLoading" class="search-btn p-button-primary" />
-        </div>
-        
-        <div v-if="errorMsg" class="error-message">
-          <i class="pi pi-exclamation-circle"></i> {{ errorMsg }}
-        </div>
-      </div>
-
-      <!-- Results Card Section -->
-      <div v-if="orderData" class="card results-box fade-in">
-        
-        <!-- Vehicle Details Section -->
-        <div class="vehicle-card">
-          <div class="vehicle-image-container">
-            <!-- Renders the custom Base64 image or the synced Unsplash fallback -->
-            <img v-if="vehicleData?.image" :src="vehicleData.image" alt="Vehicle" class="vehicle-img" />
-            <div v-else class="vehicle-placeholder">
-              <i class="pi pi-car"></i>
-            </div>
-          </div>
-          
-          <div class="vehicle-details">
-            <span class="vehicle-subtitle">VEHÍCULO EN TALLER</span>
-            <h2 class="vehicle-title">{{ vehicleData?.brand }} {{ vehicleData?.model }}</h2>
-            <div class="vehicle-badges">
-              <span class="badge plate-badge"><i class="pi pi-id-card"></i> {{ vehicleData?.plate }}</span>
-              <Tag :value="orderData.status" :severity="getStatusSeverity(orderData.status)" class="status-badge" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Dates Section -->
-        <div class="dates-container">
-          <div class="date-box">
-            <span class="date-label">FECHA DE INGRESO</span>
-            <span class="date-value"><i class="pi pi-calendar-plus text-primary"></i> {{ orderData.startDate }}</span>
-          </div>
-          <div class="date-divider"></div>
-          <div class="date-box">
-            <span class="date-label">ENTREGA ESTIMADA</span>
-            <span class="date-value"><i class="pi pi-calendar-clock text-primary"></i> {{ orderData.estimatedDate }}</span>
-          </div>
-        </div>
-
-        <!-- Timeline Section -->
-        <div class="timeline-container">
-          <h3 class="timeline-title">Progreso del Servicio</h3>
-          <Timeline :value="tasks" class="custom-timeline">
-            <template #marker="slotProps">
-              <span class="custom-marker" :class="getTaskMarkerColor(slotProps.item.status)">
-                <i :class="getTaskIcon(slotProps.item.status)"></i>
-              </span>
-            </template>
-            <template #content="slotProps">
-              <div class="timeline-content" :class="{'active-content': slotProps.item.status === 'En Proceso'}">
-                <h4 class="task-title">{{ slotProps.item.description }}</h4>
-                <Tag :value="slotProps.item.status" :severity="getTaskTagSeverity(slotProps.item.status)" class="task-tag" />
-              </div>
-            </template>
-          </Timeline>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref } from 'vue';
 import { TrackingService } from '../infrastructure/tracking.service';
-
+import PaymentModal from "./payment-modal.vue";
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
@@ -106,6 +15,8 @@ const orderData = ref(null);
 const vehicleData = ref(null);
 const tasks = ref([]);
 
+const selectedTask = ref(null);
+const showPaymentModal = ref(false);
 const searchOrder = async () => {
   if (!trackingCode.value) return;
 
@@ -114,6 +25,7 @@ const searchOrder = async () => {
   orderData.value = null;
 
   try {
+
     const orders = await TrackingService.getOrderByCode(trackingCode.value.trim().toUpperCase());
 
     if (!orders || orders.length === 0) {
@@ -123,30 +35,14 @@ const searchOrder = async () => {
 
     const order = orders[0];
     orderData.value = order;
+
+
     vehicleData.value = await TrackingService.getVehicle(order.vehicleId);
+
+
     tasks.value = await TrackingService.getTasks(order.id);
 
-    // Logic to sync the exact same Unsplash fallback image used in the "Vehicles" module if no custom photo exists
-    if (!vehicleData.value.image) {
-      try {
-        const vehiclesResp = await fetch('http://localhost:3000/vehicles');
-        const allVehicles = await vehiclesResp.json();
-        const index = allVehicles.findIndex(v => v.id === order.vehicleId);
-        
-        const fallbackImages = [
-          'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&auto=format&fit=crop',
-          'https://images.unsplash.com/photo-1542362567-b07e54358753?w=500&auto=format&fit=crop',
-          'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=500&auto=format&fit=crop',
-          'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=500&auto=format&fit=crop'
-        ];
-        
-        if (index !== -1) {
-          vehicleData.value.image = fallbackImages[index % fallbackImages.length];
-        }
-      } catch (e) {
-        console.error("Failed to fetch default fallback image:", e);
-      }
-    }
+    selectedTask.value = tasks.value.find(task => task.photo) || tasks.value[0];
 
   } catch (error) {
     errorMsg.value = 'Problemas al conectar con el servidor. Verifica tu conexión.';
@@ -156,6 +52,7 @@ const searchOrder = async () => {
   }
 };
 
+
 const getStatusSeverity = (status) => {
   if (status === 'Finalizado') return 'success';
   if (status === 'En Proceso') return 'info';
@@ -164,7 +61,7 @@ const getStatusSeverity = (status) => {
 
 const getTaskMarkerColor = (status) => {
   if (status === 'Completada') return 'marker-success';
-  if (status === 'En Proceso') return 'marker-info pulse';
+  if (status === 'En Proceso') return 'marker-info';
   return 'marker-pending';
 };
 
@@ -180,361 +77,346 @@ const getTaskTagSeverity = (status) => {
   return 'secondary';
 };
 </script>
+<template>
+  <div class="tracking-layout">
 
+    <div class="tracking-header">
+      <i class="pi pi-car header-icon"></i>
+      <h1>Rastrea tu Vehículo</h1>
+      <p>Ingresa el código que te proporcionó el taller para ver el estado de tu servicio en tiempo real.</p>
+    </div>
+
+    <div class="tracking-content">
+
+      <div class="search-box">
+        <label for="code">Código de Servicio</label>
+        <div class="p-inputgroup">
+          <InputText
+              id="code"
+              v-model="trackingCode"
+              placeholder="Ej: AS-1001A"
+              @keyup.enter="searchOrder"
+              class="code-input"
+          />
+          <Button icon="pi pi-search" label="Buscar" @click="searchOrder" :loading="isLoading" class="p-button-primary" />
+        </div>
+        <div v-if="errorMsg" class="error-message mt-3">
+          <i class="pi pi-exclamation-circle"></i> {{ errorMsg }}
+        </div>
+      </div>
+
+      <div v-if="orderData" class="results-box fade-in">
+
+        <div class="vehicle-info">
+
+          <div class="dashboard-grid">
+
+            <!-- LEFT -->
+            <div class="left-section">
+
+              <!-- TASKS -->
+              <div class="service-card">
+                <div class="card-header">
+                  <h3>Tareas de Servicio</h3>
+                </div>
+
+                <div
+                    v-for="task in tasks"
+                    :key="task.id"
+                    class="task-item"
+                    :class="{ active: selectedTask?.id === task.id }"
+                    @click="selectedTask = task"
+                >
+
+                  <div class="task-left">
+                    <div class="task-icon">
+                      <i :class="getTaskIcon(task.status)"></i>
+                    </div>
+
+                    <div>
+                      <strong>{{ task.description }}</strong>
+                      <p>{{ task.status }}</p>
+                    </div>
+                  </div>
+
+                  <Tag
+                      :value="task.status"
+                      :severity="getTaskTagSeverity(task.status)"
+                  />
+                </div>
+              </div>
+
+              <!-- EVIDENCE -->
+              <div class="evidence-card">
+
+                <img
+                    v-if="selectedTask?.photo"
+                    :src="selectedTask.photo"
+                    alt="evidence"
+                />
+
+                <div v-else class="no-image">
+                  <i class="pi pi-image"></i>
+                  <p>No hay evidencia visual</p>
+                </div>
+
+                <div class="evidence-info">
+                  <span>EVIDENCIA VISUAL</span>
+                  <strong>{{ selectedTask?.description }}</strong>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- RIGHT -->
+            <div class="right-section">
+
+              <!-- COST -->
+              <div class="cost-card">
+      <span class="mini-title">
+        COSTO ESTIMADO TOTAL
+      </span>
+
+                <h2>${{ orderData.price }}</h2>
+
+                <p>Sujeto a cambios según diagnóstico.</p>
+                <Button
+                    label="Realizar Pago"
+                    icon="pi pi-credit-card"
+                    class="pay-now-btn"
+                    @click="showPaymentModal = true"
+                />
+              </div>
+              <!-- DATES -->
+              <div class="dates-card">
+
+      <span class="mini-title">
+        TIEMPOS DE SERVICIO
+      </span>
+
+                <div class="date-box">
+                  <i class="pi pi-calendar"></i>
+
+                  <div>
+                    <small>FECHA DE INGRESO</small>
+                    <strong>{{ orderData.startDate }}</strong>
+                  </div>
+                </div>
+
+                <div class="date-box">
+                  <i class="pi pi-clock"></i>
+
+                  <div>
+                    <small>ENTREGA ESTIMADA</small>
+                    <strong>{{ orderData.estimatedDate }}</strong>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+          <div class="vehicle-header">
+            <div class="vehicle-details">
+              <span class="label">Vehículo Ingresado</span>
+              <h2>{{ vehicleData?.brand }} {{ vehicleData?.model }} <span>{{ vehicleData?.plate }}</span></h2>
+            </div>
+            <Tag :value="orderData.status" :severity="getStatusSeverity(orderData.status)" class="status-tag" />
+          </div>
+
+          <div class="dates-grid">
+            <div class="date-item">
+              <span class="label">Fecha de Ingreso</span>
+              <strong><i class="pi pi-calendar-plus text-blue-500"></i> {{ orderData.startDate }}</strong>
+            </div>
+            <div class="date-item right-align">
+              <span class="label">Entrega Estimada</span>
+              <strong><i class="pi pi-calendar text-orange-500"></i> {{ orderData.estimatedDate }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      <PaymentModal
+          v-model:visible="showPaymentModal"
+          :amount="orderData?.price || 0"
+      />
+    </div>
+  </div>
+</template>
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Fix for PrimeIcons: Do not apply font-family globally using the asterisk selector */
 * {
   box-sizing: border-box;
 }
-
+.pay-now-btn{
+  width:100%;
+  margin-top:1.5rem;
+}
 .tracking-layout {
   min-height: 100vh;
   width: 100vw;
-  /* Elegant dark background inspired by modern automotive dashboards */
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  display: flex;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);  display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 3rem 1rem;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: #f8fafc;
+  font-family: system-ui, -apple-system, sans-serif;
+  padding: 4rem 1rem;
 }
 
 .tracking-header {
   text-align: center;
-  margin-bottom: 2rem;
+  color: white;
+  margin-bottom: 2.5rem;
 }
 
-.icon-circle {
-  width: 70px;
-  height: 70px;
-  background: rgba(59, 130, 246, 0.2);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  backdrop-filter: blur(8px);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem auto;
-}
-
-.icon-circle i {
-  font-size: 2.5rem;
-  color: #60a5fa; /* Azul claro para contraste */
+.header-icon {
+  font-size: 3.5rem;
+  color: #93c5fd;
+  margin-bottom: 1rem;
 }
 
 .tracking-header h1 {
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: bold;
   margin: 0 0 0.5rem 0;
-  color: #ffffff;
 }
 
 .tracking-header p {
-  font-size: 1rem;
-  max-width: 450px;
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 500px;
   margin: 0 auto;
-  opacity: 0.8;
-  line-height: 1.5;
-  color: #cbd5e1;
 }
 
 .tracking-content {
-  width: 100%;
-  max-width: 650px;
+  width: 95%;
+  max-width: 1600px;
 }
 
-/* Card Styles - Dark Mode */
-.card {
-  background: #1e293b;
-  border-radius: 16px;
-  padding: 2.5rem 2rem;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+
+.search-box, .results-box {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: transform 0.3s ease;
+  color: #1e293b;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-}
-
-/* Search Box Centered */
-.search-box {
-  text-align: center;
-}
-
-.search-label {
+.search-box label {
   display: block;
   font-weight: 600;
-  color: #e2e8f0;
-  margin-bottom: 1rem;
+  color: #475569;
+  margin-bottom: 0.8rem;
   font-size: 1.1rem;
-}
-
-.search-input-wrapper {
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: center;
 }
 
 .code-input {
-  width: 100%;
-  max-width: 350px;
-  font-size: 1.2rem;
-  padding: 1rem;
-  text-align: center;
-  border-radius: 12px;
-  background: #0f172a;
-  border: 2px solid #334155;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: #f8fafc;
-  transition: all 0.3s;
-}
-
-.code-input:focus {
-  border-color: #3b82f6;
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(59,130,246,0.2);
-}
-
-.btn-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-:deep(.search-btn) {
-  padding: 0.8rem 2.5rem;
   font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 10px;
-  background-color: #10b981 !important;
-  border-color: #10b981 !important;
-  color: white;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-:deep(.search-btn:hover) {
-  background-color: #059669 !important;
-  border-color: #059669 !important;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 1px;
 }
 
 .error-message {
-  color: #fca5a5;
-  background-color: rgba(220, 38, 38, 0.1);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-top: 1.5rem;
-  font-size: 0.95rem;
-  display: inline-flex;
+  color: #dc2626;
+  background-color: #fef2f2;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid rgba(248, 113, 113, 0.2);
+  border: 1px solid #fecaca;
 }
 
-/* Vehicle Card - Responsive Dark */
-.vehicle-card {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #334155;
-}
 
-@media (min-width: 500px) {
-  .vehicle-card {
-    flex-direction: row;
-    align-items: center;
-  }
-}
-
-.vehicle-image-container {
-  flex-shrink: 0;
-  width: 120px;
-  height: 120px;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-  border: 2px solid #334155;
-  background: #0f172a;
-  margin: 0 auto; 
-}
-
-@media (min-width: 500px) {
-  .vehicle-image-container {
-    margin: 0; 
-  }
-}
-
-.vehicle-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.vehicle-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3.5rem;
-  color: #475569;
-}
-
-.vehicle-details {
-  flex-grow: 1;
-  text-align: center; 
-}
-
-@media (min-width: 500px) {
-  .vehicle-details {
-    text-align: left; 
-  }
-}
-
-.vehicle-subtitle {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #94a3b8;
-  letter-spacing: 1.5px;
-}
-
-.vehicle-title {
-  margin: 0.3rem 0 0.8rem 0;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #f8fafc;
-}
-
-.vehicle-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  justify-content: center;
-}
-
-@media (min-width: 500px) {
-  .vehicle-badges {
-    justify-content: flex-start;
-  }
-}
-
-.plate-badge {
-  background: #334155;
-  padding: 0.4rem 1rem;
+.vehicle-info {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  font-weight: 600;
-  color: #f1f5f9;
-  font-size: 0.95rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  border: 1px solid #475569;
+  margin-bottom: 2rem;
+  overflow: hidden;
+  width: 100%;
 }
 
-/* Dates Dark */
-.dates-container {
+.vehicle-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #0f172a;
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin-bottom: 2.5rem;
-  border: 1px solid #334155;
+  background: white;
 }
 
-.date-box {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.date-box:last-child {
-  text-align: right;
-}
-
-.date-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #94a3b8;
+.label {
+  display: block;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: 0.3rem;
 }
 
-.date-value {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #f8fafc;
+.vehicle-details h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #0f172a;
+}
+
+.vehicle-details span {
+  font-weight: normal;
+  color: #64748b;
+}
+
+.status-tag {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.dates-grid {
+  display: flex;
+  padding: 1rem 1.5rem;
+}
+
+.date-item {
+  flex: 1;
+}
+
+.date-item strong {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 1.1rem;
+  color: #334155;
 }
 
-.date-divider {
-  width: 1px;
-  height: 40px;
-  background: #334155;
+.right-align {
+  text-align: right;
 }
 
-.text-primary {
-  color: #60a5fa;
+.right-align strong {
+  justify-content: flex-end;
 }
 
-/* Timeline Styles - Dark Mode */
-.timeline-title {
+
+.timeline-section h3 {
   margin: 0 0 1.5rem 0;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #f8fafc;
-  padding-left: 0.8rem;
-  border-left: 4px solid #3b82f6;
+  color: #1e293b;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
 }
-
-.custom-marker {
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  font-size: 1rem;
-}
-
-.marker-success { background: #10b981; }
-.marker-info { background: #3b82f6; }
-.marker-pending { background: #334155; color: #94a3b8; box-shadow: none; border: 1px solid #475569; }
 
 .timeline-content {
-  padding-bottom: 2rem;
   margin-left: 0.5rem;
+  padding-bottom: 1.5rem;
 }
 
-.task-title {
+.timeline-content h4 {
   margin: 0 0 0.5rem 0;
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: #cbd5e1;
-}
-
-.active-content .task-title {
-  color: #60a5fa;
-  font-weight: 600;
-}
-
-.task-tag {
-  font-size: 0.85rem;
-  padding: 0.3rem 0.8rem;
-  border-radius: 6px;
+  color: #334155;
+  font-size: 1.1rem;
 }
 
 .fade-in {
@@ -542,7 +424,7 @@ const getTaskTagSeverity = (status) => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -550,18 +432,167 @@ const getTaskTagSeverity = (status) => {
   margin-top: 4px;
 }
 
-/* Timeline connecting line adapted for dark background */
-:deep(.p-timeline-event-connector) {
-  background-color: #334155 !important;
+.dashboard-grid{
+  display:grid;
+  grid-template-columns: 3fr 1.2fr;
+  gap:2rem;
+  margin-top:1.5rem;
+  align-items:start;
+}
+.left-section{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap:1.5rem;
+  align-items:start;
+}
+@media(max-width:1200px){
+
+  .left-section{
+    grid-template-columns:1fr;
+  }
+
 }
 
-.pulse {
-  animation: pulse-ring 2s infinite;
+.service-card,
+.evidence-card,
+.cost-card,
+.dates-card{
+  background:white;
+  border-radius:18px;
+  padding:1.5rem;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
 }
 
-@keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
-  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+.card-header{
+  margin-bottom:1rem;
+}
+
+.card-header h3{
+  margin:0;
+  color:#1e293b;
+}
+
+.task-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:1rem;
+  border-radius:14px;
+  background:#f8fafc;
+  margin-bottom:1rem;
+  cursor:pointer;
+  transition:0.2s;
+  border:2px solid transparent;
+}
+
+.task-item:hover{
+  transform:translateY(-2px);
+}
+
+.task-item.active{
+  border-color:#3b82f6;
+  background:#eff6ff;
+}
+
+.task-left{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.task-icon{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:#dbeafe;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#2563eb;
+}
+
+.task-left p{
+  margin:0.3rem 0 0;
+  color:#64748b;
+  font-size:0.9rem;
+}
+
+.evidence-card img{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  border-radius:14px;
+}
+
+.evidence-info{
+  margin-top:1rem;
+}
+
+.evidence-info span{
+  font-size:0.75rem;
+  color:#64748b;
+  font-weight:600;
+}
+
+.evidence-info strong{
+  display:block;
+  margin-top:0.4rem;
+  color:#0f172a;
+}
+
+.cost-card h2{
+  font-size:2.3rem;
+  margin:1rem 0;
+  color:#111827;
+}
+
+.mini-title{
+  font-size:0.8rem;
+  color:#64748b;
+  font-weight:700;
+  letter-spacing:1px;
+}
+
+.date-box{
+  display:flex;
+  gap:1rem;
+  margin-top:1.5rem;
+  align-items:center;
+}
+
+.date-box i{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:#dbeafe;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#2563eb;
+}
+
+.date-box small{
+  display:block;
+  color:#64748b;
+  margin-bottom:0.3rem;
+}
+
+.no-image{
+  height:260px;
+  border-radius:14px;
+  background:#f1f5f9;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  color:#64748b;
+}
+
+@media(max-width:1200px){
+
+  .dashboard-grid{
+    grid-template-columns:1fr;
+  }
+
 }
 </style>
