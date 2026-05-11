@@ -20,7 +20,7 @@ const router = createRouter({
             meta: { requiresAuth: true },
             children: [
                 { path: '', name: 'dashboard', component: () => import('../domains/workshop-operations/presentation/dashboard.vue') },
-                { path: 'customers', name: 'customers', component: () => import('../domains/customer-management/presentation/customer-list.vue') },
+                { path: 'customers', name: 'customers', component: () => import('../domains/customer-management/presentation/pages/customer-management.page.vue') },
                 { path: 'vehicles', name: 'vehicles', component : () => import('../domains/fleet-management/presentation/vehicle-list.vue')},
                 { path: 'work-orders', name: 'work-orders', component: () => import('../domains/workshop-operations/presentation/work-order-list.vue')},
                 { path: 'work-orders/new', name: 'create-work-order', component: () => import('../domains/workshop-operations/presentation/create-work-order.vue')},
