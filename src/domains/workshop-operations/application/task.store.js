@@ -1,6 +1,20 @@
+/**
+ * @file task.store.js
+ * @description State management for Task operations using Pinia.
+ * This file handles the logic for fetching, storing, and visual representation of tasks.
+ * @module TaskStore
+ */
 import { defineStore } from 'pinia';
 import http from '../../../shared/infrastructure/http-common';
 import { createTask } from '../domain/task.entity';
+/**
+ * Helper function to determine which image associated with a task based on its description.
+ * This allows non-programmers to understand that the app "looks" for keywords to pick a picture.
+ *
+ * @function getTaskImage
+ * @param {string} description - The text description of the task to analyze.
+ * @returns {string} A Base64 encoded string representing a JPEG image (Oil, Brake, or Engine).
+ */
 const getTaskImage = (description) => {
     const text = description.toLowerCase();
 
@@ -40,6 +54,15 @@ export const useTaskStore = defineStore('task', {
     }),
 
     actions: {
+        /**
+         * Fetches the list of tasks from the backend API.
+         * It transforms raw data into structured "Task Entities" and assigns images.
+         *
+         * @async
+         * @function fetchTasks
+         * @description Connects to the server, retrieves tasks, and updates the local memory (state).
+         * @returns {Promise<void>}
+         */
         async fetchAllTasks() {
             this.loading = true;
 
@@ -86,7 +109,16 @@ export const useTaskStore = defineStore('task', {
 
             return response.data;
         },
-
+        /**
+         * Updates the status of a specific task.
+         *
+         * @async
+         * @function updateTaskStatus
+         * @param {number|string} taskId - The unique identifier of the task.
+         * @param {string} newStatus - The new state of the task (e.g., 'Completed', 'Pending').
+         * @description Sends an update to the server and refreshes the local list.
+         * @returns {Promise<void>}
+         */
         async updateTaskStatus(id, newStatus) {
             const response = await http.patch(`/tasks/${id}`, { status: newStatus });
             const index = this.tasks.findIndex((task) => String(task.id) === String(id));

@@ -1,9 +1,26 @@
 <script setup>
+/**
+ * @file MechanicFilters.vue
+ * @description
+ * Filter component used in the mechanics view.
+ * Allows users to search mechanics and filter them by specialty.
+ */
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import { useI18n } from 'vue-i18n';
-
+/**
+ * Internationalization instance.
+ * Provides access to application translations.
+ */
 const { t } = useI18n();
+/**
+ * Component props definition.
+ *
+ * @typedef {Object} Props
+ * @property {string} search Current mechanic search text.
+ * @property {string|null} specialty Currently selected specialty filter.
+ * @property {Array} specialtyOptions Available specialty dropdown options.
+ */
 defineProps({ search: String, specialty: [String, null], specialtyOptions: Array });
 defineEmits(['update:search', 'update:specialty']);
 </script>
