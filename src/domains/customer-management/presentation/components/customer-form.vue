@@ -4,6 +4,8 @@ import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Tag from 'primevue/tag'
+import {useI18n} from 'vue-i18n'
+
 
 const props = defineProps({
   visible: Boolean,
@@ -15,6 +17,8 @@ const emit = defineEmits([
   'update:visible',
   'save'
 ])
+
+const {t} = useI18n();
 
 </script>
 
@@ -43,14 +47,14 @@ const emit = defineEmits([
 
         <div>
           <span class="mini-title">
-            NEW RECORD
+            {{ t('customers.form.newRecord') }}
           </span>
 
           <h2>
             {{
               editMode
-                  ? 'Edit Customer'
-                  : 'Register Customer'
+                  ? t('customers.form.editTitle')
+                  : t('customers.form.registerTitle')
             }}
           </h2>
         </div>
@@ -66,7 +70,7 @@ const emit = defineEmits([
       <!-- FULL NAME -->
 
       <div class="field">
-        <label>FULL NAME</label>
+        <label>{{t('customers.form.fullName')}}</label>
         <div class="input-container">
           <i class="pi pi-user"></i>
           <InputText
@@ -84,7 +88,7 @@ const emit = defineEmits([
         <!-- DNI -->
         <div class="field">
 
-          <label>DNI / ID</label>
+          <label>{{t('customers.form.dni')}}</label>
           <div class="input-container">
             <i class="pi pi-id-card"></i>
             <InputText
@@ -98,7 +102,7 @@ const emit = defineEmits([
         <!-- PHONE -->
         <div class="field">
 
-          <label>PHONE</label>
+          <label>{{t('customers.form.phone')}}</label>
           <div class="input-container">
             <i class="pi pi-phone"></i>
 
@@ -115,7 +119,7 @@ const emit = defineEmits([
 
       <div class="field">
 
-        <label>EMAIL ADDRESS</label>
+        <label>{{t('customers.form.email')}}</label>
         <div class="input-container">
           <i class="pi pi-envelope"></i>
           <InputText
@@ -130,13 +134,13 @@ const emit = defineEmits([
       <!-- STATUS -->
       <div class="status-card">
         <div>
-          <h4>Customer Status</h4>
-          <p>The customer can receive workshop services.</p>
+          <h4>{{t('customers.form.statusTitle')}}</h4>
+          <p>{{t('customers.form.statusDesc')}}</p>
 
         </div>
 
         <Tag
-            value="ACTIVE"
+            :value="t('customers.form.active')"
             severity="info"
             rounded
         />
@@ -152,7 +156,7 @@ const emit = defineEmits([
       <div class="footer-actions">
 
         <Button
-            label="Cancel"
+            :label="t('customers.form.cancel')"
             text
             class="cancel-btn"
             @click="
@@ -163,8 +167,8 @@ const emit = defineEmits([
         <Button
             :label="
             editMode
-            ? 'Update Customer'
-            : 'Save Customer'
+            ? t('customers.form.update')
+            : t('customers.form.save')
           "
             icon="pi pi-check"
             class="save-btn"
