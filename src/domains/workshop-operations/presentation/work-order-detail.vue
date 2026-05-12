@@ -44,7 +44,7 @@
               <i class="pi pi-file-edit info-icon"></i>
 
               <div>
-                <h3>Descripción</h3>
+                <h3>{{ t('workOrders.detail.description') }}</h3>
                 <p>{{ order.description }}</p>
               </div>
             </div>
@@ -57,7 +57,7 @@
                 <i class="pi pi-calendar"></i>
 
                 <div>
-                  <span>Ingreso</span>
+                  <span>{{ t('workOrders.detail.arrival') }}</span>
                   <strong>{{ order.startDate }}</strong>
                 </div>
               </div>
@@ -66,7 +66,7 @@
                 <i class="pi pi-clock"></i>
 
                 <div>
-                  <span>Entrega</span>
+                  <span>{{ t('workOrders.detail.delivery') }}</span>
                   <strong>{{ order.estimatedDate }}</strong>
                 </div>
               </div>
@@ -103,7 +103,7 @@
 
             <div class="price-card">
 
-              <h3>Total de la Orden</h3>
+              <h3>{{ t('workOrders.detail.orderTotal') }}</h3>
 
               <div class="price-input-container">
 
@@ -119,7 +119,7 @@
               </div>
 
               <small>
-                Actualiza el monto total de la reparación
+                {{ t('workOrders.detail.updateAmount') }}
               </small>
 
             </div>
@@ -254,12 +254,12 @@
     <div class="tasks-header">
 
       <div>
-        <h2>Tareas Asignadas</h2>
-        <p>Gestiona el progreso del trabajo</p>
+        <h2>{{ t('workOrders.detail.assignedTasks') }}</h2>
+        <p>{{ t('workOrders.detail.manageProgress') }}</p>
       </div>
 
       <Button
-          label="Nueva Tarea"
+          :label="t('workOrders.detail.newTask')"
           icon="pi pi-plus"
           severity="contrast"
           @click="openTaskDialog"
@@ -281,9 +281,9 @@
             class="custom-table"
         >
 
-          <Column field="description" header="Tarea"></Column>
+          <Column field="description" :header="t('workOrders.detail.task')"></Column>
 
-          <Column header="Mecánico">
+          <Column :header="t('workOrders.detail.mechanic')">
             <template #body="slotProps">
 
               <div class="mechanic-cell">
@@ -302,7 +302,7 @@
             </template>
           </Column>
 
-          <Column field="status" header="Estado">
+          <Column field="status" :header="t('workOrders.detail.status')">
 
             <template #body="slotProps">
 
@@ -326,44 +326,44 @@
     <!-- DIALOG -->
     <Dialog
         v-model:visible="taskDialog"
-        header="Nueva Tarea"
+        :header="t('workOrders.detail.taskDialog.title')"
         :modal="true"
         :style="{ width: '30rem' }"
         class="task-dialog"
     >
 
       <div class="field">
-        <label>Descripción</label>
+        <label>{{ t('workOrders.detail.taskDialog.description') }}</label>
 
         <InputText
             v-model.trim="newTask.description"
-            placeholder="Describe la tarea"
+            :placeholder="t('workOrders.detail.taskDialog.descPlaceholder')"
         />
       </div>
 
       <div class="field mt-4">
-        <label>Mecánico</label>
+        <label>{{ t('workOrders.detail.taskDialog.mechanic') }}</label>
 
         <Dropdown
             v-model="newTask.mechanicId"
             :options="mechanicStore.mechanics"
             optionLabel="fullName"
             optionValue="id"
-            placeholder="Selecciona un mecánico"
+            :placeholder="t('workOrders.detail.taskDialog.selectMechanic')"
         />
       </div>
 
       <template #footer>
 
         <Button
-            label="Cancelar"
+            :label="t('workOrders.detail.taskDialog.cancel')"
             text
             severity="secondary"
             @click="taskDialog = false"
         />
 
         <Button
-            label="Guardar"
+            :label="t('workOrders.detail.taskDialog.save')"
             icon="pi pi-check"
             @click="saveTask"
         />
