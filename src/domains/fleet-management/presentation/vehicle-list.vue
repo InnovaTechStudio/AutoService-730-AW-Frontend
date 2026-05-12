@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useVehicleStore } from '../application/vehicle.store';
 import { useCustomerStore } from '../../customer-management/application/customer.store';
+import {useRouter} from "vue-router";
 
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -15,6 +16,7 @@ import VehicleCard from './components/VehicleCard.vue';
 const { t } = useI18n();
 const vehicleStore = useVehicleStore();
 const customerStore = useCustomerStore();
+const router = useRouter()
 
 const vehicleDialog = ref(false);
 const vehicle = ref({});
@@ -118,6 +120,10 @@ const handleImageUpload = (event) => {
   reader.onload = () => { vehicle.value.image = reader.result; };
   reader.readAsDataURL(file);
 };
+
+const viewVehicleDetail = (selectedVehicle) => {
+  router.push(`/vehicles/${selectedVehicle.id}`);
+};
 </script>
 
 <template>
@@ -158,7 +164,7 @@ const handleImageUpload = (event) => {
     </div>
 
     <div v-else-if="filteredVehicles.length" class="vehicles-grid">
-      <VehicleCard v-for="item in filteredVehicles" :key="item.id" :vehicle="item" @edit="editVehicle" />
+      <VehicleCard v-for="item in filteredVehicles" :key="item.id" :vehicle="item" @edit="editVehicle" @view-detail="viewVehicleDetail"/>
     </div>
 
     <div v-else class="empty-state">

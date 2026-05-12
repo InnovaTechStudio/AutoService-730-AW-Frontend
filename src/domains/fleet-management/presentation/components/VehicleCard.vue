@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 defineProps({ vehicle: Object });
-defineEmits(['edit']);
+defineEmits(['edit','view-detail']);
 </script>
 
 <template>
@@ -35,7 +35,7 @@ defineEmits(['edit']);
 
       <ProgressBar :value="vehicle.progress" :showValue="false" class="vehicle-progress" />
 
-      <Button :label="t('vehicles.card.viewDetails')" icon="pi pi-arrow-right" icon-pos="right" outlined class="details-button" />
+      <Button :label="t('vehicles.card.viewDetails')" icon="pi pi-arrow-right" icon-pos="right" outlined class="details-button" @click="$emit('view-detail', vehicle.raw)"/>
     </div>
   </article>
 </template>
