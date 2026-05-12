@@ -1,4 +1,14 @@
 <script setup>
+/**
+ * @file mechanic-dashboard.vue
+ * @description **Mechanic Dashboard**
+ *
+ * Dedicated workspace for mechanics. Shows only the tasks assigned to the currently
+ * logged-in mechanic. Allows updating task status in real-time and viewing related work orders.
+ *
+ * Part of the **Mechanic** domain - Presentation Layer.
+ * Protected route (only accessible by users with role 'mechanic').
+ */
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';

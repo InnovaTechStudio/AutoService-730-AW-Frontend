@@ -1,4 +1,14 @@
 <script setup>
+/**
+ * @file tracking-view.vue
+ * @description **Vehicle Tracking View (Public Customer Page)**
+ *
+ * Public page that allows customers to track the status of their vehicle service
+ * by entering a tracking code. Displays real-time order information, tasks,
+ * visual evidence, estimated costs, and provides payment options.
+ *
+ * Part of the **Customer Trust** domain - Presentation Layer.
+ */
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { TrackingService } from '../infrastructure/tracking.service';
@@ -21,6 +31,15 @@ const tasks = ref([]);
 
 const selectedTask = ref(null);
 const showPaymentModal = ref(false);
+
+/**
+ * Searches for an order using the tracking code.
+ *
+ * Flow:
+ * 1. Validates input
+ * 2. Calls TrackingService to fetch order, vehicle, and tasks
+ * 3. Sets selected task for visual evidence
+ */
 const searchOrder = async () => {
   if (!trackingCode.value) return;
 

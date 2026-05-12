@@ -1,12 +1,40 @@
 <script setup>
+/**
+ * @file VehicleCard.vue
+ * @description **Vehicle Card Component**
+ *
+ * Reusable card component used to display individual vehicles in a grid or list view.
+ * Part of the **Fleet Management** domain - Presentation Layer.
+ *
+ * This component shows key vehicle information, progress, status, and provides
+ * actions to edit or view detailed information.
+ */
 import Button from 'primevue/button';
 import ProgressBar from 'primevue/progressbar';
 import Tag from 'primevue/tag';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-defineProps({ vehicle: Object });
-defineEmits(['edit','view-detail']);
+defineProps({
+  /**
+   * Vehicle data object (processed/enriched by parent component).
+   * Expected shape includes: name, owner, plate, year, color, status, severity, progress, image, raw.
+   * @type {Object}
+   */
+  vehicle: Object });
+defineEmits([
+  /**
+   * Emitted when user clicks the edit button.
+   * @event edit
+   * @type {Object} The raw vehicle object
+   */
+    'edit',
+  /**
+   * Emitted when user clicks the "View Details" button.
+   * @event view-detail
+   * @type {Object} The raw vehicle object
+   */
+  'view-detail']);
 </script>
 
 <template>

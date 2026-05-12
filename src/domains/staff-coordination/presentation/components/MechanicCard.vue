@@ -1,4 +1,16 @@
 <script setup>
+/**
+ * @file MechanicCard.vue
+ * @description **Mechanic Card Component**
+ *
+ * Reusable card component that displays detailed information about a mechanic,
+ * including their workload, active tasks, effectiveness, and specialty.
+ *
+ * Used in the mechanics management page to provide a visual overview of staff capacity
+ * and current workload.
+ *
+ * Part of the **Staff Coordination** domain - Presentation Layer.
+ */
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import ProgressBar from 'primevue/progressbar';
