@@ -1,11 +1,15 @@
 <script setup>
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { TrackingService } from '../infrastructure/tracking.service';
 import PaymentModal from "./payment-modal.vue";
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import Timeline from 'primevue/timeline';
+import LanguageSwitcher from '../../../shared/presentation/language-switcher.vue';
+
+const { t } = useI18n();
 
 const trackingCode = ref('');
 const isLoading = ref(false);
@@ -29,7 +33,7 @@ const searchOrder = async () => {
     const orders = await TrackingService.getOrderByCode(trackingCode.value.trim().toUpperCase());
 
     if (!orders || orders.length === 0) {
-      errorMsg.value = 'El código ingresado no existe o es incorrecto.';
+      errorMsg.value = t('tracking.invalidCode');
       return;
     }
 
@@ -45,7 +49,7 @@ const searchOrder = async () => {
     selectedTask.value = tasks.value.find(task => task.photo) || tasks.value[0];
 
   } catch (error) {
-    errorMsg.value = 'Problemas al conectar con el servidor. Verifica tu conexión.';
+    errorMsg.value = t('tracking.connectionError');
     console.error(error);
   } finally {
     isLoading.value = false;
@@ -81,24 +85,27 @@ const getTaskTagSeverity = (status) => {
   <div class="tracking-layout">
 
     <div class="tracking-header">
+      <div class="language-switcher-container">
+        <LanguageSwitcher />
+      </div>
       <i class="pi pi-car header-icon"></i>
-      <h1>Rastrea tu Vehículo</h1>
-      <p>Ingresa el código que te proporcionó el taller para ver el estado de tu servicio en tiempo real.</p>
+      <h1>{{ t('tracking.title') }}</h1>
+      <p>{{ t('tracking.description') }}</p>
     </div>
 
     <div class="tracking-content">
 
       <div class="search-box">
-        <label for="code">Código de Servicio</label>
+        <label for="code">{{ t('tracking.serviceCode') }}</label>
         <div class="p-inputgroup">
           <InputText
               id="code"
               v-model="trackingCode"
-              placeholder="Ej: AS-1001A"
+              :placeholder="t('tracking.placeholder')"
               @keyup.enter="searchOrder"
               class="code-input"
           />
-          <Button icon="pi pi-search" label="Buscar" @click="searchOrder" :loading="isLoading" class="p-button-primary" />
+          <Button icon="pi pi-search" :label="t('tracking.search')" @click="searchOrder" :loading="isLoading" class="p-button-primary" />
         </div>
         <div v-if="errorMsg" class="error-message mt-3">
           <i class="pi pi-exclamation-circle"></i> {{ errorMsg }}
@@ -117,7 +124,7 @@ const getTaskTagSeverity = (status) => {
               <!-- TASKS -->
               <div class="service-card">
                 <div class="card-header">
-                  <h3>Tareas de Servicio</h3>
+                  <h3>{{ t('tracking.serviceTasks') }}</h3>
                 </div>
 
                 <div
@@ -157,11 +164,11 @@ const getTaskTagSeverity = (status) => {
 
                 <div v-else class="no-image">
                   <i class="pi pi-image"></i>
-                  <p>No hay evidencia visual</p>
+                  <p>{{ t('tracking.noEvidence') }}</p>
                 </div>
 
                 <div class="evidence-info">
-                  <span>EVIDENCIA VISUAL</span>
+                  <span>{{ t('tracking.visualEvidence') }}</span>
                   <strong>{{ selectedTask?.description }}</strong>
                 </div>
 
@@ -175,14 +182,14 @@ const getTaskTagSeverity = (status) => {
               <!-- COST -->
               <div class="cost-card">
       <span class="mini-title">
-        COSTO ESTIMADO TOTAL
+        {{ t('tracking.estimatedCost') }}
       </span>
 
                 <h2>${{ orderData.price }}</h2>
 
-                <p>Sujeto a cambios según diagnóstico.</p>
+                <p>{{ t('tracking.costDisclaimer') }}</p>
                 <Button
-                    label="Realizar Pago"
+                    :label="t('tracking.payNow')"
                     icon="pi pi-credit-card"
                     class="pay-now-btn"
                     @click="showPaymentModal = true"
@@ -192,14 +199,14 @@ const getTaskTagSeverity = (status) => {
               <div class="dates-card">
 
       <span class="mini-title">
-        TIEMPOS DE SERVICIO
+        {{ t('tracking.serviceTimes') }}
       </span>
 
                 <div class="date-box">
                   <i class="pi pi-calendar"></i>
 
                   <div>
-                    <small>FECHA DE INGRESO</small>
+                    <small>{{ t('tracking.entryDate') }}</small>
                     <strong>{{ orderData.startDate }}</strong>
                   </div>
                 </div>
@@ -208,7 +215,7 @@ const getTaskTagSeverity = (status) => {
                   <i class="pi pi-clock"></i>
 
                   <div>
-                    <small>ENTREGA ESTIMADA</small>
+                    <small>{{ t('tracking.estimatedDelivery') }}</small>
                     <strong>{{ orderData.estimatedDate }}</strong>
                   </div>
                 </div>
@@ -220,7 +227,7 @@ const getTaskTagSeverity = (status) => {
           </div>
           <div class="vehicle-header">
             <div class="vehicle-details">
-              <span class="label">Vehículo Ingresado</span>
+              <span class="label">{{ t('tracking.vehicleEntered') }}</span>
               <h2>{{ vehicleData?.brand }} {{ vehicleData?.model }} <span>{{ vehicleData?.plate }}</span></h2>
             </div>
             <Tag :value="orderData.status" :severity="getStatusSeverity(orderData.status)" class="status-tag" />
@@ -228,11 +235,11 @@ const getTaskTagSeverity = (status) => {
 
           <div class="dates-grid">
             <div class="date-item">
-              <span class="label">Fecha de Ingreso</span>
+              <span class="label">{{ t('tracking.entryDate') }}</span>
               <strong><i class="pi pi-calendar-plus text-blue-500"></i> {{ orderData.startDate }}</strong>
             </div>
             <div class="date-item right-align">
-              <span class="label">Entrega Estimada</span>
+              <span class="label">{{ t('tracking.estimatedDelivery') }}</span>
               <strong><i class="pi pi-calendar text-orange-500"></i> {{ orderData.estimatedDate }}</strong>
             </div>
           </div>
@@ -265,9 +272,16 @@ const getTaskTagSeverity = (status) => {
 }
 
 .tracking-header {
+  position: relative;
   text-align: center;
   color: white;
   margin-bottom: 2.5rem;
+}
+
+.language-switcher-container {
+  position: absolute;
+  top: -2rem;
+  right: 0;
 }
 
 .header-icon {

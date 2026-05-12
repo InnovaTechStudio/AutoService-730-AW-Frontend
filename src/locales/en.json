@@ -369,17 +369,34 @@
     }
   },
   "tracking": {
-    "title": "Track your Vehicle",
-    "subtitle": "Enter the service code provided by the workshop to monitor real-time progress.",
-    "vehicle": "VEHICLE IN WORKSHOP",
-    "searchLabel": "Service Code",
-    "searchPlaceholder": "e.g. AS-1001A",
-    "searchButton": "Search Service",
-    "arrival": "ARRIVAL DATE",
-    "delivery": "ESTIMATED DELIVERY",
-    "progress": "Service Progress",
-    "errorNotFound": "The entered code does not exist or is incorrect.",
-    "errorConnection": "Connection issues with the server. Check your connection."
+    "title": "Track Your Vehicle",
+    "description": "Enter the code provided by the workshop to view your service status in real time.",
+    "serviceCode": "Service Code",
+    "placeholder": "Ex: AS-1001A",
+    "search": "Search",
+    "invalidCode": "The entered code does not exist or is incorrect.",
+    "connectionError": "Problems connecting to the server. Check your connection.",
+    "serviceTasks": "Service Tasks",
+    "noEvidence": "No visual evidence",
+    "visualEvidence": "VISUAL EVIDENCE",
+    "estimatedCost": "ESTIMATED TOTAL COST",
+    "costDisclaimer": "Subject to changes according to diagnosis.",
+    "payNow": "Make Payment",
+    "serviceTimes": "SERVICE TIMES",
+    "entryDate": "ENTRY DATE",
+    "estimatedDelivery": "ESTIMATED DELIVERY",
+    "vehicleEntered": "Vehicle Entered",
+    "payment": {
+      "title": "Payment Process",
+      "total": "Total to pay",
+      "card": "Card",
+      "cash": "Cash",
+      "cardNumber": "Card number",
+      "date": "Date",
+      "scanQr": "Scan the QR to pay",
+      "confirm": "Confirm Payment",
+      "success": "Payment made with {method}"
+    }
   },
   "payment": {
     "title": "Payment Process",
@@ -414,5 +431,24 @@
     "pending": "Pending",
     "inProgress": "In Progress",
     "completed": "Completed"
+  },
+  "mechanicDashboard": {
+    "eyebrow": "Mechanic Workspace",
+    "title": "My assigned tasks",
+    "description": "Update the progress of your tasks to sync progress with the administrator dashboard.",
+    "logout": "Log out",
+    "pending": "Pending",
+    "inProgress": "In progress",
+    "completed": "Completed",
+    "updateStatus": "Update status",
+    "viewOrder": "View order",
+    "emptyTitle": "You have no assigned tasks",
+    "emptyDescription": "When the administrator assigns tasks to you, they will appear here.",
+    "noOrder": "No order",
+    "statuses": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    }
   }
 }

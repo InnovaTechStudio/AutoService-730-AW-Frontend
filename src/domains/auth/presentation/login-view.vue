@@ -61,9 +61,17 @@ const password = ref('admin');
 
 const handleLogin = async () => {
   if (!email.value || !password.value) return;
+
+
   const success = await authStore.login(email.value, password.value);
+
   if (success) {
-    router.push('/');
+
+    if (authStore.user?.role === 'mechanic') {
+      router.push('/mechanic');
+    } else {
+      router.push('/');
+    }
   }
 };
 </script>

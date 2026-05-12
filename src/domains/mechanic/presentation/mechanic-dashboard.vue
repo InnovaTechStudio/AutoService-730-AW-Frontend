@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../auth/application/auth.store';
 import { useTaskStore } from '../../workshop-operations/application/task.store';
@@ -9,13 +10,19 @@ import Card from 'primevue/card';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import Dropdown from 'primevue/dropdown';
+import LanguageSwitcher from '../../../shared/presentation/language-switcher.vue';
 
 const router = useRouter();
+const { t } = useI18n();
 const authStore = useAuthStore();
 const taskStore = useTaskStore();
 const workOrderStore = useWorkOrderStore();
 
-const statusOptions = ['Pendiente', 'En Proceso', 'Completada'];
+const statusOptions = computed(() => [
+  { label: t('mechanicDashboard.statuses.pending'), value: 'Pendiente' },
+  { label: t('mechanicDashboard.statuses.inProgress'), value: 'En Proceso' },
+  { label: t('mechanicDashboard.statuses.completed'), value: 'Completada' }
+]);
 
 onMounted(async () => {
   await Promise.all([
@@ -34,12 +41,12 @@ const completedTasks = computed(() => myTasks.value.filter(t => t.status === 'Co
 
 const getOrderCode = (workOrderId) => {
   const order = workOrderStore.workOrders.find(o => String(o.id) === String(workOrderId));
-  return order?.trackingCode || 'Sin orden';
+  return order?.trackingCode || t('mechanicDashboard.noOrder');
 };
 
 const getSeverity = (status) => {
-  if (status === 'Completada') return 'success';
-  if (status === 'En Proceso') return 'info';
+  if (status === t('mechanicDashboard.statuses.completed')) return 'success';
+  if (status === t('mechanicDashboard.statuses.inProgress')) return 'info';
   return 'warning';
 };
 
@@ -57,18 +64,21 @@ const logout = () => {
   <section class="mechanic-page">
     <div class="mechanic-header">
       <div>
-        <span class="eyebrow">Mechanic Workspace</span>
-        <h1>Mis tareas asignadas</h1>
-        <p>Actualiza el avance de tus tareas para sincronizar el progreso con el panel del administrador.</p>
+        <span class="eyebrow">{{ t('mechanicDashboard.eyebrow') }}</span>
+        <h1>{{ t('mechanicDashboard.title') }}</h1>
+        <p>{{ t('mechanicDashboard.description') }}</p>
       </div>
 
-      <Button label="Cerrar sesión" icon="pi pi-sign-out" outlined severity="danger" @click="logout" />
+      <div class="header-actions">
+        <LanguageSwitcher />
+        <Button :label="t('mechanicDashboard.logout')" icon="pi pi-sign-out" outlined severity="danger" @click="logout" />
+      </div>
     </div>
 
     <div class="summary-row">
-      <Card class="summary-card"><template #content><span>Pendientes</span><strong>{{ pendingTasks }}</strong></template></Card>
-      <Card class="summary-card"><template #content><span>En proceso</span><strong>{{ progressTasks }}</strong></template></Card>
-      <Card class="summary-card"><template #content><span>Completadas</span><strong>{{ completedTasks }}</strong></template></Card>
+      <Card class="summary-card"><template #content><span>{{ t('mechanicDashboard.pending') }}</span><strong>{{ pendingTasks }}</strong></template></Card>
+      <Card class="summary-card"><template #content><span>{{ t('mechanicDashboard.inProgress') }}</span><strong>{{ progressTasks }}</strong></template></Card>
+      <Card class="summary-card"><template #content><span>{{ t('mechanicDashboard.completed') }}</span><strong>{{ completedTasks }}</strong></template></Card>
     </div>
 
     <div class="tasks-grid">
@@ -80,21 +90,23 @@ const logout = () => {
               <h3>{{ task.description }}</h3>
             </div>
 
-            <Tag :value="task.status" :severity="getSeverity(task.status)" rounded />
+            <Tag :value="task.status === 'Pendiente' ? t('mechanicDashboard.statuses.pending') : task.status === 'En Proceso' ? t('mechanicDashboard.statuses.inProgress') : t('mechanicDashboard.statuses.completed')" :severity="getSeverity(task.status)" rounded />
           </div>
 
           <div class="field">
-            <label>Actualizar estado</label>
+            <label>{{ t('mechanicDashboard.updateStatus') }}</label>
             <Dropdown
                 :model-value="task.status"
                 :options="statusOptions"
+                option-label="label"
+                option-value="value"
                 class="w-full"
                 @update:model-value="updateStatus(task, $event)"
             />
           </div>
 
           <Button
-              label="Ver orden"
+              :label="t('mechanicDashboard.viewOrder')"
               icon="pi pi-arrow-right"
               icon-pos="right"
               outlined
@@ -107,8 +119,8 @@ const logout = () => {
 
     <div v-if="!myTasks.length" class="empty-state">
       <i class="pi pi-check-circle"></i>
-      <h3>No tienes tareas asignadas</h3>
-      <p>Cuando el administrador te asigne tareas, aparecerán aquí.</p>
+      <h3>{{ t('mechanicDashboard.emptyTitle') }}</h3>
+      <p>{{ t('mechanicDashboard.emptyDescription') }}</p>
     </div>
   </section>
 </template>
@@ -216,6 +228,13 @@ p {
 .empty-state i {
   color: #0b1680;
   font-size: 2rem;
+}
+
+
+.header-actions {
+  display:flex;
+  align-items:center;
+  gap:1rem;
 }
 
 @media (max-width: 768px) {

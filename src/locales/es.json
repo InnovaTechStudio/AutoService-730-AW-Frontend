@@ -370,16 +370,33 @@
   },
   "tracking": {
     "title": "Rastrea tu Vehículo",
-    "subtitle": "Ingresa el código de servicio que te proporcionó el taller para monitorear el progreso en tiempo real.",
-    "vehicle": "VEHÍCULO EN TALLER",
-    "searchLabel": "Código de Servicio",
-    "searchPlaceholder": "Ej: AS-1001A",
-    "searchButton": "Buscar Servicio",
-    "arrival": "FECHA DE INGRESO",
-    "delivery": "ENTREGA ESTIMADA",
-    "progress": "Progreso del Servicio",
-    "errorNotFound": "El código ingresado no existe o es incorrecto.",
-    "errorConnection": "Problemas al conectar con el servidor. Verifica tu conexión."
+    "description": "Ingresa el código que te proporcionó el taller para ver el estado de tu servicio en tiempo real.",
+    "serviceCode": "Código de Servicio",
+    "placeholder": "Ej: AS-1001A",
+    "search": "Buscar",
+    "invalidCode": "El código ingresado no existe o es incorrecto.",
+    "connectionError": "Problemas al conectar con el servidor. Verifica tu conexión.",
+    "serviceTasks": "Tareas de Servicio",
+    "noEvidence": "No hay evidencia visual",
+    "visualEvidence": "EVIDENCIA VISUAL",
+    "estimatedCost": "COSTO ESTIMADO TOTAL",
+    "costDisclaimer": "Sujeto a cambios según diagnóstico.",
+    "payNow": "Realizar Pago",
+    "serviceTimes": "TIEMPOS DE SERVICIO",
+    "entryDate": "FECHA DE INGRESO",
+    "estimatedDelivery": "ENTREGA ESTIMADA",
+    "vehicleEntered": "Vehículo Ingresado",
+    "payment": {
+      "title": "Proceso de Pago",
+      "total": "Total a pagar",
+      "card": "Tarjeta",
+      "cash": "Efectivo",
+      "cardNumber": "Número de tarjeta",
+      "date": "Fecha",
+      "scanQr": "Escanea el QR para pagar",
+      "confirm": "Confirmar Pago",
+      "success": "Pago realizado con {method}"
+    }
   },
   "payment": {
     "title": "Proceso de Pago",
@@ -414,5 +431,24 @@
     "pending": "Pendiente",
     "inProgress": "En Proceso",
     "completed": "Completada"
+  },
+  "mechanicDashboard": {
+    "eyebrow": "Espacio del mecánico",
+    "title": "Mis tareas asignadas",
+    "description": "Actualiza el avance de tus tareas para sincronizar el progreso con el panel del administrador.",
+    "logout": "Cerrar sesión",
+    "pending": "Pendientes",
+    "inProgress": "En proceso",
+    "completed": "Completadas",
+    "updateStatus": "Actualizar estado",
+    "viewOrder": "Ver orden",
+    "emptyTitle": "No tienes tareas asignadas",
+    "emptyDescription": "Cuando el administrador te asigne tareas, aparecerán aquí.",
+    "noOrder": "Sin orden",
+    "statuses": {
+      "pending": "Pendiente",
+      "inProgress": "En Proceso",
+      "completed": "Completada"
+    }
   }
 }
