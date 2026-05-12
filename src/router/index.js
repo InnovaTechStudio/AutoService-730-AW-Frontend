@@ -15,13 +15,25 @@ const router = createRouter({
             component: () => import('../domains/customer-trust/presentation/tracking-view.vue')
         },
         {
+            path: '/mechanic',
+            name: 'mechanic-dashboard',
+            component: () => import('../domains/mechanic/presentation/mechanic-dashboard.vue'),
+            meta: { requiresAuth: true, role: 'mechanic' }
+        },
+        {
             path: '/',
             component: () => import('../shared/presentation/admin-layout.vue'),
             meta: { requiresAuth: true },
             children: [
                 { path: '', name: 'dashboard', component: () => import('../domains/workshop-operations/presentation/dashboard.vue') },
-                { path: 'customers', name: 'customers', component: () => import('../domains/customer-management/presentation/customer-list.vue') },
+                { path: 'customers', name: 'customers', component: () => import('../domains/customer-management/presentation/pages/customer-management.page.vue') },
                 { path: 'vehicles', name: 'vehicles', component : () => import('../domains/fleet-management/presentation/vehicle-list.vue')},
+                {
+                    path: 'vehicles/:id',
+                    name: 'vehicle-detail',
+                    component: () => import('../domains/fleet-management/presentation/vehicle-detail.vue'),
+                    props: true
+                },
                 { path: 'work-orders', name: 'work-orders', component: () => import('../domains/workshop-operations/presentation/work-order-list.vue')},
                 { path: 'work-orders/new', name: 'create-work-order', component: () => import('../domains/workshop-operations/presentation/create-work-order.vue')},
                 { path: 'work-orders/:id', name: 'work-order-details', component: () => import('../domains/workshop-operations/presentation/work-order-detail.vue'), props: true},
@@ -38,8 +50,15 @@ router.beforeEach((to, from, next) => {
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
         next('/login');
     }
-    else if (to.path === '/login' && authStore.isAuthenticated) {
+    else if (to.meta.role && authStore.userRole !== to.meta.role) {
         next('/');
+    }
+    else if (to.path === '/login' && authStore.isAuthenticated) {
+        if (authStore.userRole === 'mechanic') {
+            next('/mechanic');
+        } else {
+            next('/');
+        }
     }
     else {
         next();

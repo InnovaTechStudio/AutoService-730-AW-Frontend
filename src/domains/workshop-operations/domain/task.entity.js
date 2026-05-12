@@ -4,5 +4,6 @@ export const createTask = (data = {}) => ({
     description: data.description || '',
     status: data.status || 'Pendiente',
     mechanicId: data.mechanicId || null,
-    price: data.price || 0
+    price: data.price || 0,
+    photo: data.photo || ''
 });

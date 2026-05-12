@@ -1,81 +1,7 @@
-<template>
-  <div class="tracking-layout">
-
-    <div class="tracking-header">
-      <i class="pi pi-car header-icon"></i>
-      <h1>Rastrea tu Vehículo</h1>
-      <p>Ingresa el código que te proporcionó el taller para ver el estado de tu servicio en tiempo real.</p>
-    </div>
-
-    <div class="tracking-content">
-
-      <div class="search-box">
-        <label for="code">Código de Servicio</label>
-        <div class="p-inputgroup">
-          <InputText
-              id="code"
-              v-model="trackingCode"
-              placeholder="Ej: AS-1001A"
-              @keyup.enter="searchOrder"
-              class="code-input"
-          />
-          <Button icon="pi pi-search" label="Buscar" @click="searchOrder" :loading="isLoading" class="p-button-primary" />
-        </div>
-        <div v-if="errorMsg" class="error-message mt-3">
-          <i class="pi pi-exclamation-circle"></i> {{ errorMsg }}
-        </div>
-      </div>
-
-      <div v-if="orderData" class="results-box fade-in">
-
-        <div class="vehicle-info">
-          <div class="vehicle-header">
-            <div class="vehicle-details">
-              <span class="label">Vehículo Ingresado</span>
-              <h2>{{ vehicleData?.brand }} {{ vehicleData?.model }} <span>{{ vehicleData?.plate }}</span></h2>
-            </div>
-            <Tag :value="orderData.status" :severity="getStatusSeverity(orderData.status)" class="status-tag" />
-          </div>
-
-          <div class="dates-grid">
-            <div class="date-item">
-              <span class="label">Fecha de Ingreso</span>
-              <strong><i class="pi pi-calendar-plus text-blue-500"></i> {{ orderData.startDate }}</strong>
-            </div>
-            <div class="date-item right-align">
-              <span class="label">Entrega Estimada</span>
-              <strong><i class="pi pi-calendar text-orange-500"></i> {{ orderData.estimatedDate }}</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="timeline-section">
-          <h3>Progreso del Servicio</h3>
-          <Timeline :value="tasks" class="custom-timeline">
-            <template #marker="slotProps">
-              <span class="custom-marker" :class="getTaskMarkerColor(slotProps.item.status)">
-                <i :class="getTaskIcon(slotProps.item.status)"></i>
-              </span>
-            </template>
-            <template #content="slotProps">
-              <div class="timeline-content">
-                <h4>{{ slotProps.item.description }}</h4>
-                <Tag :value="slotProps.item.status" :severity="getTaskTagSeverity(slotProps.item.status)" class="task-tag" />
-              </div>
-            </template>
-          </Timeline>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref } from 'vue';
 import { TrackingService } from '../infrastructure/tracking.service';
-
+import PaymentModal from "./payment-modal.vue";
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
@@ -89,6 +15,8 @@ const orderData = ref(null);
 const vehicleData = ref(null);
 const tasks = ref([]);
 
+const selectedTask = ref(null);
+const showPaymentModal = ref(false);
 const searchOrder = async () => {
   if (!trackingCode.value) return;
 
@@ -113,6 +41,8 @@ const searchOrder = async () => {
 
 
     tasks.value = await TrackingService.getTasks(order.id);
+
+    selectedTask.value = tasks.value.find(task => task.photo) || tasks.value[0];
 
   } catch (error) {
     errorMsg.value = 'Problemas al conectar con el servidor. Verifica tu conexión.';
@@ -147,18 +77,187 @@ const getTaskTagSeverity = (status) => {
   return 'secondary';
 };
 </script>
+<template>
+  <div class="tracking-layout">
 
+    <div class="tracking-header">
+      <i class="pi pi-car header-icon"></i>
+      <h1>Rastrea tu Vehículo</h1>
+      <p>Ingresa el código que te proporcionó el taller para ver el estado de tu servicio en tiempo real.</p>
+    </div>
+
+    <div class="tracking-content">
+
+      <div class="search-box">
+        <label for="code">Código de Servicio</label>
+        <div class="p-inputgroup">
+          <InputText
+              id="code"
+              v-model="trackingCode"
+              placeholder="Ej: AS-1001A"
+              @keyup.enter="searchOrder"
+              class="code-input"
+          />
+          <Button icon="pi pi-search" label="Buscar" @click="searchOrder" :loading="isLoading" class="p-button-primary" />
+        </div>
+        <div v-if="errorMsg" class="error-message mt-3">
+          <i class="pi pi-exclamation-circle"></i> {{ errorMsg }}
+        </div>
+      </div>
+
+      <div v-if="orderData" class="results-box fade-in">
+
+        <div class="vehicle-info">
+
+          <div class="dashboard-grid">
+
+            <!-- LEFT -->
+            <div class="left-section">
+
+              <!-- TASKS -->
+              <div class="service-card">
+                <div class="card-header">
+                  <h3>Tareas de Servicio</h3>
+                </div>
+
+                <div
+                    v-for="task in tasks"
+                    :key="task.id"
+                    class="task-item"
+                    :class="{ active: selectedTask?.id === task.id }"
+                    @click="selectedTask = task"
+                >
+
+                  <div class="task-left">
+                    <div class="task-icon">
+                      <i :class="getTaskIcon(task.status)"></i>
+                    </div>
+
+                    <div>
+                      <strong>{{ task.description }}</strong>
+                      <p>{{ task.status }}</p>
+                    </div>
+                  </div>
+
+                  <Tag
+                      :value="task.status"
+                      :severity="getTaskTagSeverity(task.status)"
+                  />
+                </div>
+              </div>
+
+              <!-- EVIDENCE -->
+              <div class="evidence-card">
+
+                <img
+                    v-if="selectedTask?.photo"
+                    :src="selectedTask.photo"
+                    alt="evidence"
+                />
+
+                <div v-else class="no-image">
+                  <i class="pi pi-image"></i>
+                  <p>No hay evidencia visual</p>
+                </div>
+
+                <div class="evidence-info">
+                  <span>EVIDENCIA VISUAL</span>
+                  <strong>{{ selectedTask?.description }}</strong>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- RIGHT -->
+            <div class="right-section">
+
+              <!-- COST -->
+              <div class="cost-card">
+      <span class="mini-title">
+        COSTO ESTIMADO TOTAL
+      </span>
+
+                <h2>${{ orderData.price }}</h2>
+
+                <p>Sujeto a cambios según diagnóstico.</p>
+                <Button
+                    label="Realizar Pago"
+                    icon="pi pi-credit-card"
+                    class="pay-now-btn"
+                    @click="showPaymentModal = true"
+                />
+              </div>
+              <!-- DATES -->
+              <div class="dates-card">
+
+      <span class="mini-title">
+        TIEMPOS DE SERVICIO
+      </span>
+
+                <div class="date-box">
+                  <i class="pi pi-calendar"></i>
+
+                  <div>
+                    <small>FECHA DE INGRESO</small>
+                    <strong>{{ orderData.startDate }}</strong>
+                  </div>
+                </div>
+
+                <div class="date-box">
+                  <i class="pi pi-clock"></i>
+
+                  <div>
+                    <small>ENTREGA ESTIMADA</small>
+                    <strong>{{ orderData.estimatedDate }}</strong>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+          <div class="vehicle-header">
+            <div class="vehicle-details">
+              <span class="label">Vehículo Ingresado</span>
+              <h2>{{ vehicleData?.brand }} {{ vehicleData?.model }} <span>{{ vehicleData?.plate }}</span></h2>
+            </div>
+            <Tag :value="orderData.status" :severity="getStatusSeverity(orderData.status)" class="status-tag" />
+          </div>
+
+          <div class="dates-grid">
+            <div class="date-item">
+              <span class="label">Fecha de Ingreso</span>
+              <strong><i class="pi pi-calendar-plus text-blue-500"></i> {{ orderData.startDate }}</strong>
+            </div>
+            <div class="date-item right-align">
+              <span class="label">Entrega Estimada</span>
+              <strong><i class="pi pi-calendar text-orange-500"></i> {{ orderData.estimatedDate }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      <PaymentModal
+          v-model:visible="showPaymentModal"
+          :amount="orderData?.price || 0"
+      />
+    </div>
+  </div>
+</template>
 <style scoped>
 
 * {
   box-sizing: border-box;
 }
-
+.pay-now-btn{
+  width:100%;
+  margin-top:1.5rem;
+}
 .tracking-layout {
   min-height: 100vh;
   width: 100vw;
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-  display: flex;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);  display: flex;
   flex-direction: column;
   align-items: center;
   font-family: system-ui, -apple-system, sans-serif;
@@ -191,8 +290,8 @@ const getTaskTagSeverity = (status) => {
 }
 
 .tracking-content {
-  width: 100%;
-  max-width: 600px;
+  width: 95%;
+  max-width: 1600px;
 }
 
 
@@ -239,6 +338,7 @@ const getTaskTagSeverity = (status) => {
   border-radius: 8px;
   margin-bottom: 2rem;
   overflow: hidden;
+  width: 100%;
 }
 
 .vehicle-header {
@@ -319,26 +419,6 @@ const getTaskTagSeverity = (status) => {
   font-size: 1.1rem;
 }
 
-.task-tag {
-  font-size: 0.75rem;
-}
-
-
-.custom-marker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.marker-success { background-color: #10b981; }
-.marker-info { background-color: #3b82f6; }
-.marker-pending { background-color: #cbd5e1; color: #475569; }
-
 .fade-in {
   animation: fadeIn 0.4s ease-out;
 }
@@ -350,5 +430,169 @@ const getTaskTagSeverity = (status) => {
 
 :deep(.p-timeline-event-separator) {
   margin-top: 4px;
+}
+
+.dashboard-grid{
+  display:grid;
+  grid-template-columns: 3fr 1.2fr;
+  gap:2rem;
+  margin-top:1.5rem;
+  align-items:start;
+}
+.left-section{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap:1.5rem;
+  align-items:start;
+}
+@media(max-width:1200px){
+
+  .left-section{
+    grid-template-columns:1fr;
+  }
+
+}
+
+.service-card,
+.evidence-card,
+.cost-card,
+.dates-card{
+  background:white;
+  border-radius:18px;
+  padding:1.5rem;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.card-header{
+  margin-bottom:1rem;
+}
+
+.card-header h3{
+  margin:0;
+  color:#1e293b;
+}
+
+.task-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:1rem;
+  border-radius:14px;
+  background:#f8fafc;
+  margin-bottom:1rem;
+  cursor:pointer;
+  transition:0.2s;
+  border:2px solid transparent;
+}
+
+.task-item:hover{
+  transform:translateY(-2px);
+}
+
+.task-item.active{
+  border-color:#3b82f6;
+  background:#eff6ff;
+}
+
+.task-left{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.task-icon{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:#dbeafe;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#2563eb;
+}
+
+.task-left p{
+  margin:0.3rem 0 0;
+  color:#64748b;
+  font-size:0.9rem;
+}
+
+.evidence-card img{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  border-radius:14px;
+}
+
+.evidence-info{
+  margin-top:1rem;
+}
+
+.evidence-info span{
+  font-size:0.75rem;
+  color:#64748b;
+  font-weight:600;
+}
+
+.evidence-info strong{
+  display:block;
+  margin-top:0.4rem;
+  color:#0f172a;
+}
+
+.cost-card h2{
+  font-size:2.3rem;
+  margin:1rem 0;
+  color:#111827;
+}
+
+.mini-title{
+  font-size:0.8rem;
+  color:#64748b;
+  font-weight:700;
+  letter-spacing:1px;
+}
+
+.date-box{
+  display:flex;
+  gap:1rem;
+  margin-top:1.5rem;
+  align-items:center;
+}
+
+.date-box i{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:#dbeafe;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#2563eb;
+}
+
+.date-box small{
+  display:block;
+  color:#64748b;
+  margin-bottom:0.3rem;
+}
+
+.no-image{
+  height:260px;
+  border-radius:14px;
+  background:#f1f5f9;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  color:#64748b;
+}
+
+@media(max-width:1200px){
+
+  .dashboard-grid{
+    grid-template-columns:1fr;
+  }
+
 }
 </style>

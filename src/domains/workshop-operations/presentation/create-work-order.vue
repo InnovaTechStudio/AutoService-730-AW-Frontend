@@ -21,6 +21,22 @@
                 filter class="w-full"
                 @change="onVehicleChange"
             />
+            <div v-if="selectedVehicle" class="vehicle-preview-card">
+              <img
+                  :src="selectedVehicle.image"
+                  :alt="selectedVehicle.brand"
+                  class="vehicle-preview-image"
+              />
+
+              <div class="vehicle-preview-info">
+                <h4>
+                  {{ selectedVehicle.brand }}
+                  {{ selectedVehicle.model }}
+                </h4>
+
+                <p>{{ selectedVehicle.plate }}</p>
+              </div>
+            </div>
           </div>
 
           <div class="field mb-3" v-if="selectedCustomerName">
@@ -69,6 +85,7 @@
                     placeholder="Seleccionar"
                     class="w-full"
                 />
+
               </template>
             </Column>
             <Column header="">
@@ -118,6 +135,7 @@ const mechanicStore = useMechanicStore();
 
 const isSaving = ref(false);
 const selectedCustomerName = ref('');
+const selectedVehicle = ref(null);
 const newWO = ref({ vehicleId: null, customerId: null, description: '', estimatedDate: null, price: 0 });
 const tasks = ref([]);
 
@@ -132,11 +150,22 @@ onMounted(async () => {
 const goBack = () => router.push('/work-orders');
 
 const onVehicleChange = () => {
-  const vehicle = vehicleStore.vehicles.find(v => String(v.id) === String(newWO.value.vehicleId));
+  const vehicle = vehicleStore.vehicles.find(
+      v => String(v.id) === String(newWO.value.vehicleId)
+  );
+
+  selectedVehicle.value = vehicle || null;
+
   if (vehicle) {
     newWO.value.customerId = vehicle.customerId;
-    const customer = customerStore.customers.find(c => String(c.id) === String(vehicle.customerId));
-    selectedCustomerName.value = customer ? customer.fullName : 'No encontrado';
+
+    const customer = customerStore.customers.find(
+        c => String(c.id) === String(vehicle.customerId)
+    );
+
+    selectedCustomerName.value = customer
+        ? customer.fullName
+        : 'No encontrado';
   }
 };
 
@@ -185,3 +214,208 @@ const saveFullWorkOrder = async () => {
   }
 };
 </script>
+
+<style scoped>
+
+/* CONTENEDOR GENERAL */
+.container {
+  padding: 2rem;
+  background: #f1f5f9;
+  min-height: 100vh;
+}
+
+/* TITULOS */
+h1 {
+  color: #0f172a;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+h3 {
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.7rem;
+}
+
+/* TARJETAS */
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid #e2e8f0;
+  box-shadow:
+      0 4px 10px rgba(15, 23, 42, 0.04),
+      0 2px 4px rgba(15, 23, 42, 0.02);
+  transition: all 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+      0 8px 24px rgba(15, 23, 42, 0.08),
+      0 4px 10px rgba(15, 23, 42, 0.05);
+}
+
+/* CAMPOS */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field label {
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+/* INPUTS */
+:deep(.p-inputtext),
+:deep(.p-dropdown),
+:deep(.p-calendar),
+:deep(.p-inputtextarea) {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+:deep(.p-inputtext:focus),
+:deep(.p-dropdown:not(.p-disabled).p-focus),
+:deep(.p-inputtextarea:focus) {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+}
+
+/* PREVIEW VEHICULO */
+.vehicle-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fafc, #eef2ff);
+  border: 1px solid #dbeafe;
+}
+
+.vehicle-preview-image {
+  width: 100px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.vehicle-preview-info h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.vehicle-preview-info p {
+  margin-top: 0.4rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* TABLA */
+:deep(.p-datatable) {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+:deep(.p-datatable-thead > tr > th) {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+:deep(.p-datatable-tbody > tr > td) {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+:deep(.p-datatable-tbody > tr:hover) {
+  background: #f8fafc;
+}
+
+/* BOTONES */
+:deep(.p-button) {
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+:deep(.p-button:hover) {
+  transform: translateY(-1px);
+}
+
+/* BOTON PRINCIPAL */
+:deep(.p-button:not(.p-button-text)) {
+  box-shadow: 0 4px 10px rgba(59,130,246,0.15);
+}
+
+/* MENSAJE VACIO */
+.text-500 {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* SEPARACION INFERIOR */
+.mb-3 {
+  margin-bottom: 1.5rem !important;
+}
+
+.mb-4 {
+  margin-bottom: 2rem !important;
+}
+
+.mt-4 {
+  margin-top: 2rem !important;
+}
+
+/* FOOTER BOTONES */
+.flex.justify-content-end {
+  padding-top: 1rem;
+  border-top: 1px solid #cbd5e1;
+}
+
+/* RESPONSIVE */
+@media screen and (max-width: 768px) {
+
+  .container {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1.2rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .vehicle-preview-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .vehicle-preview-image {
+    width: 100%;
+    height: 180px;
+  }
+}
+
+</style>

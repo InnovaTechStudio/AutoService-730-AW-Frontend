@@ -1,61 +1,349 @@
 <template>
-  <div class="container" v-if="order">
-    <div class="flex justify-content-between align-items-center mb-4">
-      <div>
-        <Button icon="pi pi-arrow-left" text @click="goBack" class="mr-2" />
-        <h1 class="inline-block m-0">Detalle de Orden: {{ order.trackingCode }}</h1>
+  <div class="order-page" v-if="order">
+
+    <!-- HEADER -->
+    <div class="order-header">
+      <div class="flex align-items-center gap-3">
+        <Button
+            icon="pi pi-arrow-left"
+            rounded
+            outlined
+            severity="secondary"
+            @click="goBack"
+        />
+
+        <div>
+          <h1 class="title">
+            Orden #{{ order.trackingCode }}
+          </h1>
+
+          <p class="subtitle">
+            Gestión completa de la orden de trabajo
+          </p>
+        </div>
       </div>
-      <Tag :value="order.status" :severity="order.status === 'Finalizado' ? 'success' : 'info'" class="text-xl" />
+
+      <Tag
+          :value="order.status"
+          :severity="order.status === 'Finalizado' ? 'success' : 'warning'"
+          class="status-tag"
+      />
     </div>
 
-    <div class="card p-4 mb-4 bg-white border-round shadow-1">
-      <div class="grid">
-        <div class="col-12 md:col-6">
-          <p><strong>Descripción:</strong> {{ order.description }}</p>
-          <p><strong>Fecha Ingreso:</strong> {{ order.startDate }}</p>
-          <p><strong>Fecha Estimada:</strong> {{ order.estimatedDate }}</p>
-        </div>
-        <div class="col-12 md:col-6 flex flex-column align-items-end justify-content-center">
-          <label class="font-bold mb-2">Precio Total (S/.)</label>
-          <div class="p-inputgroup" style="width: 200px;">
-            <span class="p-inputgroup-addon">S/.</span>
-            <InputText v-model.number="localPrice" type="number" @blur="savePrice" />
+    <!-- CARD PRINCIPAL -->
+    <Card class="main-card">
+
+      <template #content>
+
+        <div class="grid">
+
+          <!-- INFORMACIÓN -->
+          <div class="col-12 md:col-7">
+
+            <div class="info-block">
+              <i class="pi pi-file-edit info-icon"></i>
+
+              <div>
+                <h3>Descripción</h3>
+                <p>{{ order.description }}</p>
+              </div>
+            </div>
+
+            <Divider />
+
+            <div class="dates-container">
+
+              <div class="date-card">
+                <i class="pi pi-calendar"></i>
+
+                <div>
+                  <span>Ingreso</span>
+                  <strong>{{ order.startDate }}</strong>
+                </div>
+              </div>
+
+              <div class="date-card">
+                <i class="pi pi-clock"></i>
+
+                <div>
+                  <span>Entrega</span>
+                  <strong>{{ order.estimatedDate }}</strong>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- VEHÍCULO -->
+            <div v-if="vehicle" class="vehicle-card">
+
+              <img
+                  :src="vehicle.image"
+                  :alt="vehicle.brand"
+                  class="vehicle-image"
+              />
+
+              <div class="vehicle-info">
+                <h2>
+                  {{ vehicle.brand }} {{ vehicle.model }}
+                </h2>
+
+                <Chip
+                    :label="vehicle.plate"
+                    icon="pi pi-car"
+                    class="plate-chip"
+                />
+              </div>
+
+            </div>
+
           </div>
+
+          <!-- PRECIO -->
+          <div class="col-12 md:col-5">
+
+            <div class="price-card">
+
+              <h3>Total de la Orden</h3>
+
+              <div class="price-input-container">
+
+                <span class="currency">S/.</span>
+
+                <InputText
+                    v-model.number="localPrice"
+                    type="number"
+                    class="price-input"
+                    @blur="savePrice"
+                />
+
+              </div>
+
+              <small>
+                Actualiza el monto total de la reparación
+              </small>
+
+            </div>
+
+          </div>
+
         </div>
+
+      </template>
+
+    </Card>
+
+    <!-- QA CHECKLIST -->
+
+    <div class="qa-header">
+
+      <div>
+        <h2>Checklist de Validación</h2>
+        <p>Control final antes de entrega del vehículo</p>
       </div>
+
+      <Tag
+          :value="qaCompleted ? 'QA Aprobado' : 'QA Pendiente'"
+          :severity="qaCompleted ? 'success' : 'warning'"
+          class="qa-status-tag"
+      />
+
     </div>
 
-    <div class="flex justify-content-between align-items-center mb-3 mt-5">
-      <h2>Tareas Asignadas</h2>
-      <Button label="Agregar Tarea" icon="pi pi-plus" @click="openTaskDialog" severity="secondary" />
-    </div>
+    <Card class="qa-card">
 
-    <DataTable :value="taskStore.tasks" :loading="taskStore.loading" dataKey="id" responsiveLayout="scroll" class="bg-white">
-      <Column field="description" header="Descripción de la Tarea"></Column>
-      <Column header="Mecánico">
-        <template #body="slotProps">
-          {{ getMechanicName(slotProps.data.mechanicId) }}
-        </template>
-      </Column>
-      <Column field="status" header="Estado">
-        <template #body="slotProps">
-          <Dropdown
-              v-model="slotProps.data.status"
-              :options="['Pendiente', 'En Proceso', 'Completada']"
-              @change="updateTaskStatus(slotProps.data)"
-              class="w-full"
+      <template #content>
+
+        <div class="qa-grid">
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.tasksCompleted"
+                binary
+                inputId="tasksCompleted"
+            />
+
+            <label for="tasksCompleted">
+              Todas las tareas completadas
+            </label>
+          </div>
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.sparePartsChecked"
+                binary
+                inputId="sparePartsChecked"
+            />
+
+            <label for="sparePartsChecked">
+              Repuestos verificados
+            </label>
+          </div>
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.diagnosisValidated"
+                binary
+                inputId="diagnosisValidated"
+            />
+
+            <label for="diagnosisValidated">
+              Diagnóstico validado
+            </label>
+          </div>
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.cleaningDone"
+                binary
+                inputId="cleaningDone"
+            />
+
+            <label for="cleaningDone">
+              Limpieza realizada
+            </label>
+          </div>
+
+          <div class="qa-item">
+            <Checkbox
+                v-model="qaChecklist.finalTestDone"
+                binary
+                inputId="finalTestDone"
+            />
+
+            <label for="finalTestDone">
+              Prueba final realizada
+            </label>
+          </div>
+
+        </div>
+
+        <div class="qa-footer">
+
+          <div class="qa-summary">
+            <i
+                :class="qaCompleted
+            ? 'pi pi-check-circle'
+            : 'pi pi-exclamation-circle'"
+            ></i>
+
+            <span>
+          {{
+            qaCompleted
+                ? 'El vehículo está listo para entrega'
+                : 'Faltan validaciones antes de entregar'
+          }}
+        </span>
+          </div>
+
+          <Button
+              :label="qaCompleted
+          ? 'Ready for Delivery'
+          : 'Pending Validation'"
+              :severity="qaCompleted ? 'success' : 'warning'"
+              :disabled="!qaCompleted"
+              icon="pi pi-verified"
           />
-        </template>
-      </Column>
-    </DataTable>
 
-    <Dialog v-model:visible="taskDialog" header="Nueva Tarea" :modal="true" class="p-fluid">
+        </div>
+
+      </template>
+
+    </Card>
+
+    <!-- TAREAS -->
+    <div class="tasks-header">
+
+      <div>
+        <h2>Tareas Asignadas</h2>
+        <p>Gestiona el progreso del trabajo</p>
+      </div>
+
+      <Button
+          label="Nueva Tarea"
+          icon="pi pi-plus"
+          severity="contrast"
+          @click="openTaskDialog"
+      />
+
+    </div>
+
+    <!-- TABLA -->
+    <Card class="table-card">
+
+      <template #content>
+
+        <DataTable
+            :value="taskStore.tasks"
+            :loading="taskStore.loading"
+            responsiveLayout="scroll"
+            stripedRows
+            showGridlines
+            class="custom-table"
+        >
+
+          <Column field="description" header="Tarea"></Column>
+
+          <Column header="Mecánico">
+            <template #body="slotProps">
+
+              <div class="mechanic-cell">
+
+                <Avatar
+                    icon="pi pi-user"
+                    shape="circle"
+                />
+
+                <span>
+                  {{ getMechanicName(slotProps.data.mechanicId) }}
+                </span>
+
+              </div>
+
+            </template>
+          </Column>
+
+          <Column field="status" header="Estado">
+
+            <template #body="slotProps">
+
+              <Dropdown
+                  v-model="slotProps.data.status"
+                  :options="['Pendiente', 'En Proceso', 'Completada']"
+                  @change="updateTaskStatus(slotProps.data)"
+                  class="status-dropdown"
+              />
+
+            </template>
+
+          </Column>
+
+        </DataTable>
+
+      </template>
+
+    </Card>
+
+    <!-- DIALOG -->
+    <Dialog
+        v-model:visible="taskDialog"
+        header="Nueva Tarea"
+        :modal="true"
+        :style="{ width: '30rem' }"
+        class="task-dialog"
+    >
+
       <div class="field">
         <label>Descripción</label>
-        <InputText v-model.trim="newTask.description" required autofocus />
+
+        <InputText
+            v-model.trim="newTask.description"
+            placeholder="Describe la tarea"
+        />
       </div>
-      <div class="field">
-        <label>Asignar a Mecánico</label>
+
+      <div class="field mt-4">
+        <label>Mecánico</label>
+
         <Dropdown
             v-model="newTask.mechanicId"
             :options="mechanicStore.mechanics"
@@ -64,14 +352,26 @@
             placeholder="Selecciona un mecánico"
         />
       </div>
+
       <template #footer>
-        <Button label="Cancelar" icon="pi pi-times" text @click="taskDialog = false" />
-        <Button label="Guardar" icon="pi pi-check" @click="saveTask" />
+
+        <Button
+            label="Cancelar"
+            text
+            severity="secondary"
+            @click="taskDialog = false"
+        />
+
+        <Button
+            label="Guardar"
+            icon="pi pi-check"
+            @click="saveTask"
+        />
+
       </template>
+
     </Dialog>
-  </div>
-  <div v-else class="flex justify-content-center mt-5">
-    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+
   </div>
 </template>
 
@@ -81,6 +381,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useWorkOrderStore } from '../application/work-order.store';
 import { useTaskStore } from '../application/task.store';
 import { useMechanicStore } from '../../staff-coordination/application/mechanic.store';
+import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
+import Checkbox from 'primevue/checkbox';
 
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
@@ -90,11 +392,16 @@ import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 
+import Card from 'primevue/card';
+import Divider from 'primevue/divider';
+import Avatar from 'primevue/avatar';
+import Chip from 'primevue/chip';
 const route = useRoute();
 const router = useRouter();
 const workOrderStore = useWorkOrderStore();
 const taskStore = useTaskStore();
 const mechanicStore = useMechanicStore();
+const vehicleStore = useVehicleStore();
 
 const orderId = route.params.id;
 
@@ -103,15 +410,30 @@ const order = computed(() => {
   return workOrderStore.workOrders.find(wo => String(wo.id) === String(orderId));
 });
 
+const vehicle = computed(() => {
+  if (!order.value) return null;
+
+  return vehicleStore.vehicles.find(
+      v => String(v.id) === String(order.value.vehicleId)
+  );
+});
+
 const localPrice = ref(0);
 const taskDialog = ref(false);
 const newTask = ref({});
-
+const qaChecklist = ref({
+  tasksCompleted: false,
+  sparePartsChecked: false,
+  diagnosisValidated: false,
+  cleaningDone: false,
+  finalTestDone: false
+});
 onMounted(async () => {
 
   const promises = [
     taskStore.fetchTasksByOrder(orderId),
-    mechanicStore.fetchMechanics()
+    mechanicStore.fetchMechanics(),
+    vehicleStore.fetchVehicles()
   ];
 
   if (workOrderStore.workOrders.length === 0) {
@@ -129,6 +451,11 @@ onMounted(async () => {
 
 watch(order, (newVal) => {
   if (newVal) localPrice.value = newVal.price || 0;
+
+});
+
+const qaCompleted = computed(() => {
+  return Object.values(qaChecklist.value).every(value => value === true);
 });
 
 const getMechanicName = (id) => {
@@ -163,3 +490,330 @@ const updateTaskStatus = async (task) => {
   await taskStore.updateTaskStatus(task.id, task.status);
 };
 </script>
+<style scoped>
+
+/* HEADER */
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.subtitle {
+  margin-top: 0.3rem;
+  color: #64748b;
+}
+
+.status-tag {
+  font-size: 1rem;
+  padding: 0.7rem 1.2rem;
+}
+
+/* CARD */
+
+.main-card,
+.table-card {
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  border: none;
+}
+
+/* INFO */
+
+.info-block {
+  display: flex;
+  gap: 1rem;
+  align-items: start;
+}
+
+.info-icon {
+  font-size: 1.5rem;
+  color: #3b82f6;
+  margin-top: 0.3rem;
+}
+
+.info-block h3 {
+  margin-bottom: 0.5rem;
+  color: #0f172a;
+}
+
+.info-block p {
+  color: #475569;
+  line-height: 1.6;
+}
+
+/* FECHAS */
+
+.dates-container {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.date-card {
+  flex: 1;
+  min-width: 180px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  padding: 1rem;
+  border-radius: 18px;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.date-card i {
+  font-size: 1.5rem;
+  color: #2563eb;
+}
+
+.date-card span {
+  display: block;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* VEHÍCULO */
+
+.vehicle-card {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: white;
+  border-radius: 24px;
+  padding: 1rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+}
+
+.vehicle-image {
+  width: 180px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+.vehicle-info h2 {
+  margin: 0 0 1rem;
+  color: #0f172a;
+}
+
+.plate-chip {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* PRECIO */
+
+.price-card {
+  height: 100%;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);  display: flex;
+  color: white;
+  border-radius: 24px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.price-card h3 {
+  margin-bottom: 2rem;
+  font-size: 1.4rem;
+}
+
+.price-input-container {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.currency {
+  padding: 1rem;
+  color: #1e3a8a;
+  font-weight: bold;
+}
+
+.price-input {
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1e3a8a;
+}
+
+.price-card small {
+  margin-top: 1rem;
+  opacity: 0.8;
+}
+
+/* TASKS */
+
+.tasks-header {
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tasks-header h2 {
+  margin: 0;
+}
+
+.tasks-header p {
+  margin-top: 0.3rem;
+  color: #64748b;
+}
+
+/* TABLA */
+
+.custom-table {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.mechanic-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.status-dropdown {
+  width: 100%;
+}
+
+/* DIALOG */
+
+.task-dialog ::v-deep(.p-dialog-content) {
+  padding-top: 1rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* RESPONSIVE */
+
+@media screen and (max-width: 768px) {
+
+  .order-header {
+    flex-direction: column;
+    align-items: start;
+    gap: 1rem;
+  }
+
+  .vehicle-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .vehicle-image {
+    width: 100%;
+    height: 200px;
+  }
+
+  .tasks-header {
+    flex-direction: column;
+    align-items: start;
+    gap: 1rem;
+  }
+
+}
+/* QA */
+
+.qa-header {
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qa-status-tag {
+  font-size: 0.95rem;
+  padding: 0.6rem 1rem;
+}
+
+.qa-card {
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  border: none;
+}
+
+.qa-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.qa-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.qa-item label {
+  font-weight: 600;
+  color: #334155;
+}
+
+.qa-footer {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.qa-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.qa-summary i {
+  font-size: 1.2rem;
+  color: #16a34a;
+}
+
+@media screen and (max-width: 768px) {
+
+  .qa-header {
+    flex-direction: column;
+    align-items: start;
+    gap: 1rem;
+  }
+
+  .qa-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .qa-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+}
+</style>
+
