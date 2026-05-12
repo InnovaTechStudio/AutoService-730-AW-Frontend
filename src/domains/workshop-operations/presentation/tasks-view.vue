@@ -6,7 +6,7 @@ import { useWorkOrderStore } from '../application/work-order.store';
 import { useMechanicStore } from '../../staff-coordination/application/mechanic.store';
 
 import Button from 'primevue/button';
-
+import {useI18n} from 'vue-i18n';
 import TaskFilters from './components/tasks/TaskFilters.vue';
 import TaskCard from './components/tasks/TaskCard.vue';
 import TaskDialog from './components/tasks/TaskDialog.vue';
@@ -15,7 +15,7 @@ const router = useRouter();
 const taskStore = useTaskStore();
 const workOrderStore = useWorkOrderStore();
 const mechanicStore = useMechanicStore();
-
+const {t} = useI18n();
 const displayDialog = ref(false);
 const taskForm = ref({});
 const search = ref('');
@@ -172,10 +172,10 @@ const goToWorkOrder = (workOrderId) => {
   <section class="tasks-page">
     <div class="tasks-header">
       <div>
-        <span class="eyebrow">Control operativo</span>
-        <h1>Tablero de tareas</h1>
+        <span class="eyebrow">{{ t('tasks.eyebrow') }}</span>
+        <h1>{{ t('tasks.title') }}</h1>
         <p>
-          Gestiona tareas por orden, asigna mecánicos y actualiza el avance real del servicio.
+          {{ t('tasks.description') }}
         </p>
       </div>
 
@@ -189,7 +189,7 @@ const goToWorkOrder = (workOrderId) => {
         />
 
         <Button
-            label="Nueva tarea"
+            :label="t('tasks.newButton')"
             icon="pi pi-plus"
             class="add-button"
             @click="openDialog"
@@ -199,22 +199,22 @@ const goToWorkOrder = (workOrderId) => {
 
     <div class="summary-row">
       <div class="summary-card">
-        <span>Total tareas</span>
+        <span>{{ t('tasks.summary.total') }}</span>
         <strong>{{ taskStore.tasks.length }}</strong>
       </div>
 
       <div class="summary-card">
-        <span>Pendientes</span>
+        <span>{{ t('tasks.summary.pending') }}</span>
         <strong>{{ pendingTasks }}</strong>
       </div>
 
       <div class="summary-card">
-        <span>En proceso</span>
+        <span>{{ t('tasks.summary.inProgress') }}</span>
         <strong>{{ inProgressTasks }}</strong>
       </div>
 
       <div class="summary-card success">
-        <span>Completadas</span>
+        <span>{{ t('tasks.summary.completed') }}</span>
         <strong>{{ completedTasks }}</strong>
       </div>
     </div>
@@ -229,7 +229,7 @@ const goToWorkOrder = (workOrderId) => {
 
     <div v-if="taskStore.loading" class="empty-state">
       <i class="pi pi-spin pi-spinner"></i>
-      <p>Cargando tareas...</p>
+      <p>{{t('tasks.loading')}}</p>
     </div>
 
     <div v-else-if="filteredTasks.length" class="tasks-grid">
@@ -247,8 +247,8 @@ const goToWorkOrder = (workOrderId) => {
 
     <div v-else class="empty-state">
       <i class="pi pi-check-square"></i>
-      <h3>No se encontraron tareas</h3>
-      <p>Prueba cambiando filtros o registra una nueva tarea.</p>
+      <h3>{{t('tasks.empty.title')}}</h3>
+      <p>{{t('taks.empty.description')}}</p>
     </div>
 
     <TaskDialog

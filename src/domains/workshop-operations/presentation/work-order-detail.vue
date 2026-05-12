@@ -14,11 +14,11 @@
 
         <div>
           <h1 class="title">
-            Orden #{{ order.trackingCode }}
+           {{t('tasks.card.viewOrder')}}#{{ order.trackingCode }}
           </h1>
 
           <p class="subtitle">
-            Gestión completa de la orden de trabajo
+            {{ t('workOrders.detail.subtitle') }}
           </p>
         </div>
       </div>
@@ -383,6 +383,7 @@ import { useTaskStore } from '../application/task.store';
 import { useMechanicStore } from '../../staff-coordination/application/mechanic.store';
 import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
 import Checkbox from 'primevue/checkbox';
+import {useI18n} from 'vue-i18n';
 
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
@@ -489,6 +490,8 @@ const saveTask = async () => {
 const updateTaskStatus = async (task) => {
   await taskStore.updateTaskStatus(task.id, task.status);
 };
+
+const {t} = useI18n();
 </script>
 <style scoped>
 
