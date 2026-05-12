@@ -4,47 +4,39 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="logo-area">
-        <img
-            src="/AutoService-logo.jpg"
-            alt="AutoService Logo"
-            class="logo"
-        />
-
-        <div class="logo-text">
-          <h2>AutoService</h2>
-          <span class="subtitle">Panel Administrador</span>
-        </div>
+        <h2>AutoService</h2>
+        <span class="subtitle">{{ t('nav.controlPanel') }}</span>
       </div>
 
       <nav class="menu">
         <router-link to="/" class="menu-item">
           <i class="pi pi-home"></i>
-          <span>Dashboard</span>
+          <span>{{ t('nav.dashboard') }}</span>
         </router-link>
 
         <router-link to="/customers" class="menu-item">
           <i class="pi pi-users"></i>
-          <span>Clientes</span>
+          <span>{{ t('nav.customers') }}</span>
         </router-link>
 
         <router-link to="/vehicles" class="menu-item">
           <i class="pi pi-car"></i>
-          <span>Vehículos</span>
+          <span>{{ t('nav.vehicles') }}</span>
         </router-link>
 
         <router-link to="/work-orders" class="menu-item">
           <i class="pi pi-address-book"></i>
-          <span>Órdenes de Trabajo</span>
+          <span>{{ t('nav.workOrders') }}</span>
         </router-link>
 
         <router-link to="/tasks" class="menu-item">
           <i class="pi pi-check-square"></i>
-          <span>Tareas</span>
+          <span>{{ t('nav.tasks') }}</span>
         </router-link>
 
         <router-link to="/mechanics" class="menu-item">
           <i class="pi pi-users"></i>
-          <span>Mecánicos</span>
+          <span>{{ t('nav.mechanics') }}</span>
         </router-link>
       </nav>
     </aside>
@@ -56,22 +48,22 @@
       <header class="topbar">
 
         <div class="topbar-left">
-
           <span class="welcome-text">
-            Bienvenido,
-            <strong>{{ authStore.user?.name || 'Administrador' }}</strong>
+            {{ t('topbar.welcome') }}
+            <strong>{{ authStore.user?.name || t('topbar.admin') }}</strong>
           </span>
         </div>
 
         <div class="topbar-right">
+          <LanguageSwitcher />
 
           <div class="user-info">
             <i class="pi pi-user user-icon"></i>
-            <span>{{ authStore.user?.name || 'Administrador' }}</span>
+            <span>{{ authStore.user?.name || t('topbar.admin') }}</span>
           </div>
 
           <Button
-              label="Cerrar Sesión"
+              :label="t('topbar.logout')"
               icon="pi pi-sign-out"
               severity="danger"
               rounded
@@ -91,10 +83,13 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../domains/auth/application/auth.store';
 import Button from 'primevue/button';
+import LanguageSwitcher from './language-switcher.vue';
 
+const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
 
@@ -113,45 +108,18 @@ const handleLogout = () => {
   overflow: hidden;
 }
 
+/* SIDEBAR */
 .sidebar {
   width: 260px;
-  background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+  background: #0f172a;
   color: white;
   display: flex;
   flex-direction: column;
 }
 
-
 .logo-area {
-  padding: 1.5rem;
+  padding: 1.8rem 1.5rem;
   border-bottom: 1px solid #1e293b;
-
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.logo {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-}
-.logo-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.logo-area h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.subtitle {
-  font-size: 0.9rem;
-  color: #94a3b8;
 }
 
 .logo-area h2 {

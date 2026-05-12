@@ -2,6 +2,7 @@
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 import Tag from 'primevue/tag';
+import {useI18n} from 'vue-i18n'
 
 defineProps({
   task: Object,
@@ -9,6 +10,7 @@ defineProps({
 });
 
 defineEmits(['status-change', 'edit', 'delete', 'go-order']);
+const {t} = useI18n();
 </script>
 
 <template>
@@ -33,12 +35,12 @@ defineEmits(['status-change', 'edit', 'delete', 'go-order']);
     </div>
 
     <div class="task-meta">
-      <span><i class="pi pi-clock"></i>{{ task.estimatedTime }} h estimadas</span>
+      <span><i class="pi pi-clock"></i>{{t('tasks.card.estimatedHours')}}</span>
       <span><i class="pi pi-flag"></i>{{ task.priority }}</span>
     </div>
 
     <div class="task-status">
-      <label>Actualizar estado</label>
+      <label>{{t('tasks.card.updateStatus')}}</label>
       <Dropdown
           :model-value="task.status"
           :options="statusOptions"
@@ -49,7 +51,7 @@ defineEmits(['status-change', 'edit', 'delete', 'go-order']);
 
     <div class="task-actions">
       <Button
-          label="Orden"
+          :label="t('tasks.card.viewOrder')"
           icon="pi pi-external-link"
           outlined
           class="action-button"
