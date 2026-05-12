@@ -1,6 +1,9 @@
 <script setup>
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps({
   search: String,
@@ -17,7 +20,7 @@ defineEmits(['update:search', 'update:status']);
       <i class="pi pi-search"></i>
       <InputText
           :model-value="search"
-          placeholder="Buscar por placa, dueño, marca o modelo..."
+          :placeholder="t('vehicles.filters.searchPlaceholder')"
           @update:model-value="$emit('update:search', $event)"
       />
     </span>
@@ -27,7 +30,7 @@ defineEmits(['update:search', 'update:status']);
         :options="statusOptions"
         option-label="label"
         option-value="value"
-        placeholder="Filtrar por estado"
+        :placeholder="t('vehicles.filters.statusPlaceholder')"
         show-clear
         class="status-filter"
         @update:model-value="$emit('update:status', $event)"
@@ -36,24 +39,8 @@ defineEmits(['update:search', 'update:status']);
 </template>
 
 <style scoped>
-.vehicle-filters {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.search-box {
-  flex: 1;
-  min-width: 280px;
-}
-
-.search-box :deep(.p-inputtext) {
-  width: 100%;
-  border-radius: 16px;
-}
-
-.status-filter {
-  min-width: 220px;
-}
+.vehicle-filters { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.search-box { flex: 1; min-width: 280px; }
+.search-box :deep(.p-inputtext) { width: 100%; border-radius: 16px; }
+.status-filter { min-width: 220px; }
 </style>
