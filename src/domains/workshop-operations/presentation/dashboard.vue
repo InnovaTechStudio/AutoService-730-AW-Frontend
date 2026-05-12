@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
 import { useWorkOrderStore } from '../../workshop-operations/application/work-order.store';
 import { useTaskStore } from '../../workshop-operations/application/task.store';
@@ -12,6 +13,7 @@ import WeeklyIncomePanel from './components/dashboard/WeeklyIncomePanel.vue';
 import RecentOrdersPanel from './components/dashboard/RecentOrdersPanel.vue';
 import FrequentServicesPanel from './components/dashboard/FrequentServicesPanel.vue';
 
+const { t } = useI18n();
 const router = useRouter();
 const vehicleStore = useVehicleStore();
 const workOrderStore = useWorkOrderStore();
@@ -72,10 +74,10 @@ const activeVehiclePreview = computed(() => {
       }));
 });
 
-const frequentServices = ref([
-  { name: 'Cambio de aceite', count: 12, amount: 540, progress: 86, icon: 'pi pi-cog' },
-  { name: 'Reparación de frenos', count: 8, amount: 820, progress: 68, icon: 'pi pi-wrench' },
-  { name: 'Rotación de neumáticos', count: 5, amount: 140, progress: 44, icon: 'pi pi-refresh' }
+const frequentServices = computed(() => [
+  { name: t('dashboard.panels.frequentServices.oilChange') || 'Cambio de aceite', count: 12, amount: 540, progress: 86, icon: 'pi pi-cog' },
+  { name: t('dashboard.panels.frequentServices.brakeRepair') || 'Reparación de frenos', count: 8, amount: 820, progress: 68, icon: 'pi pi-wrench' },
+  { name: t('dashboard.panels.frequentServices.tireRotation') || 'Rotación de neumáticos', count: 5, amount: 140, progress: 44, icon: 'pi pi-refresh' }
 ]);
 
 const weeklyIncomeData = ref({
@@ -92,19 +94,10 @@ const weeklyIncomeData = ref({
 
 const barChartOptions = ref({
   maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false }
-  },
+  plugins: { legend: { display: false } },
   scales: {
-    x: {
-      grid: { display: false },
-      ticks: { color: '#64748b' }
-    },
-    y: {
-      grid: { color: '#eef2f7' },
-      ticks: { display: false },
-      border: { display: false }
-    }
+    x: { grid: { display: false }, ticks: { color: '#64748b' } },
+    y: { grid: { color: '#eef2f7' }, ticks: { display: false }, border: { display: false } }
   }
 });
 
@@ -131,8 +124,6 @@ onMounted(async () => {
 });
 </script>
 
-
-
 <template>
   <section class="admin-dashboard">
     <DashboardHeader
@@ -142,33 +133,30 @@ onMounted(async () => {
 
     <div class="kpi-grid">
       <DashboardMetricCard
-          title="Vehículos activos"
+          :title="t('dashboard.metrics.activeVehicles')"
           :value="vehiclesInWorkshop"
-          subtitle="En atención actualmente"
+          :subtitle="t('dashboard.metrics.activeVehiclesSub')"
           icon="pi pi-car"
           color="blue"
       />
-
       <DashboardMetricCard
-          title="Órdenes activas"
+          :title="t('dashboard.metrics.activeOrders')"
           :value="activeOrders"
-          subtitle="Servicios en proceso"
+          :subtitle="t('dashboard.metrics.activeOrdersSub')"
           icon="pi pi-file-edit"
           color="indigo"
       />
-
       <DashboardMetricCard
-          title="Completados"
+          :title="t('dashboard.metrics.completed')"
           :value="completedOrders"
-          subtitle="Órdenes finalizadas"
+          :subtitle="t('dashboard.metrics.completedSub')"
           icon="pi pi-check-circle"
           color="green"
       />
-
       <DashboardMetricCard
-          title="Ingresos proyectados"
+          :title="t('dashboard.metrics.projectedRevenue')"
           :value="`S/. ${projectedIncome}`"
-          subtitle="Según órdenes activas"
+          :subtitle="t('dashboard.metrics.projectedRevenueSub')"
           icon="pi pi-wallet"
           color="violet"
       />
@@ -179,29 +167,22 @@ onMounted(async () => {
           :vehicles="activeVehiclePreview"
           @view-vehicles="router.push('/vehicles')"
       />
-
       <WeeklyIncomePanel
           :weeklyIncome="weeklyIncome"
           :chartData="weeklyIncomeData"
           :chartOptions="barChartOptions"
       />
-
       <RecentOrdersPanel
           :orders="recentOrders"
           @view-orders="router.push('/work-orders')"
       />
-
       <FrequentServicesPanel :services="frequentServices" />
     </div>
   </section>
 </template>
 
-
-
 <style scoped>
-.admin-dashboard {
-  min-height: 100%;
-}
+.admin-dashboard { min-height: 100%; }
 
 .kpi-grid {
   display: grid;
@@ -217,18 +198,11 @@ onMounted(async () => {
 }
 
 @media (max-width: 1200px) {
-  .kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
-  .kpi-grid {
-    grid-template-columns: 1fr;
-  }
+  .kpi-grid { grid-template-columns: 1fr; }
 }
 </style>
