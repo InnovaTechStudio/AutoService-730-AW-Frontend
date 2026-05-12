@@ -1,5 +1,18 @@
 <script setup>
-
+/**
+ * @file customer-form.vue
+ * @description **Customer Form Dialog Component**
+ *
+ * Reusable modal dialog for creating and editing customers.
+ * This component is used in the customer management page and follows
+ * the Presentation Layer of the Customer Management domain.
+ *
+ * Features:
+ * - Supports both Create and Edit modes
+ * - Two-way data binding with parent component via v-model
+ * - Emits events for save and visibility control
+ * - Fully internationalized using Vue I18n
+ */
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'

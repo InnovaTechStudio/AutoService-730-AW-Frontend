@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @file vehicle-list.vue
+ * @description **Vehicle List Page**
+ *
+ * Main page for managing the workshop's vehicle fleet. Displays all vehicles in a
+ * responsive grid with search, filtering, and CRUD capabilities.
+ *
+ * Part of the **Fleet Management** domain - Presentation Layer.
+ */
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useVehicleStore } from '../application/vehicle.store';

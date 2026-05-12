@@ -42,42 +42,89 @@
 </template>
 
 <script setup>
+/**
+ * @file login-view.vue
+ * @description **Login View Component**
+ *
+ * This is the main login page for the AutoService application.
+ * It provides a clean, modern interface for users (workshop administrators and mechanics)
+ * to authenticate. The component integrates with the Auth Store, handles form submission,
+ * and redirects users based on their role after successful login.
+ *
+ * Part of the **Auth** domain - Presentation Layer.
+ */
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../application/auth.store';
 
+// PrimeVue Components
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
+
+// Shared Components
 import LanguageSwitcher from '../../../shared/presentation/language-switcher.vue';
 
+/**
+ * Vue I18n composable for internationalization support.
+ */
 const { t } = useI18n();
+
+/**
+ * Vue Router instance to handle navigation after successful login.
+ */
 const router = useRouter();
 const authStore = useAuthStore();
 
+/**
+ * Reactive email input value.
+ * Pre-filled with a default admin credential for easier testing.
+ * @type {import('vue').Ref<string>}
+ */
 const email = ref('admin@autotaller.com');
+
+/**
+ * Reactive password input value.
+ * Pre-filled with a default admin credential for easier testing.
+ * @type {import('vue').Ref<string>}
+ */
 const password = ref('admin');
 
+
+/**
+ * Handles the login form submission.
+ *
+ * Steps:
+ * 1. Validates that both email and password are provided.
+ * 2. Calls the authStore.login() method.
+ * 3. On success, redirects the user based on their role:
+ *    - Mechanic users → /mechanic dashboard
+ *    - Admin users → Main application dashboard (/)
+ *
+ * @returns {Promise<void>}
+ */
 const handleLogin = async () => {
+  // Basic client-side validation
   if (!email.value || !password.value) return;
 
-
+  // Attempt login through the store
   const success = await authStore.login(email.value, password.value);
 
   if (success) {
-
+    // Role-based redirection
     if (authStore.user?.role === 'mechanic') {
       router.push('/mechanic');
     } else {
       router.push('/');
     }
   }
+  // If login fails, the error will be displayed automatically via authStore.error
 };
 </script>
 
 <style scoped>
-
+/* ==================== STYLES ==================== */
 .login-layout {
   display: flex;
   min-height: 100vh;

@@ -1,4 +1,17 @@
 <script setup>
+/**
+ * @file customer-management.page.vue (formerly customer-list.vue)
+ * @description **Customer Management Main Page**
+ *
+ * Main view for managing workshop customers. This component serves as the
+ * central hub for the Customer Management domain in the Presentation Layer.
+ *
+ * Features:
+ * - Displays a searchable and sortable list of customers
+ * - Supports Create, Read, Update, and Delete (CRUD) operations
+ * - Uses reusable CustomerForm component for both adding and editing
+ * - Integrates with Customer Store for state management
+ */
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useCustomerStore } from '../../application/customer.store';
@@ -32,15 +45,25 @@ const filteredCustomers = computed(() => {
     );
   });
 });
-
+/**
+ * Lifecycle hook: Fetches customers when component is mounted.
+ */
 onMounted(() => { store.fetchCustomers(); });
 
+/**
+ * Opens the modal in "Create New Customer" mode.
+ */
 const openAddModal = () => {
   editMode.value = false;
   customerForm.value = { fullName: '', dni: '', email: '', phone: '' };
   showFormModal.value = true;
 };
 
+/**
+ * Opens the modal in "Edit Customer" mode and pre-fills the form.
+ *
+ * @param {Object} customer - Customer object to edit
+ */
 const openEditModal = (customer) => {
   editMode.value = true;
   selectedCustomerId.value = customer.id;
@@ -48,6 +71,9 @@ const openEditModal = (customer) => {
   showFormModal.value = true;
 };
 
+/**
+ * Saves or updates a customer depending on the current mode.
+ */
 const saveCustomer = async () => {
   if (editMode.value) {
     await store.updateCustomer(selectedCustomerId.value, customerForm.value);
@@ -57,12 +83,20 @@ const saveCustomer = async () => {
   showFormModal.value = false;
 };
 
+/**
+ * Opens the delete confirmation dialog.
+ *
+ * @param {Object} customer - Customer to be deleted
+ */
 const openDeleteModal = (customer) => {
   selectedCustomerId.value = customer.id;
   customerForm.value = customer;
   showDeleteModal.value = true;
 };
 
+/**
+ * Confirms and executes customer deletion.
+ */
 const confirmDelete = async () => {
   await store.deleteCustomer(selectedCustomerId.value);
   showDeleteModal.value = false;

@@ -1,3 +1,10 @@
+/**
+* @file MechanicsView.vue
+* @description
+* Main view for mechanic management.
+* Displays mechanic workload metrics, filtering tools,
+* registration dialog, and mechanic performance information.
+*/
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -10,6 +17,10 @@ import MechanicCard from './components/MechanicCard.vue';
 import MechanicDialog from './components/MechanicDialog.vue';
 
 const { t } = useI18n();
+/**
+ * Mechanics store instance.
+ * Handles mechanic CRUD operations and state management.
+ */
 const mechanicStore = useMechanicStore();
 const taskStore = useTaskStore();
 
@@ -34,6 +45,13 @@ onMounted(async () => {
 const getActiveTasksCount = (mechanicId) =>
     taskStore.tasks.filter((task) => String(task.mechanicId) === String(mechanicId) && task.status !== 'Completada').length;
 
+/**
+ * Calculates the workload percentage for a mechanic.
+ *
+ * @param {string|number} mechanicId Mechanic identifier.
+ * @param {number} maxCapacity Maximum task capacity.
+ * @returns {number} Workload percentage.
+ */
 const calculateLoadPercentage = (mechanicId, maxCapacity) => {
   const max = Number(maxCapacity) || 1;
   const count = getActiveTasksCount(mechanicId);
@@ -54,6 +72,13 @@ const getSeverity = (mechanicId, maxCapacity) => {
   return 'success';
 };
 
+/**
+ * Returns the CSS class associated with workload level.
+ *
+ * @param {string|number} mechanicId Mechanic identifier.
+ * @param {number} maxCapacity Maximum mechanic capacity.
+ * @returns {string} CSS class name.
+ */
 const getLoadClass = (mechanicId, maxCapacity) => {
   const percentage = calculateLoadPercentage(mechanicId, maxCapacity);
   if (percentage >= 100) return 'load-high';

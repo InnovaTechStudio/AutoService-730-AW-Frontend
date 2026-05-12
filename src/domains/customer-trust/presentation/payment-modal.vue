@@ -108,7 +108,15 @@
 </template>
 
 <script setup>
-
+/**
+ * @file payment-modal.vue
+ * @description **Payment Modal Component**
+ *
+ * Modal dialog for processing payments in the vehicle tracking / customer trust section.
+ * Allows users to select a payment method and simulate completing a payment for a work order.
+ *
+ * Part of the **Customer Trust** domain - Presentation Layer.
+ */
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -129,7 +137,12 @@ const emit = defineEmits([
 ]);
 
 const selectedMethod = ref('Tarjeta');
-
+/**
+ * Processes the payment based on the selected method.
+ *
+ * Currently simulates payment processing with an alert.
+ * In a real implementation, this would integrate with a payment gateway.
+ */
 const processPayment = () => {
 
   alert(t('tracking.payment.success', { method: selectedMethod.value }));

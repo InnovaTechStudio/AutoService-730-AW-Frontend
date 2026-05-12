@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @file vehicle-detail.vue
+ * @description **Vehicle Detail View**
+ *
+ * Comprehensive detail page for a single vehicle. Shows technical information,
+ * owner details, related work orders, associated tasks, progress, and visual media.
+ *
+ * Part of the **Fleet Management** domain - Presentation Layer.
+ */
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {useI18n} from 'vue-i18n';

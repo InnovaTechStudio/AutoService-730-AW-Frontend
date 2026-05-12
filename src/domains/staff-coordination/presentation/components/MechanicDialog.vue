@@ -1,4 +1,18 @@
 <script setup>
+/**
+ * @file MechanicDialog.vue
+ * @description **Mechanic Dialog Component**
+ *
+ * Reusable modal dialog for creating new mechanics and editing existing ones.
+ * Used in the mechanics management page.
+ *
+ * Part of the **Staff Coordination** domain - Presentation Layer.
+ *
+ * Features:
+ * - Supports both Create and Edit modes (determined by presence of `mechanic.id`)
+ * - Two-way data binding via props/emits
+ * - Form fields for name, specialty, and maximum task capacity
+ */
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';

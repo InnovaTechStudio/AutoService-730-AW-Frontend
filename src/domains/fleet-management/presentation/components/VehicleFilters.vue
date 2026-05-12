@@ -1,4 +1,17 @@
 <script setup>
+/**
+ * @file VehicleFilters.vue
+ * @description **Vehicle Filters Component**
+ *
+ * Reusable filter bar for the vehicles list page. Allows users to:
+ * - Search vehicles by plate, brand, model, owner, etc.
+ * - Filter vehicles by status (In Workshop, Ready, Delivered)
+ *
+ * This component uses Vue's `v-model` pattern through `defineProps` + `defineEmits`
+ * for two-way data binding with the parent component.
+ *
+ * Part of the **Fleet Management** domain - Presentation Layer.
+ */
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import { useI18n } from 'vue-i18n';
@@ -7,10 +20,15 @@ const { t } = useI18n();
 
 defineProps({
   search: String,
+
   status: [String, null],
+
   statusOptions: Array
 });
 
+/**
+ * Events emitted to parent component for two-way binding.
+ */
 defineEmits(['update:search', 'update:status']);
 </script>
 
