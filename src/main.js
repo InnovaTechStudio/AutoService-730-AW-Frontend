@@ -4,10 +4,12 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import App from './App.vue';
 import router from './router';
+import i18n from './i18n.js';
 import 'primeicons/primeicons.css';
 import './style.css';
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
+
 
 const app = createApp(App);
 
@@ -18,6 +20,7 @@ app.use(PrimeVue, {theme: {preset: Aura, options: {
         }
     }
 });
+app.use(i18n);
 app.component('Dialog', Dialog);
 app.component('Button', Button);
 
