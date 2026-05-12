@@ -163,7 +163,7 @@
             />
 
             <label for="tasksCompleted">
-              Todas las tareas completadas
+              {{ t('workOrders.detail.tasksCompleted') }}
             </label>
           </div>
 
@@ -175,7 +175,7 @@
             />
 
             <label for="sparePartsChecked">
-              Repuestos verificados
+              {{ t('workOrders.detail.sparePartsChecked') }}
             </label>
           </div>
 
@@ -187,7 +187,7 @@
             />
 
             <label for="diagnosisValidated">
-              Diagnóstico validado
+              {{ t('workOrders.detail.diagnosisValidated') }}
             </label>
           </div>
 
@@ -199,7 +199,7 @@
             />
 
             <label for="cleaningDone">
-              Limpieza realizada
+              {{ t('workOrders.detail.cleaningDone') }}
             </label>
           </div>
 
@@ -211,7 +211,7 @@
             />
 
             <label for="finalTestDone">
-              Prueba final realizada
+              {{ t('workOrders.detail.finalTestDone') }}
             </label>
           </div>
 
@@ -229,17 +229,17 @@
             <span>
           {{
             qaCompleted
-                ? 'El vehículo está listo para entrega'
-                : 'Faltan validaciones antes de entregar'
+                ? t('workOrders.detail.vehicleReady')
+                : t('workOrders.detail.pendingValidations')
           }}
         </span>
           </div>
 
           <Button
               :label="qaCompleted
-          ? 'Ready for Delivery'
-          : 'Pending Validation'"
-              :severity="qaCompleted ? 'success' : 'warning'"
+          ? t('workOrders.detail.readyDelivery')
+          : t('workOrders.detail.pendingValidation')"
+              :severity="qaCompleted ? t('workOrders.detail.readyDelivery') :t('workOrders.detail.pendingValidation')"
               :disabled="!qaCompleted"
               icon="pi pi-verified"
           />
@@ -308,7 +308,7 @@
 
               <Dropdown
                   v-model="slotProps.data.status"
-                  :options="['Pendiente', 'En Proceso', 'Completada']"
+                  :options="[t('status.pending'), t('status.inProgress'), t('status.completed')]"
                   @change="updateTaskStatus(slotProps.data)"
                   class="status-dropdown"
               />

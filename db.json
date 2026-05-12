@@ -322,6 +322,7 @@
     },
     {
       "id": "WO-2",
+      "workshopId": "WS-1",
       "trackingCode": "AS-1002B",
       "vehicleId": "V-2",
       "customerId": "C-2",
@@ -329,8 +330,7 @@
       "status": "Finalizado",
       "startDate": "2026-05-05",
       "estimatedDate": "2026-05-07",
-      "price": 250,
-      "workshopId": "WS-1"
+      "price": 250
     },
     {
       "id": "WO-3",
@@ -426,18 +426,6 @@
       "startDate": "2026-05-11",
       "estimatedDate": "2026-06-04",
       "price": 100,
-      "workshopId": "WS-1"
-    },
-    {
-      "id": "NhgObDwjSRQ",
-      "trackingCode": "AS-JG0K7",
-      "vehicleId": "V-2",
-      "customerId": "C-2",
-      "description": "",
-      "status": "En Proceso",
-      "startDate": "2026-05-12",
-      "estimatedDate": "2026-05-06",
-      "price": 0,
       "workshopId": "WS-1"
     }
   ],

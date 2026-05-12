@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import {useI18n} from 'vue-i18n';
 
 import { useVehicleStore } from '../application/vehicle.store';
 import { useCustomerStore } from '../../customer-management/application/customer.store';
@@ -16,6 +17,7 @@ import Column from 'primevue/column';
 
 const route = useRoute();
 const router = useRouter();
+const {t} = useI18n();
 
 const vehicleStore = useVehicleStore();
 const customerStore = useCustomerStore();
@@ -130,14 +132,14 @@ const goToOrder = (orderId) => {
             @click="goBack"
         />
 
-        <span class="eyebrow">Detalle técnico</span>
+        <span class="eyebrow">{{t('vehicleDetail.technicalDetail')}}</span>
 
         <h1 v-if="vehicle">
           {{ vehicle.brand }} {{ vehicle.model }}
         </h1>
 
         <p v-if="vehicle">
-          Revisión técnica del vehículo, propietario, órdenes asociadas y tareas vinculadas.
+          {{ t('vehicleDetail.description') }}
         </p>
       </div>
 
@@ -152,7 +154,7 @@ const goToOrder = (orderId) => {
 
     <div v-if="!vehicle" class="empty-state">
       <i class="pi pi-spin pi-spinner"></i>
-      <p>Cargando detalle del vehículo...</p>
+      <p>{{ t('vehicleDetail.loading') }}</p>
     </div>
 
     <div v-else class="detail-grid">
@@ -173,7 +175,7 @@ const goToOrder = (orderId) => {
 
             <div class="progress-block">
               <div class="progress-label">
-                <span>Avance operativo</span>
+                <span>{{ t('vehicleDetail.operationalProgress') }}</span>
                 <strong>{{ progress }}%</strong>
               </div>
 
@@ -190,15 +192,15 @@ const goToOrder = (orderId) => {
       <div class="side-column">
         <Card class="info-card">
           <template #content>
-            <h3>Propietario</h3>
+            <h3>{{ t('vehicleDetail.owner') }}</h3>
 
             <div class="info-row">
-              <span>Nombre</span>
+              <span>{{ t('common.name') }}</span>
               <strong>{{ owner?.fullName || 'No asignado' }}</strong>
             </div>
 
             <div class="info-row">
-              <span>Teléfono</span>
+              <span>{{ t('common.phone') }}</span>
               <strong>{{ owner?.phone || 'No registrado' }}</strong>
             </div>
 
@@ -211,21 +213,21 @@ const goToOrder = (orderId) => {
 
         <Card class="info-card">
           <template #content>
-            <h3>Última orden</h3>
+            <h3>{{ t('vehicleDetail.lastOrder') }}</h3>
 
             <div v-if="lastOrder">
               <div class="info-row">
-                <span>Código</span>
+                <span>{{ t('common.code') }}</span>
                 <strong>{{ lastOrder.trackingCode }}</strong>
               </div>
 
               <div class="info-row">
-                <span>Entrega estimada</span>
+                <span>{{ t('vehicleDetail.estimatedDelivery') }}</span>
                 <strong>{{ lastOrder.estimatedDate || 'No definida' }}</strong>
               </div>
 
               <Button
-                  label="Ver orden"
+                  :label="t('vehicleDetail.viewOrder')"
                   icon="pi pi-arrow-right"
                   icon-pos="right"
                   outlined
@@ -234,7 +236,7 @@ const goToOrder = (orderId) => {
               />
             </div>
 
-            <p v-else class="muted">Este vehículo aún no tiene órdenes asociadas.</p>
+            <p v-else class="muted">{{ t('vehicleDetail.noOrders') }}</p>
           </template>
         </Card>
       </div>
@@ -243,8 +245,8 @@ const goToOrder = (orderId) => {
         <template #content>
           <div class="section-heading">
             <div>
-              <h3>Órdenes asociadas</h3>
-              <p>Historial operativo del vehículo dentro del taller.</p>
+              <h3>{{ t('vehicleDetail.relatedOrders') }}</h3>
+              <p>{{ t('vehicleDetail.orderHistory') }}.</p>
             </div>
           </div>
 
@@ -253,9 +255,9 @@ const goToOrder = (orderId) => {
               responsiveLayout="scroll"
               class="clean-table"
           >
-            <Column field="trackingCode" header="Código" />
+            <Column field="trackingCode" :header="t('common.code')" />
 
-            <Column field="status" header="Estado">
+            <Column field="status" :header=" t('common.status') ">
               <template #body="slotProps">
                 <Tag
                     :value="slotProps.data.status"
@@ -265,10 +267,10 @@ const goToOrder = (orderId) => {
               </template>
             </Column>
 
-            <Column field="startDate" header="Ingreso" />
-            <Column field="estimatedDate" header="Entrega" />
+            <Column field="startDate" :header="t('vehicleDetail.entryDate')" />
+            <Column field="estimatedDate" :header="t('vehicleDetail.delivery')" />
 
-            <Column header="Acción">
+            <Column :header="t('common.action')">
               <template #body="slotProps">
                 <Button
                     icon="pi pi-search"
@@ -286,8 +288,8 @@ const goToOrder = (orderId) => {
         <template #content>
           <div class="section-heading">
             <div>
-              <h3>Tareas vinculadas</h3>
-              <p>Tareas técnicas relacionadas a las órdenes del vehículo.</p>
+              <h3>{{ t('vehicleDetail.relatedTasks') }}</h3>
+              <p>{{ t('vehicleDetail.taskDescription') }}</p>
             </div>
           </div>
 
@@ -311,7 +313,7 @@ const goToOrder = (orderId) => {
           </div>
 
           <div v-else class="mini-empty">
-            No hay tareas registradas para este vehículo.
+            {{ t('vehicleDetail.noTasks') }}
           </div>
         </template>
       </Card>

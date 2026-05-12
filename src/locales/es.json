@@ -155,6 +155,24 @@
       "save": "Guardar"
     }
   },
+  "vehicleDetail": {
+    "technicalDetail": "Detalle técnico",
+    "description": "Revisión técnica del vehículo, propietario, órdenes asociadas y tareas vinculadas.",
+    "loading": "Cargando detalle del vehículo...",
+    "operationalProgress": "Avance operativo",
+    "owner": "Propietario",
+    "lastOrder": "Última orden",
+    "estimatedDelivery": "Entrega estimada",
+    "viewOrder": "Ver orden",
+    "noOrders": "Este vehículo aún no tiene órdenes asociadas.",
+    "relatedOrders": "Órdenes asociadas",
+    "orderHistory": "Historial operativo del vehículo dentro del taller.",
+    "entryDate": "Ingreso",
+    "delivery": "Entrega",
+    "relatedTasks": "Tareas vinculadas",
+    "taskDescription": "Tareas técnicas relacionadas a las órdenes del vehículo.",
+    "noTasks": "No hay tareas registradas para este vehículo."
+  },
   "workOrders": {
     "eyebrow": "Operación del taller",
     "title": "Órdenes de trabajo",
@@ -229,7 +247,21 @@
         "selectMechanic": "Selecciona un mecánico",
         "cancel": "Cancelar",
         "save": "Guardar"
-      }
+      },
+      "qaChecklist": "Checklist de Validación",
+      "qaSubtitle": "Control final antes de entrega del vehículo",
+      "qaApproved": "QA Aprobado",
+      "qaPending": "QA Pendiente",
+      "tasksCompleted": "Todas las tareas completadas",
+      "sparePartsChecked": "Repuestos verificados",
+      "diagnosisValidated": "Diagnóstico validado",
+      "cleaningDone": "Limpieza realizada",
+      "finalTestDone": "Prueba final realizada",
+      "vehicleReady": "El vehículo está listo para entrega",
+      "pendingValidations": "Faltan validaciones antes de entregar",
+      "readyDelivery": "Listo para entrega",
+      "pendingValidation": "Validación pendiente",
+      "mechanicNotFound": "Mecánico no encontrado"
     }
   },
   "tasks": {
@@ -365,9 +397,22 @@
     "success": "Pago realizado con {method}"
   },
   "common": {
-    "loading": "Cargando...",
-    "noAssigned": "Sin asignar",
-    "notFound": "No encontrado",
-    "language": "Idioma"
+    "loading": "Loading...",
+    "noAssigned": "Unassigned",
+    "notFound": "Not found",
+    "language": "Language",
+    "name": "Name",
+    "phone": "Phone",
+    "notRegistered": "Not registered",
+    "unassigned": "Unassigned",
+    "code": "Code",
+    "undefined": "Undefined",
+    "status": "Status",
+    "action": "Action"
+  },
+  "status": {
+    "pending": "Pendiente",
+    "inProgress": "En Proceso",
+    "completed": "Completada"
   }
 }

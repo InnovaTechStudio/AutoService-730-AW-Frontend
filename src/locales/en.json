@@ -155,6 +155,24 @@
       "save": "Save"
     }
   },
+  "vehicleDetail": {
+    "technicalDetail": "Technical detail",
+    "description": "Technical review of the vehicle, owner, related work orders and linked tasks.",
+    "loading": "Loading vehicle detail...",
+    "operationalProgress": "Operational progress",
+    "owner": "Owner",
+    "lastOrder": "Last work order",
+    "estimatedDelivery": "Estimated delivery",
+    "viewOrder": "View order",
+    "noOrders": "This vehicle has no related work orders yet.",
+    "relatedOrders": "Related work orders",
+    "orderHistory": "Vehicle operational history inside the workshop.",
+    "entryDate": "Entry date",
+    "delivery": "Delivery",
+    "relatedTasks": "Related tasks",
+    "taskDescription": "Technical tasks related to vehicle work orders.",
+    "noTasks": "No tasks registered for this vehicle."
+  },
   "workOrders": {
     "eyebrow": "Workshop operations",
     "title": "Work orders",
@@ -229,7 +247,21 @@
         "selectMechanic": "Select a mechanic",
         "cancel": "Cancel",
         "save": "Save"
-      }
+      },
+      "qaChecklist": "Validation Checklist",
+      "qaSubtitle": "Final control before vehicle delivery",
+      "qaApproved": "QA Approved",
+      "qaPending": "QA Pending",
+      "tasksCompleted": "All tasks completed",
+      "sparePartsChecked": "Spare parts checked",
+      "diagnosisValidated": "Diagnosis validated",
+      "cleaningDone": "Cleaning completed",
+      "finalTestDone": "Final test completed",
+      "vehicleReady": "Vehicle is ready for delivery",
+      "pendingValidations": "Validations pending before delivery",
+      "readyDelivery": "Ready for Delivery",
+      "pendingValidation": "Pending Validation",
+      "mechanicNotFound": "Mechanic not found"
     }
   },
   "tasks": {
@@ -368,6 +400,19 @@
     "loading": "Loading...",
     "noAssigned": "Unassigned",
     "notFound": "Not found",
-    "language": "Language"
+    "language": "Language",
+    "name": "Name",
+    "phone": "Phone",
+    "notRegistered": "Not registered",
+    "unassigned": "Unassigned",
+    "code": "Code",
+    "undefined": "Undefined",
+    "status": "Status",
+    "action": "Action"
+  },
+  "status": {
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed"
   }
 }
