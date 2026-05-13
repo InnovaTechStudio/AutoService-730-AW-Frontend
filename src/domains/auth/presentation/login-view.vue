@@ -114,7 +114,7 @@ const handleLogin = async () => {
   if (success) {
     // Role-based redirection
     if (authStore.user?.role === 'mechanic') {
-      router.push('/mechanic');
+      router.push('/mechanic/workspace');
     } else {
       router.push('/');
     }
