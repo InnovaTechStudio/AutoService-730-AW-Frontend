@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const http = axios.create({
-    baseURL: 'http://localhost:3000',
+    baseURL: 'https://autoservice-api.ddns.net/',
     headers: { 'Content-type': 'application/json' }
 });
 
