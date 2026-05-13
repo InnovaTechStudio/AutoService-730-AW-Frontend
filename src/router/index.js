@@ -15,7 +15,7 @@ const router = createRouter({
             component: () => import('../domains/customer-trust/presentation/tracking-view.vue')
         },
         {
-            path: '/mechanic',
+            path: '/mechanic/workspace',
             name: 'mechanic-dashboard',
             component: () => import('../domains/mechanic/presentation/mechanic-dashboard.vue'),
             meta: { requiresAuth: true, role: 'mechanic' }
@@ -55,7 +55,7 @@ router.beforeEach((to, from, next) => {
     }
     else if (to.path === '/login' && authStore.isAuthenticated) {
         if (authStore.userRole === 'mechanic') {
-            next('/mechanic');
+            next('/mechanic/workspace');
         } else {
             next('/');
         }

@@ -85,7 +85,7 @@ export const useAuthStore = defineStore('auth', {
             this.error = null;
 
             // Demo login for mechanic role
-            if (email === 'mechanic@autoservice.com' && password === '123456') {
+            if (email === 'mechanic@autoservice.com' && password === 'mechanic') {
                 const mechanicUser = {
                     id: 'MECH-1',
                     name: 'Roberto Sánchez',

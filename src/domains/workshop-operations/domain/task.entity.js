@@ -27,10 +27,20 @@
  */
 export const createTask = (data = {}) => ({
     id: data.id || null,
+    workshopId: data.workshopId || null,
     workOrderId: data.workOrderId || null,
     description: data.description || '',
     status: data.status || 'Pendiente',
     mechanicId: data.mechanicId || null,
+    priority: data.priority || 'Media',
+    estimatedTime: data.estimatedTime || 'No definido',
     price: data.price || 0,
-    photo: data.photo || ''
+    photo: data.photo || '',
+    technicalDiagnosis: data.technicalDiagnosis || '',
+    customerExplanation: data.customerExplanation || '',
+    internalObservation: data.internalObservation || '',
+    evidenceRegistered: data.evidenceRegistered || '',
+    adminReviewStatus: data.adminReviewStatus || 'Sin enviar',
+    customerReportStatus: data.customerReportStatus || 'No visible',
+    completedAt: data.completedAt || null
 });
