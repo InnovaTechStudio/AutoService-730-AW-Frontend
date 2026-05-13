@@ -34,11 +34,6 @@ const showPaymentModal = ref(false);
 
 /**
  * Searches for an order using the tracking code.
- *
- * Flow:
- * 1. Validates input
- * 2. Calls TrackingService to fetch order, vehicle, and tasks
- * 3. Sets selected task for visual evidence
  */
 const searchOrder = async () => {
   if (!trackingCode.value) return;
@@ -48,7 +43,6 @@ const searchOrder = async () => {
   orderData.value = null;
 
   try {
-
     const orders = await TrackingService.getOrderByCode(trackingCode.value.trim().toUpperCase());
 
     if (!orders || orders.length === 0) {
@@ -59,10 +53,8 @@ const searchOrder = async () => {
     const order = orders[0];
     orderData.value = order;
 
-
     vehicleData.value = await TrackingService.getVehicle(order.vehicleId);
     vehicleHistory.value = await TrackingService.getVehicleHistory(vehicleData.value.plate);
-
     tasks.value = await TrackingService.getTasks(order.id);
 
     selectedTask.value = tasks.value.find(task => task.photo) || tasks.value[0];
@@ -75,6 +67,10 @@ const searchOrder = async () => {
   }
 };
 
+// NUEVO: Función para descargar el PDF
+const downloadPDF = () => {
+  window.print();
+};
 
 const getStatusSeverity = (status) => {
   if (status === 'Finalizado') return 'success';
@@ -100,10 +96,11 @@ const getTaskTagSeverity = (status) => {
   return 'secondary';
 };
 </script>
+
 <template>
   <div class="tracking-layout">
 
-    <div class="tracking-header">
+    <div class="tracking-header no-print">
       <div class="language-switcher-container">
         <LanguageSwitcher />
       </div>
@@ -113,8 +110,7 @@ const getTaskTagSeverity = (status) => {
     </div>
 
     <div class="tracking-content">
-
-      <div class="search-box">
+      <div class="search-box no-print">
         <label for="code">{{ t('tracking.serviceCode') }}</label>
         <div class="p-inputgroup">
           <InputText
@@ -131,16 +127,42 @@ const getTaskTagSeverity = (status) => {
         </div>
       </div>
 
-      <div v-if="orderData" class="results-box fade-in">
+      <div v-if="orderData" class="results-box fade-in no-print">
 
         <div class="vehicle-info">
+          <div class="vehicle-header">
+            <div class="vehicle-details">
+              <span class="label">{{ t('tracking.vehicleEntered') }}</span>
+              <h2>{{ vehicleData?.brand }} {{ vehicleData?.model }} <span>{{ vehicleData?.plate }}</span></h2>
+            </div>
 
-          <div class="dashboard-grid">
+            <div class="header-actions">
+              <Tag :value="orderData.status" :severity="getStatusSeverity(orderData.status)" class="status-tag" />
+              <Button
+                  icon="pi pi-file-pdf"
+                  label="Descargar PDF"
+                  severity="info"
+                  outlined
+                  @click="downloadPDF"
+              />
+            </div>
+          </div>
 
-            <!-- LEFT -->
+          <div class="dates-grid">
+            <div class="date-item">
+              <span class="label">{{ t('tracking.entryDate') }}</span>
+              <strong><i class="pi pi-calendar-plus text-blue-500"></i> {{ orderData.startDate }}</strong>
+            </div>
+            <div class="date-item right-align">
+              <span class="label">{{ t('tracking.estimatedDelivery') }}</span>
+              <strong><i class="pi pi-calendar text-orange-500"></i> {{ orderData.estimatedDate }}</strong>
+            </div>
+          </div>
+
+          <div class="dashboard-grid" style="padding: 0 1.5rem 1.5rem 1.5rem;">
+
             <div class="left-section">
 
-              <!-- TASKS -->
               <div class="service-card">
                 <div class="card-header">
                   <h3>{{ t('tracking.serviceTasks') }}</h3>
@@ -172,7 +194,6 @@ const getTaskTagSeverity = (status) => {
                 </div>
               </div>
 
-              <!-- EVIDENCE -->
               <div class="evidence-card">
 
                 <img
@@ -261,17 +282,13 @@ const getTaskTagSeverity = (status) => {
               </div>
             </div>
 
-            <!-- RIGHT -->
             <div class="right-section">
 
-              <!-- COST -->
               <div class="cost-card">
-      <span class="mini-title">
-        {{ t('tracking.estimatedCost') }}
-      </span>
-
+                <span class="mini-title">
+                  {{ t('tracking.estimatedCost') }}
+                </span>
                 <h2>${{ orderData.price }}</h2>
-
                 <p>{{ t('tracking.costDisclaimer') }}</p>
                 <Button
                     :label="t('tracking.payNow')"
@@ -280,65 +297,102 @@ const getTaskTagSeverity = (status) => {
                     @click="showPaymentModal = true"
                 />
               </div>
-              <!-- DATES -->
+
               <div class="dates-card">
-
-      <span class="mini-title">
-        {{ t('tracking.serviceTimes') }}
-      </span>
-
+                <span class="mini-title">
+                  {{ t('tracking.serviceTimes') }}
+                </span>
                 <div class="date-box">
                   <i class="pi pi-calendar"></i>
-
                   <div>
                     <small>{{ t('tracking.entryDate') }}</small>
                     <strong>{{ orderData.startDate }}</strong>
                   </div>
                 </div>
-
                 <div class="date-box">
                   <i class="pi pi-clock"></i>
-
                   <div>
                     <small>{{ t('tracking.estimatedDelivery') }}</small>
                     <strong>{{ orderData.estimatedDate }}</strong>
                   </div>
                 </div>
-
               </div>
 
             </div>
 
           </div>
-          <div class="vehicle-header">
-            <div class="vehicle-details">
-              <span class="label">{{ t('tracking.vehicleEntered') }}</span>
-              <h2>{{ vehicleData?.brand }} {{ vehicleData?.model }} <span>{{ vehicleData?.plate }}</span></h2>
-            </div>
-            <Tag :value="orderData.status" :severity="getStatusSeverity(orderData.status)" class="status-tag" />
-          </div>
-
-          <div class="dates-grid">
-            <div class="date-item">
-              <span class="label">{{ t('tracking.entryDate') }}</span>
-              <strong><i class="pi pi-calendar-plus text-blue-500"></i> {{ orderData.startDate }}</strong>
-            </div>
-            <div class="date-item right-align">
-              <span class="label">{{ t('tracking.estimatedDelivery') }}</span>
-              <strong><i class="pi pi-calendar text-orange-500"></i> {{ orderData.estimatedDate }}</strong>
-            </div>
-          </div>
         </div>
       </div>
+
       <PaymentModal
           v-model:visible="showPaymentModal"
           :amount="orderData?.price || 0"
       />
     </div>
+
+    <div class="a4-document print-only" v-if="orderData">
+      <div class="doc-header">
+        <div class="doc-brand">
+          <h2>AutoService</h2>
+          <span>Red de Talleres Especializados</span>
+        </div>
+        <div class="doc-meta">
+          <h1>Reporte de Servicio</h1>
+          <p><strong>Placa:</strong> {{ vehicleData?.plate }}</p>
+          <p><strong>Fecha de Emisión:</strong> {{ new Date().toLocaleDateString() }}</p>
+          <p><strong>Código de Rastreo:</strong> {{ orderData.id }}</p>
+        </div>
+      </div>
+
+      <div class="doc-body">
+        <div class="print-section">
+          <h3>Datos del Vehículo</h3>
+          <p><strong>Marca y Modelo:</strong> {{ vehicleData?.brand }} {{ vehicleData?.model }}</p>
+          <p><strong>Estado Actual del Servicio:</strong> {{ orderData.status }}</p>
+          <p><strong>Fecha de Ingreso:</strong> {{ orderData.startDate }}</p>
+          <p><strong>Entrega Estimada:</strong> {{ orderData.estimatedDate }}</p>
+        </div>
+
+        <div class="print-section">
+          <h3>Resumen de Tareas Realizadas</h3>
+          <table class="print-table">
+            <thead>
+            <tr>
+              <th>Tarea</th>
+              <th>Estado</th>
+              <th>Detalle del Mecánico</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="task in tasks" :key="task.id">
+              <td>{{ task.description }}</td>
+              <td>{{ task.status }}</td>
+              <td>{{ task.customerExplanation || 'Sin detalles adicionales' }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="print-section" v-if="vehicleHistory.length">
+          <h3>Historial Técnico Registrado</h3>
+          <ul>
+            <li v-for="record in vehicleHistory" :key="record.id">
+              <strong>{{ record.serviceDate }}</strong> - {{ record.serviceTitle }} (Mecánico: {{ record.mechanicName }})
+              <br><em>Recomendación dejada:</em> {{ record.recommendation }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="print-footer">
+          <h2>Costo Estimado: ${{ orderData.price }}</h2>
+          <p>Este documento es un resumen informativo generado por el sistema de AutoService y no representa un comprobante de pago con validez fiscal.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
-<style scoped>
 
+<style scoped>
 * {
   box-sizing: border-box;
 }
@@ -349,11 +403,23 @@ const getTaskTagSeverity = (status) => {
 .tracking-layout {
   min-height: 100vh;
   width: 100vw;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);  display: flex;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  display: flex;
   flex-direction: column;
   align-items: center;
   font-family: system-ui, -apple-system, sans-serif;
   padding: 4rem 1rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Oculta la plantilla del PDF en pantalla normal */
+.print-only {
+  display: none;
 }
 
 .tracking-header {
@@ -393,7 +459,6 @@ const getTaskTagSeverity = (status) => {
   max-width: 1600px;
 }
 
-
 .search-box, .results-box {
   background: white;
   border-radius: 12px;
@@ -429,7 +494,6 @@ const getTaskTagSeverity = (status) => {
   gap: 0.5rem;
   border: 1px solid #fecaca;
 }
-
 
 .vehicle-info {
   background: #f8fafc;
@@ -498,7 +562,6 @@ const getTaskTagSeverity = (status) => {
 .right-align strong {
   justify-content: flex-end;
 }
-
 
 .timeline-section h3 {
   margin: 0 0 1.5rem 0;
@@ -625,12 +688,11 @@ const getTaskTagSeverity = (status) => {
   border: 1px dashed #cbd5e1;
   border-radius: 16px;
 }
-@media(max-width:1200px){
 
+@media(max-width:1200px){
   .left-section{
     grid-template-columns:1fr;
   }
-
 }
 
 .service-card,
@@ -769,10 +831,80 @@ const getTaskTagSeverity = (status) => {
 }
 
 @media(max-width:1200px){
-
   .dashboard-grid{
     grid-template-columns:1fr;
   }
+}
+</style>
 
+<style>
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Ocultamos absolutamente toda la página web... */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Quitamos fondos negros que tengas aplicados al body o html */
+  html, body, #app, .tracking-layout {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 100% !important;
+  }
+
+  /* ...Y hacemos visible ÚNICAMENTE nuestra plantilla A4 oculta */
+  .a4-document, .a4-document * {
+    visibility: visible;
+  }
+
+  /* Posicionamos la hoja A4 exactamente en la esquina superior */
+  .a4-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20mm;
+    display: block !important;
+    color: black;
+  }
+
+  /* Todo lo que tenga la clase no-print no saldrá (botones, input, headers oscuros) */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Diseño interno del PDF */
+  .doc-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .doc-brand h2 { margin: 0; color: #2563eb; font-size: 24px; }
+  .doc-brand span { font-size: 12px; color: #64748b; }
+
+  .doc-meta h1 { margin: 0 0 10px 0; font-size: 18px; text-transform: uppercase; }
+  .doc-meta p { margin: 2px 0; font-size: 14px; }
+
+  .print-section { margin-bottom: 2rem; }
+  .print-section h3 { border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 10px; font-size: 16px; color: #1e293b;}
+
+  .print-section p, .print-section li { font-size: 14px; color: #334155; line-height: 1.5; margin-bottom: 5px; }
+
+  .print-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+  .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
+  .print-table th { background-color: #f8fafc; font-weight: bold; }
+
+  .print-footer { margin-top: 3rem; text-align: right; border-top: 2px solid #2563eb; padding-top: 1rem; }
+  .print-footer h2 { margin: 0 0 10px 0; font-size: 20px;}
+  .print-footer p { font-size: 11px; color: #64748b; }
 }
 </style>
