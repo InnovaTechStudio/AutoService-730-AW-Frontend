@@ -1,7 +1,27 @@
+/**
+ * @file customer.store.js
+ * @description **Customer Store (Pinia)**
+ *
+ * This store manages all customer-related state and business operations in the AutoService application.
+ * It follows the Domain-Driven Design (DDD) pattern:
+ * - Application Layer: Orchestrates use cases and coordinates between Presentation and Infrastructure layers.
+ *
+ * Responsibilities:
+ * - Fetching customers from the backend
+ * - Creating, updating, and deleting customers
+ * - Maintaining the list of customers in a reactive state
+ */
 import { defineStore } from 'pinia';
 import { CustomerService } from '../infrastructure/customer.service';
 import {Customer} from "../domain/customer.entity.js";
 
+/**
+ * Customer Management Store using Pinia.
+ *
+ * @typedef {Object} CustomerStoreState
+ * @property {Array<Object>} customers - List of all customers
+ * @property {boolean} loading - Loading state for async operations
+ */
 export const useCustomerStore = defineStore('customer', {
 
     state: () => ({
@@ -10,7 +30,14 @@ export const useCustomerStore = defineStore('customer', {
     }),
 
     actions: {
-
+        /**
+         * Fetches all customers from the backend and updates the store.
+         *
+         * Each customer is transformed using the Customer entity to ensure
+         * data consistency and business rules are applied.
+         *
+         * @returns {Promise<void>}
+         */
         async fetchCustomers() {
             this.loading = true;
 
@@ -25,7 +52,12 @@ export const useCustomerStore = defineStore('customer', {
                 this.loading = false;
             }
         },
-
+        /**
+         * Creates a new customer and adds it to the store.
+         *
+         * @param {Object} customer - Raw customer data from the form
+         * @returns {Promise<Object>} The newly created customer (as entity)
+         */
         async addCustomer(customer) {
 
             // normalizar antes de enviar
@@ -40,7 +72,13 @@ export const useCustomerStore = defineStore('customer', {
 
             return savedCustomer;
         },
-
+        /**
+         * Updates an existing customer's information.
+         *
+         * @param {string|number} id - ID of the customer to update
+         * @param {Object} customerData - Updated customer data
+         * @returns {Promise<void>}
+         */
         async updateCustomer(id, customerData) {
 
             try {
@@ -63,7 +101,12 @@ export const useCustomerStore = defineStore('customer', {
                 console.error('Error al actualizar cliente:', error);
             }
         },
-
+        /**
+         * Deletes a customer by ID and removes it from the local state.
+         *
+         * @param {string|number} id - ID of the customer to delete
+         * @returns {Promise<void>}
+         */
         async deleteCustomer(id) {
 
             try {

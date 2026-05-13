@@ -1,23 +1,18 @@
 import axios from 'axios';
 
 const publicHttp = axios.create({
-    //baseURL: import.meta.env.VITE_API_URL,
+    // Corregido: Se quitó el slash (/) extra al final de la URL
     baseURL: 'https://autoservice-api.ddns.net',
     headers: { 'Content-type': 'application/json' }
 });
 
 /**
  * Service to handle customer tracking operations.
- * Connects to the local mock backend to fetch work orders, vehicles, and tasks.
  */
 export const TrackingService = {
-    /**
-     * Fetches a work order either by its database ID or its user-friendly tracking code.
-     * @param {string} trackingCode - The ID or tracking code (e.g., 'AS-1003C')
-     * @returns {Promise<Array>} Array containing the matched work order(s)
-     */
     async getOrderByCode(trackingCode) {
         try {
+            // Lógica robusta restaurada de main
             const response = await publicHttp.get(`/work-orders/${trackingCode}`);
             return [response.data];
         } catch (error) {
@@ -27,25 +22,15 @@ export const TrackingService = {
         }
     },
 
-    /**
-     * Fetches the vehicle details linked to a work order.
-     * @param {string} vehicleId - The ID of the vehicle
-     * @returns {Promise<Object>} Vehicle data object
-     */
     async getVehicle(vehicleId) {
         const response = await publicHttp.get(`/vehicles/${vehicleId}`);
         return response.data;
     },
 
-    /**
-     * Fetches all tasks associated with a specific work order to build the timeline.
-     * @param {string} workOrderId - The ID of the root work order
-     * @returns {Promise<Array>} Array of filtered task objects
-     */
     async getTasks(workOrderId) {
         try {
+            // Parseo avanzado restaurado de main (esto soluciona que no carguen las fotos)
             const response = await publicHttp.get(`/tasks?workOrderId=${workOrderId}`);
-
             let tasksArray = [];
 
             if (Array.isArray(response.data)) {
@@ -59,9 +44,19 @@ export const TrackingService = {
             }
 
             return tasksArray.filter(task => String(task.workOrderId) === String(workOrderId));
-
         } catch (error) {
             console.error("Error fetching tasks:", error);
+            return [];
+        }
+    },
+
+    async getVehicleHistory(plate) {
+        try {
+            const response = await publicHttp.get(`/vehicle-history?plate=${plate}`);
+            const data = response.data;
+            return Array.isArray(data) ? data : (data.data || []);
+        } catch (error) {
+            console.error("Error fetching history:", error);
             return [];
         }
     }

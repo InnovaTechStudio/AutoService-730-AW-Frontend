@@ -1,11 +1,25 @@
 <script setup>
+/**
+ * @file tracking-view.vue
+ * @description **Vehicle Tracking View (Public Customer Page)**
+ *
+ * Public page that allows customers to track the status of their vehicle service
+ * by entering a tracking code. Displays real-time order information, tasks,
+ * visual evidence, estimated costs, and provides payment options.
+ *
+ * Part of the **Customer Trust** domain - Presentation Layer.
+ */
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { TrackingService } from '../infrastructure/tracking.service';
 import PaymentModal from "./payment-modal.vue";
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import Timeline from 'primevue/timeline';
+import LanguageSwitcher from '../../../shared/presentation/language-switcher.vue';
+
+const { t } = useI18n();
 
 const trackingCode = ref('');
 const isLoading = ref(false);
@@ -14,9 +28,18 @@ const errorMsg = ref('');
 const orderData = ref(null);
 const vehicleData = ref(null);
 const tasks = ref([]);
-
+const vehicleHistory = ref([]);
 const selectedTask = ref(null);
 const showPaymentModal = ref(false);
+
+/**
+ * Searches for an order using the tracking code.
+ *
+ * Flow:
+ * 1. Validates input
+ * 2. Calls TrackingService to fetch order, vehicle, and tasks
+ * 3. Sets selected task for visual evidence
+ */
 const searchOrder = async () => {
   if (!trackingCode.value) return;
 
@@ -29,7 +52,7 @@ const searchOrder = async () => {
     const orders = await TrackingService.getOrderByCode(trackingCode.value.trim().toUpperCase());
 
     if (!orders || orders.length === 0) {
-      errorMsg.value = 'El código ingresado no existe o es incorrecto.';
+      errorMsg.value = t('tracking.invalidCode');
       return;
     }
 
@@ -38,14 +61,14 @@ const searchOrder = async () => {
 
 
     vehicleData.value = await TrackingService.getVehicle(order.vehicleId);
-
+    vehicleHistory.value = await TrackingService.getVehicleHistory(vehicleData.value.plate);
 
     tasks.value = await TrackingService.getTasks(order.id);
 
     selectedTask.value = tasks.value.find(task => task.photo) || tasks.value[0];
 
   } catch (error) {
-    errorMsg.value = 'Problemas al conectar con el servidor. Verifica tu conexión.';
+    errorMsg.value = t('tracking.connectionError');
     console.error(error);
   } finally {
     isLoading.value = false;
@@ -81,24 +104,27 @@ const getTaskTagSeverity = (status) => {
   <div class="tracking-layout">
 
     <div class="tracking-header">
+      <div class="language-switcher-container">
+        <LanguageSwitcher />
+      </div>
       <i class="pi pi-car header-icon"></i>
-      <h1>Rastrea tu Vehículo</h1>
-      <p>Ingresa el código que te proporcionó el taller para ver el estado de tu servicio en tiempo real.</p>
+      <h1>{{ t('tracking.title') }}</h1>
+      <p>{{ t('tracking.description') }}</p>
     </div>
 
     <div class="tracking-content">
 
       <div class="search-box">
-        <label for="code">Código de Servicio</label>
+        <label for="code">{{ t('tracking.serviceCode') }}</label>
         <div class="p-inputgroup">
           <InputText
               id="code"
               v-model="trackingCode"
-              placeholder="Ej: AS-1001A"
+              :placeholder="t('tracking.placeholder')"
               @keyup.enter="searchOrder"
               class="code-input"
           />
-          <Button icon="pi pi-search" label="Buscar" @click="searchOrder" :loading="isLoading" class="p-button-primary" />
+          <Button icon="pi pi-search" :label="t('tracking.search')" @click="searchOrder" :loading="isLoading" class="p-button-primary" />
         </div>
         <div v-if="errorMsg" class="error-message mt-3">
           <i class="pi pi-exclamation-circle"></i> {{ errorMsg }}
@@ -117,7 +143,7 @@ const getTaskTagSeverity = (status) => {
               <!-- TASKS -->
               <div class="service-card">
                 <div class="card-header">
-                  <h3>Tareas de Servicio</h3>
+                  <h3>{{ t('tracking.serviceTasks') }}</h3>
                 </div>
 
                 <div
@@ -157,16 +183,82 @@ const getTaskTagSeverity = (status) => {
 
                 <div v-else class="no-image">
                   <i class="pi pi-image"></i>
-                  <p>No hay evidencia visual</p>
+                  <p>{{ t('tracking.noEvidence') }}</p>
                 </div>
 
                 <div class="evidence-info">
-                  <span>EVIDENCIA VISUAL</span>
+                  <span>{{ t('tracking.visualEvidence') }}</span>
                   <strong>{{ selectedTask?.description }}</strong>
                 </div>
 
               </div>
+              <div class="customer-report-card">
+                <div class="card-header">
+                  <h3>Informe del Mecánico para el Cliente</h3>
+                  <p>Resumen técnico explicado en lenguaje simple.</p>
+                </div>
 
+                <div v-if="tasks.some(task => task.customerExplanation)" class="customer-report-list">
+                  <div
+                      v-for="task in tasks.filter(task => task.customerExplanation)"
+                      :key="task.id"
+                      class="customer-report-item"
+                  >
+                    <Tag :value="task.status" :severity="getTaskTagSeverity(task.status)" />
+                    <h4>{{ task.description }}</h4>
+                    <p>{{ task.customerExplanation }}</p>
+
+                    <div v-if="task.evidenceRegistered" class="evidence-note">
+                      <i class="pi pi-camera"></i>
+                      {{ task.evidenceRegistered }}
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else class="empty-mini">
+                  <i class="pi pi-info-circle"></i>
+                  <p>Aún no hay informe visible del mecánico para el cliente.</p>
+                </div>
+              </div>
+
+              <div class="history-card">
+                <div class="card-header">
+                  <h3>Historial técnico del vehículo</h3>
+                  <p>Registro asociado a la placa {{ vehicleData?.plate }}.</p>
+                </div>
+
+                <div v-if="vehicleHistory.length" class="history-list">
+                  <div
+                      v-for="record in vehicleHistory"
+                      :key="record.id"
+                      class="history-item"
+                  >
+                    <div class="history-date">
+                      <i class="pi pi-calendar"></i>
+                      {{ record.serviceDate }}
+                    </div>
+
+                    <h4>{{ record.serviceTitle }}</h4>
+                    <p>{{ record.customerSummary }}</p>
+
+                    <div class="history-meta">
+                      <span><i class="pi pi-building"></i>{{ record.workshopName }}</span>
+                      <span><i class="pi pi-user"></i>{{ record.mechanicName }}</span>
+                      <span><i class="pi pi-check-circle"></i>{{ record.tasksCompleted }} tareas</span>
+                    </div>
+
+                    <div class="recommendation">
+                      <strong>Recomendación:</strong>
+                      {{ record.recommendation }}
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else class="empty-mini">
+                  <i class="pi pi-folder-open"></i>
+                  <p>No hay historial técnico previo para este vehículo.</p>
+                </div>
+              </div>
             </div>
 
             <!-- RIGHT -->
@@ -175,14 +267,14 @@ const getTaskTagSeverity = (status) => {
               <!-- COST -->
               <div class="cost-card">
       <span class="mini-title">
-        COSTO ESTIMADO TOTAL
+        {{ t('tracking.estimatedCost') }}
       </span>
 
                 <h2>${{ orderData.price }}</h2>
 
-                <p>Sujeto a cambios según diagnóstico.</p>
+                <p>{{ t('tracking.costDisclaimer') }}</p>
                 <Button
-                    label="Realizar Pago"
+                    :label="t('tracking.payNow')"
                     icon="pi pi-credit-card"
                     class="pay-now-btn"
                     @click="showPaymentModal = true"
@@ -192,14 +284,14 @@ const getTaskTagSeverity = (status) => {
               <div class="dates-card">
 
       <span class="mini-title">
-        TIEMPOS DE SERVICIO
+        {{ t('tracking.serviceTimes') }}
       </span>
 
                 <div class="date-box">
                   <i class="pi pi-calendar"></i>
 
                   <div>
-                    <small>FECHA DE INGRESO</small>
+                    <small>{{ t('tracking.entryDate') }}</small>
                     <strong>{{ orderData.startDate }}</strong>
                   </div>
                 </div>
@@ -208,7 +300,7 @@ const getTaskTagSeverity = (status) => {
                   <i class="pi pi-clock"></i>
 
                   <div>
-                    <small>ENTREGA ESTIMADA</small>
+                    <small>{{ t('tracking.estimatedDelivery') }}</small>
                     <strong>{{ orderData.estimatedDate }}</strong>
                   </div>
                 </div>
@@ -220,7 +312,7 @@ const getTaskTagSeverity = (status) => {
           </div>
           <div class="vehicle-header">
             <div class="vehicle-details">
-              <span class="label">Vehículo Ingresado</span>
+              <span class="label">{{ t('tracking.vehicleEntered') }}</span>
               <h2>{{ vehicleData?.brand }} {{ vehicleData?.model }} <span>{{ vehicleData?.plate }}</span></h2>
             </div>
             <Tag :value="orderData.status" :severity="getStatusSeverity(orderData.status)" class="status-tag" />
@@ -228,11 +320,11 @@ const getTaskTagSeverity = (status) => {
 
           <div class="dates-grid">
             <div class="date-item">
-              <span class="label">Fecha de Ingreso</span>
+              <span class="label">{{ t('tracking.entryDate') }}</span>
               <strong><i class="pi pi-calendar-plus text-blue-500"></i> {{ orderData.startDate }}</strong>
             </div>
             <div class="date-item right-align">
-              <span class="label">Entrega Estimada</span>
+              <span class="label">{{ t('tracking.estimatedDelivery') }}</span>
               <strong><i class="pi pi-calendar text-orange-500"></i> {{ orderData.estimatedDate }}</strong>
             </div>
           </div>
@@ -265,9 +357,16 @@ const getTaskTagSeverity = (status) => {
 }
 
 .tracking-header {
+  position: relative;
   text-align: center;
   color: white;
   margin-bottom: 2.5rem;
+}
+
+.language-switcher-container {
+  position: absolute;
+  top: -2rem;
+  right: 0;
 }
 
 .header-icon {
@@ -444,6 +543,87 @@ const getTaskTagSeverity = (status) => {
   grid-template-columns: 1.2fr 1fr;
   gap:1.5rem;
   align-items:start;
+}
+
+.customer-report-card,
+.history-card {
+  margin-top: 1.5rem;
+  background: white;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.customer-report-list,
+.history-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.customer-report-item,
+.history-item {
+  padding: 1rem;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.customer-report-item h4,
+.history-item h4 {
+  margin: 0.7rem 0 0.4rem;
+  color: #0f172a;
+}
+
+.customer-report-item p,
+.history-item p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.evidence-note {
+  margin-top: 0.8rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: #ecfdf5;
+  color: #047857;
+  font-weight: 600;
+}
+
+.history-date {
+  color: #0b1680;
+  font-weight: 800;
+}
+
+.history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.8rem;
+  color: #64748b;
+}
+
+.history-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.recommendation {
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #334155;
+}
+
+.empty-mini {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  text-align: center;
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
 }
 @media(max-width:1200px){
 

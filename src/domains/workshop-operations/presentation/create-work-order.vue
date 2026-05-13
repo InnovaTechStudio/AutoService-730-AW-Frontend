@@ -2,22 +2,22 @@
   <div class="container">
     <div class="flex align-items-center mb-4">
       <Button icon="pi pi-arrow-left" text @click="goBack" class="mr-3" />
-      <h1 class="m-0">Registrar Nueva Orden de Trabajo</h1>
+      <h1 class="m-0">{{t('workOrders.create.title')}}</h1>
     </div>
 
     <div class="grid">
       <div class="col-12 md:col-5">
         <div class="card p-4 bg-white border-round shadow-1 h-full">
-          <h3>Datos Generales</h3>
+          <h3>{{t('workOrders.create.generalData')}}</h3>
 
           <div class="field mb-3">
-            <label>Vehículo</label>
+            <label>{{t('workOrders.create.vehicle')}}</label>
             <Dropdown
                 v-model="newWO.vehicleId"
                 :options="vehicleStore.vehicles"
                 optionLabel="plate"
                 optionValue="id"
-                placeholder="Seleccionar Placa"
+                :placeholder="t('workOrders.create.selectPlate')"
                 filter class="w-full"
                 @change="onVehicleChange"
             />
@@ -45,17 +45,17 @@
           </div>
 
           <div class="field mb-3">
-            <label>Descripción del Problema</label>
+            <label>{{ t('workOrders.create.description') }}</label>
             <Textarea v-model="newWO.description" rows="3" class="w-full" />
           </div>
 
           <div class="formgrid grid">
             <div class="field col">
-              <label>Fecha Estimada</label>
+              <label>{{ t('workOrders.create.estimatedDate') }}</label>
               <Calendar v-model="newWO.estimatedDate" dateFormat="yy-mm-dd" showIcon class="w-full" />
             </div>
             <div class="field col">
-              <label>Precio Total (S/.)</label>
+              <label>{{ t('workOrders.create.totalPrice') }} </label>
               <InputText v-model.number="newWO.price" type="number" class="w-full" />
             </div>
           </div>
@@ -65,17 +65,17 @@
       <div class="col-12 md:col-7">
         <div class="card p-4 bg-white border-round shadow-1 h-full">
           <div class="flex justify-content-between align-items-center mb-3">
-            <h3>Tareas Asignadas</h3>
-            <Button label="Añadir Tarea" icon="pi pi-plus" size="small" @click="addTaskRow" severity="secondary" />
+            <h3>{{ t('workOrders.create.assignedTasks') }}</h3>
+            <Button :label="t('workOrders.create.addTask')" icon="pi pi-plus" size="small" @click="addTaskRow" severity="secondary" />
           </div>
 
           <DataTable :value="tasks" responsiveLayout="scroll" class="p-datatable-sm">
-            <Column header="Descripción">
+            <Column :header="t('workOrders.create.taskDescription')">
               <template #body="slotProps">
                 <InputText v-model="slotProps.data.description" placeholder="Ej: Cambio de aceite" class="w-full" />
               </template>
             </Column>
-            <Column header="Mecánico Asignado">
+            <Column :header="t('workOrders.create.assignedMechanic')">
               <template #body="slotProps">
                 <Dropdown
                     v-model="slotProps.data.mechanicId"
@@ -96,15 +96,15 @@
           </DataTable>
 
           <div v-if="tasks.length === 0" class="text-center p-3 text-500">
-            No has agregado tareas. Añade al menos una.
+            {{ t('workOrders.create.noTasks') }}
           </div>
         </div>
       </div>
     </div>
 
     <div class="flex justify-content-end mt-4">
-      <Button label="Cancelar" icon="pi pi-times" text severity="secondary" class="mr-2" @click="goBack" />
-      <Button label="Guardar Orden Completa" icon="pi pi-save" @click="saveFullWorkOrder" :loading="isSaving" />
+      <Button :label="t('workOrders.create.cancel')" icon="pi pi-times" text severity="secondary" class="mr-2" @click="goBack" />
+      <Button :label="t('workOrders.create.saveOrder')" icon="pi pi-save" @click="saveFullWorkOrder" :loading="isSaving" />
     </div>
   </div>
 </template>
@@ -117,6 +117,7 @@ import { useTaskStore } from '../application/task.store';
 import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
 import { useCustomerStore } from '../../customer-management/application/customer.store';
 import { useMechanicStore } from '../../staff-coordination/application/mechanic.store';
+import {useI18n} from 'vue-i18n';
 
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -127,6 +128,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 
 const router = useRouter();
+const {t} = useI18n();
 const workOrderStore = useWorkOrderStore();
 const taskStore = useTaskStore();
 const vehicleStore = useVehicleStore();

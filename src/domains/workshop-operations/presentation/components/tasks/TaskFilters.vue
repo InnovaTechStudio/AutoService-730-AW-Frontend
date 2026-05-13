@@ -1,6 +1,7 @@
 <script setup>
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
+import {useI18n} from "vue-i18n";
 
 defineProps({
   search: String,
@@ -9,6 +10,8 @@ defineProps({
   statusOptions: Array,
   mechanicOptions: Array
 });
+
+const {t} = useI18n();
 
 defineEmits(['update:search', 'update:status', 'update:mechanicId']);
 </script>
@@ -19,7 +22,7 @@ defineEmits(['update:search', 'update:status', 'update:mechanicId']);
       <i class="pi pi-search"></i>
       <InputText
           :model-value="search"
-          placeholder="Buscar por descripción, orden o mecánico..."
+          :placeholder="t('tasks.filters.searchPlaceholder')"
           @update:model-value="$emit('update:search', $event)"
       />
     </span>
@@ -27,7 +30,7 @@ defineEmits(['update:search', 'update:status', 'update:mechanicId']);
     <Dropdown
         :model-value="status"
         :options="statusOptions"
-        placeholder="Estado"
+        :placeholder="t('tasks.filters.statusPlaceholder')"
         show-clear
         class="filter-select"
         @update:model-value="$emit('update:status', $event)"
@@ -38,7 +41,7 @@ defineEmits(['update:search', 'update:status', 'update:mechanicId']);
         :options="mechanicOptions"
         option-label="fullName"
         option-value="id"
-        placeholder="Mecánico"
+        :placeholder="t('tasks.filters.mechanicPlaceholder')"
         show-clear
         filter
         class="filter-select"

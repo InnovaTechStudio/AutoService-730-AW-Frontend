@@ -4,7 +4,7 @@
       :visible="visible"
       modal
       :style="{ width: '500px' }"
-      header="Proceso de Pago"
+      :header="t('tracking.payment.title')"
       class="payment-dialog"
       @update:visible="$emit('update:visible', false)"
   >
@@ -13,7 +13,7 @@
 
       <!-- TOTAL -->
       <div class="payment-total">
-        <span>Total a pagar</span>
+        <span>{{ t('tracking.payment.total') }}</span>
         <h2>${{ amount }}</h2>
       </div>
 
@@ -45,7 +45,7 @@
         >
           <img src="https://img.logo.dev/name/Bcp?token=pk_N7BjeKbxQY2n_ta1Keni5Q&retina=true" alt="Plin" />
 
-          <span>Tarjeta</span>
+          <span>{{ t('tracking.payment.card') }}</span>
         </div>
 
         <div
@@ -54,7 +54,7 @@
             @click="selectedMethod = 'Efectivo'"
         >
           <i class="pi pi-money-bill"></i>
-          <span>Efectivo</span>
+          <span>{{ t('tracking.payment.cash') }}</span>
         </div>
 
       </div>
@@ -66,13 +66,13 @@
       >
 
         <div class="form-group">
-          <label>Número de tarjeta</label>
+          <label>{{ t('tracking.payment.cardNumber') }}</label>
           <InputText placeholder="1234 5678 9012 3456" />
         </div>
 
         <div class="row">
           <div class="form-group">
-            <label>Fecha</label>
+            <label>{{ t('tracking.payment.date') }}</label>
             <InputText placeholder="MM/YY" />
           </div>
 
@@ -90,12 +90,12 @@
           class="qr-box"
       >
         <i class="pi pi-qrcode"></i>
-        <p>Escanea el QR para pagar</p>
+        <p>{{ t('tracking.payment.scanQr') }}</p>
       </div>
 
       <!-- ACTION -->
       <Button
-          label="Confirmar Pago"
+          :label="t('tracking.payment.confirm')"
           icon="pi pi-check"
           class="pay-btn"
           @click="processPayment"
@@ -108,12 +108,23 @@
 </template>
 
 <script setup>
-
+/**
+ * @file payment-modal.vue
+ * @description **Payment Modal Component**
+ *
+ * Modal dialog for processing payments in the vehicle tracking / customer trust section.
+ * Allows users to select a payment method and simulate completing a payment for a work order.
+ *
+ * Part of the **Customer Trust** domain - Presentation Layer.
+ */
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
+
+const { t } = useI18n();
 
 const props = defineProps({
   visible: Boolean,
@@ -126,10 +137,15 @@ const emit = defineEmits([
 ]);
 
 const selectedMethod = ref('Tarjeta');
-
+/**
+ * Processes the payment based on the selected method.
+ *
+ * Currently simulates payment processing with an alert.
+ * In a real implementation, this would integrate with a payment gateway.
+ */
 const processPayment = () => {
 
-  alert(`Pago realizado con ${selectedMethod.value}`);
+  alert(t('tracking.payment.success', { method: selectedMethod.value }));
 
   emit('success');
 
