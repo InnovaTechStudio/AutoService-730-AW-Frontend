@@ -28,7 +28,7 @@ const errorMsg = ref('');
 const orderData = ref(null);
 const vehicleData = ref(null);
 const tasks = ref([]);
-
+const vehicleHistory = ref([]);
 const selectedTask = ref(null);
 const showPaymentModal = ref(false);
 
@@ -61,7 +61,7 @@ const searchOrder = async () => {
 
 
     vehicleData.value = await TrackingService.getVehicle(order.vehicleId);
-
+    vehicleHistory.value = await TrackingService.getVehicleHistory(vehicleData.value.plate);
 
     tasks.value = await TrackingService.getTasks(order.id);
 
@@ -192,7 +192,73 @@ const getTaskTagSeverity = (status) => {
                 </div>
 
               </div>
+              <div class="customer-report-card">
+                <div class="card-header">
+                  <h3>Informe del Mecánico para el Cliente</h3>
+                  <p>Resumen técnico explicado en lenguaje simple.</p>
+                </div>
 
+                <div v-if="tasks.some(task => task.customerExplanation)" class="customer-report-list">
+                  <div
+                      v-for="task in tasks.filter(task => task.customerExplanation)"
+                      :key="task.id"
+                      class="customer-report-item"
+                  >
+                    <Tag :value="task.status" :severity="getTaskTagSeverity(task.status)" />
+                    <h4>{{ task.description }}</h4>
+                    <p>{{ task.customerExplanation }}</p>
+
+                    <div v-if="task.evidenceRegistered" class="evidence-note">
+                      <i class="pi pi-camera"></i>
+                      {{ task.evidenceRegistered }}
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else class="empty-mini">
+                  <i class="pi pi-info-circle"></i>
+                  <p>Aún no hay informe visible del mecánico para el cliente.</p>
+                </div>
+              </div>
+
+              <div class="history-card">
+                <div class="card-header">
+                  <h3>Historial técnico del vehículo</h3>
+                  <p>Registro asociado a la placa {{ vehicleData?.plate }}.</p>
+                </div>
+
+                <div v-if="vehicleHistory.length" class="history-list">
+                  <div
+                      v-for="record in vehicleHistory"
+                      :key="record.id"
+                      class="history-item"
+                  >
+                    <div class="history-date">
+                      <i class="pi pi-calendar"></i>
+                      {{ record.serviceDate }}
+                    </div>
+
+                    <h4>{{ record.serviceTitle }}</h4>
+                    <p>{{ record.customerSummary }}</p>
+
+                    <div class="history-meta">
+                      <span><i class="pi pi-building"></i>{{ record.workshopName }}</span>
+                      <span><i class="pi pi-user"></i>{{ record.mechanicName }}</span>
+                      <span><i class="pi pi-check-circle"></i>{{ record.tasksCompleted }} tareas</span>
+                    </div>
+
+                    <div class="recommendation">
+                      <strong>Recomendación:</strong>
+                      {{ record.recommendation }}
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else class="empty-mini">
+                  <i class="pi pi-folder-open"></i>
+                  <p>No hay historial técnico previo para este vehículo.</p>
+                </div>
+              </div>
             </div>
 
             <!-- RIGHT -->
@@ -477,6 +543,87 @@ const getTaskTagSeverity = (status) => {
   grid-template-columns: 1.2fr 1fr;
   gap:1.5rem;
   align-items:start;
+}
+
+.customer-report-card,
+.history-card {
+  margin-top: 1.5rem;
+  background: white;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.customer-report-list,
+.history-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.customer-report-item,
+.history-item {
+  padding: 1rem;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.customer-report-item h4,
+.history-item h4 {
+  margin: 0.7rem 0 0.4rem;
+  color: #0f172a;
+}
+
+.customer-report-item p,
+.history-item p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.evidence-note {
+  margin-top: 0.8rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: #ecfdf5;
+  color: #047857;
+  font-weight: 600;
+}
+
+.history-date {
+  color: #0b1680;
+  font-weight: 800;
+}
+
+.history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.8rem;
+  color: #64748b;
+}
+
+.history-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.recommendation {
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #334155;
+}
+
+.empty-mini {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  text-align: center;
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
 }
 @media(max-width:1200px){
 

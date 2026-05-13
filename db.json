@@ -1,6 +1,15 @@
 {
   "workshops": [
     {
+      "id": "MECH-1",
+      "name": "Roberto Sánchez",
+      "email": "mechanic@autoservice.com",
+      "password": "mechanic",
+      "role": "mechanic",
+      "mechanicId": "M-1",
+      "workshopId": "WS-1"
+    },
+    {
       "id": "WS-1",
       "name": "AutoTaller Surco",
       "email": "admin@autotaller.com",
@@ -13,15 +22,6 @@
       "email": "admin@rapidos.com",
       "password": "admin",
       "role": "admin"
-    },
-    {
-      "id": "MECH-1",
-      "name": "Roberto Sánchez",
-      "email": "mechanic@autoservice.com",
-      "password": "123456",
-      "role": "mechanic",
-      "mechanicId": "M-1",
-      "workshopId": "WS-1"
     }
   ],
   "customers": [
@@ -427,9 +427,59 @@
       "estimatedDate": "2026-06-04",
       "price": 100,
       "workshopId": "WS-1"
+    },
+    {
+      "id": "aKKsBScNUcQ",
+      "trackingCode": "AS-AYOBD",
+      "vehicleId": "V-2",
+      "customerId": "C-2",
+      "description": "",
+      "status": "En Proceso",
+      "startDate": "2026-05-13",
+      "estimatedDate": "2026-07-09",
+      "price": 500,
+      "workshopId": "WS-1"
     }
   ],
   "tasks": [
+    {
+      "id": "T-M1-001",
+      "workshopId": "WS-1",
+      "workOrderId": "WO-1",
+      "description": "Revisión de frenos delanteros",
+      "status": "Completada",
+      "mechanicId": "M-1",
+      "priority": "Alta",
+      "estimatedTime": "2 horas",
+      "price": 180,
+      "photo": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3",
+      "technicalDiagnosis": "Desgaste en el aceite ",
+      "customerExplanation": "se recomienda cambio de marca de aceite",
+      "internalObservation": "Se recomienda vender la marca de aceite ayudin",
+      "evidenceRegistered": "",
+      "adminReviewStatus": "Enviado al Administrador",
+      "customerReportStatus": "Visible para Cliente",
+      "completedAt": "2026-05-13T04:36:42.531Z"
+    },
+    {
+      "id": "T-M1-002",
+      "workshopId": "WS-1",
+      "workOrderId": "WO-7",
+      "description": "Cambio de inyectores y limpieza de motor",
+      "status": "En Proceso",
+      "mechanicId": "M-1",
+      "priority": "Media",
+      "estimatedTime": "3 horas",
+      "price": 260,
+      "photo": "https://images.unsplash.com/photo-1517524206127-48bbd363f3d7",
+      "technicalDiagnosis": "",
+      "customerExplanation": "",
+      "internalObservation": "",
+      "evidenceRegistered": "",
+      "adminReviewStatus": "Sin enviar",
+      "customerReportStatus": "No visible",
+      "completedAt": null
+    },
     {
       "id": "T-3",
       "workshopId": "WS-1",
@@ -585,6 +635,57 @@
       "price": 0,
       "photo": "data:image/jpeg;base64,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",
       "workshopId": "WS-1"
+    },
+    {
+      "id": "1ZB0Z2Rcdik",
+      "workshopId": "WS-1",
+      "workOrderId": "aKKsBScNUcQ",
+      "description": "cambio de luna ",
+      "status": "Completada",
+      "mechanicId": "M-1",
+      "priority": "Media",
+      "estimatedTime": "No definido",
+      "price": 0,
+      "photo": "",
+      "technicalDiagnosis": "luna rota por  posible choque ",
+      "customerExplanation": "chocaste ps",
+      "internalObservation": "Comprar luna especifica de marca ",
+      "evidenceRegistered": "",
+      "adminReviewStatus": "Enviado al Administrador",
+      "customerReportStatus": "No visible",
+      "completedAt": "2026-05-13T05:09:46.681Z"
+    }
+  ],
+  "vehicle-history": [
+    {
+      "id": "VH-1",
+      "plate": "ABC-123",
+      "date": "2026-05-11",
+      "workOrderCode": "AS-1001A",
+      "service": "Cambio de aceite y revisión de frenos",
+      "technicalDiagnosis": "Desgaste moderado en pastillas delanteras.",
+      "customerExplanation": "Se encontró desgaste en los frenos delanteros y se recomienda reemplazo próximo.",
+      "mechanic": "Carlos Mendoza",
+      "workshop": "AutoService Surco"
+    },
+    {
+      "id": "VH-1",
+      "vehicleId": "V-1",
+      "plate": "ABC-123",
+      "customerId": "C-1",
+      "workshopId": "WS-1",
+      "workshopName": "AutoTaller Surco",
+      "workOrderId": "WO-1",
+      "trackingCode": "AS-1001A",
+      "serviceDate": "2026-05-08",
+      "serviceTitle": "Mantenimiento 10k y revisión de frenos",
+      "mechanicName": "Roberto Sánchez",
+      "technicalSummary": "Se detectó desgaste en frenos delanteros y necesidad de cambio de aceite.",
+      "customerSummary": "Se realizó revisión preventiva y se recomienda mantener control del sistema de frenos.",
+      "tasksCompleted": 2,
+      "recommendation": "Revisar nuevamente en 30 días o ante ruidos al frenar.",
+      "evidenceRegistered": "Fotos de revisión de frenos registradas",
+      "createdFromAdminValidation": true
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
