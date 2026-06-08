@@ -21,6 +21,11 @@ const router = createRouter({
             meta: { requiresAuth: true, role: 'mechanic' }
         },
         {
+            path: '/inventory',
+            name: 'inventory',
+            component: () => import('../domains/inventory-management/presentation/inventory-view.vue')
+        },
+        {
             path: '/',
             component: () => import('../shared/presentation/admin-layout.vue'),
             meta: { requiresAuth: true },

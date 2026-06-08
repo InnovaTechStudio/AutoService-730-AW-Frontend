@@ -95,6 +95,13 @@ const getTaskTagSeverity = (status) => {
   if (status === 'En Proceso') return 'info';
   return 'secondary';
 };
+const getTasksWithMaterials = () => {
+  return tasks.value.filter(task => task.usedMaterials?.length > 0);
+};
+
+const getMaterialsGrandTotal = () => {
+  return tasks.value.reduce((total, task) => total + Number(task.materialsTotal || 0), 0);
+};
 </script>
 
 <template>
@@ -241,7 +248,56 @@ const getTaskTagSeverity = (status) => {
                   <p>Aún no hay informe visible del mecánico para el cliente.</p>
                 </div>
               </div>
+              <div class="materials-receipt-card">
+                <div class="card-header">
+                  <h3>Materiales utilizados en el servicio</h3>
+                  <p>Detalle de repuestos y materiales registrados por el taller.</p>
+                </div>
 
+                <div v-if="getTasksWithMaterials().length" class="materials-receipt-list">
+                  <div
+                      v-for="task in getTasksWithMaterials()"
+                      :key="task.id"
+                      class="materials-task-block"
+                  >
+                    <div class="materials-task-header">
+                      <div>
+                        <Tag :value="task.status" :severity="getTaskTagSeverity(task.status)" />
+                        <h4>{{ task.description }}</h4>
+                      </div>
+
+                      <strong>S/. {{ Number(task.materialsTotal || 0).toFixed(2) }}</strong>
+                    </div>
+
+                    <div
+                        v-for="material in task.usedMaterials"
+                        :key="material.inventoryItemId"
+                        class="receipt-material-row"
+                    >
+                      <div>
+                        <strong>{{ material.name }}</strong>
+                        <span>{{ material.brand }}</span>
+                      </div>
+
+                      <div class="receipt-numbers">
+                        <span>Cant: {{ material.quantity }}</span>
+                        <span>Unit: S/. {{ Number(material.unitPrice || 0).toFixed(2) }}</span>
+                        <strong>S/. {{ Number(material.subtotal || 0).toFixed(2) }}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="receipt-total-row">
+                    <span>Total de materiales</span>
+                    <strong>S/. {{ getMaterialsGrandTotal().toFixed(2) }}</strong>
+                  </div>
+                </div>
+
+                <div v-else class="empty-mini">
+                  <i class="pi pi-box"></i>
+                  <p>Aún no hay materiales registrados para este servicio.</p>
+                </div>
+              </div>
               <div class="history-card">
                 <div class="card-header">
                   <h3>Historial técnico del vehículo</h3>
@@ -372,6 +428,46 @@ const getTaskTagSeverity = (status) => {
             </tbody>
           </table>
         </div>
+        <div class="print-section" v-if="getTasksWithMaterials().length">
+          <h3>Materiales Utilizados</h3>
+
+          <table class="print-table">
+            <thead>
+            <tr>
+              <th>Tarea</th>
+              <th>Material</th>
+              <th>Marca</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <template
+                v-for="task in getTasksWithMaterials()"
+                :key="task.id"
+            >
+              <tr
+                  v-for="material in task.usedMaterials"
+                  :key="material.inventoryItemId"
+              >
+                <td>{{ task.description }}</td>
+                <td>{{ material.name }}</td>
+                <td>{{ material.brand }}</td>
+                <td>{{ material.quantity }}</td>
+                <td>S/. {{ Number(material.unitPrice || 0).toFixed(2) }}</td>
+                <td>S/. {{ Number(material.subtotal || 0).toFixed(2) }}</td>
+              </tr>
+            </template>
+            </tbody>
+          </table>
+
+          <div class="print-material-total">
+            <strong>Total de materiales:</strong>
+            S/. {{ getMaterialsGrandTotal().toFixed(2) }}
+          </div>
+        </div>
 
         <div class="print-section" v-if="vehicleHistory.length">
           <h3>Historial Técnico Registrado</h3>
@@ -384,7 +480,9 @@ const getTaskTagSeverity = (status) => {
         </div>
 
         <div class="print-footer">
-          <h2>Costo Estimado: ${{ orderData.price }}</h2>
+          <h2>Costo de servicio: S/. {{ Number(orderData.price || 0).toFixed(2) }}</h2>
+          <h2>Total materiales: S/. {{ getMaterialsGrandTotal().toFixed(2) }}</h2>
+          <h2>Total estimado: S/. {{ (Number(orderData.price || 0) + getMaterialsGrandTotal()).toFixed(2) }}</h2>
           <p>Este documento es un resumen informativo generado por el sistema de AutoService y no representa un comprobante de pago con validez fiscal.</p>
         </div>
       </div>
@@ -829,7 +927,91 @@ const getTaskTagSeverity = (status) => {
   align-items:center;
   color:#64748b;
 }
+.materials-receipt-card {
+  margin-top: 1.5rem;
+  background: white;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
 
+.materials-receipt-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.materials-task-block {
+  padding: 1rem;
+  border-radius: 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.materials-task-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .8rem;
+}
+
+.materials-task-header h4 {
+  margin: .6rem 0 0;
+  color: #0f172a;
+}
+
+.materials-task-header strong {
+  color: #0b1680;
+  font-size: 1.1rem;
+}
+
+.receipt-material-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .75rem;
+  border-radius: 14px;
+  background: #ffffff;
+  margin-top: .6rem;
+}
+
+.receipt-material-row strong,
+.receipt-material-row span {
+  display: block;
+}
+
+.receipt-material-row span {
+  color: #64748b;
+  font-size: .88rem;
+}
+
+.receipt-numbers {
+  text-align: right;
+}
+
+.receipt-numbers strong {
+  color: #0b1680;
+}
+
+.receipt-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 14px;
+  background: #eef2ff;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.receipt-total-row strong {
+  color: #0b1680;
+  font-size: 1.15rem;
+}
+.print-material-total {
+  margin-top: 10px;
+  text-align: right;
+  font-size: 14px;
+  color: #1e293b;
+}
 @media(max-width:1200px){
   .dashboard-grid{
     grid-template-columns:1fr;

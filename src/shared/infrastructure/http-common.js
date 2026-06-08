@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const http = axios.create({
-    baseURL: 'https://autoservice-api.ddns.net/',
+    baseURL: 'http://localhost:3000',
     headers: { 'Content-type': 'application/json' }
 });
 
@@ -16,9 +16,7 @@ http.interceptors.request.use((config) => {
         ? user.workshopId
         : user.id;
 
-    if (!workshopId) {
-        return config;
-    }
+    if (!workshopId) return config;
 
     if (config.method === 'get') {
         config.params = { ...config.params, workshopId };

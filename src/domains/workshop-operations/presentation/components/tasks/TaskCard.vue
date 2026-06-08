@@ -10,7 +10,7 @@ defineProps({
   statusOptions: Array
 });
 
-defineEmits(['status-change', 'edit', 'delete', 'go-order']);
+defineEmits(['status-change', 'material-status-change', 'edit', 'delete', 'go-order']);
 
 const { t } = useI18n();
 
@@ -27,6 +27,13 @@ const getCustomerSeverity = (status) => {
 const formatDate = (date) => {
   if (!date) return 'Sin completar';
   return new Date(date).toLocaleString();
+};
+const hasMaterials = (task) => {
+  return task.raw?.usedMaterials?.length > 0;
+};
+
+const getMaterialsTotal = (task) => {
+  return Number(task.raw?.materialsTotal || 0).toFixed(2);
 };
 </script>
 
@@ -118,7 +125,64 @@ const formatDate = (date) => {
           <p>{{ task.raw?.evidenceRegistered || 'Sin evidencia registrada' }}</p>
         </div>
       </div>
+      <div v-if="hasMaterials(task)" class="materials-admin-box">
+        <div class="materials-admin-header">
+          <div>
+            <h4>Materiales utilizados</h4>
+            <p>Materiales seleccionados por el mecánico desde el inventario.</p>
+          </div>
 
+          <div class="materials-total">
+            <span>Total</span>
+            <strong>S/. {{ getMaterialsTotal(task) }}</strong>
+          </div>
+        </div>
+
+        <Tag
+            :value="task.raw?.materialRequestStatus || 'Materiales utilizados'"
+            severity="success"
+            rounded
+            class="material-status-tag"
+        />
+        <div class="material-review-actions">
+          <Button
+              label="Aprobar materiales"
+              icon="pi pi-check"
+              severity="success"
+              outlined
+              size="small"
+              @click="$emit('material-status-change', task.raw, 'Aprobado')"
+          />
+
+          <Button
+              label="Observar"
+              icon="pi pi-exclamation-triangle"
+              severity="warning"
+              outlined
+              size="small"
+              @click="$emit('material-status-change', task.raw, 'En revisión')"
+          />
+        </div>
+
+        <div class="materials-admin-list">
+          <div
+              v-for="material in task.raw.usedMaterials"
+              :key="material.inventoryItemId"
+              class="material-admin-item"
+          >
+            <div>
+              <strong>{{ material.name }}</strong>
+              <span>{{ material.brand }}</span>
+            </div>
+
+            <div class="material-numbers">
+              <span>Cant: {{ material.quantity }}</span>
+              <span>Unit: S/. {{ Number(material.unitPrice || 0).toFixed(2) }}</span>
+              <strong>S/. {{ Number(material.subtotal || 0).toFixed(2) }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="completed-row">
         <i class="pi pi-calendar-check"></i>
         <span>Completado: {{ formatDate(task.raw?.completedAt) }}</span>
@@ -302,7 +366,92 @@ p i {
 .icon-button {
   border-radius: 14px;
 }
+.materials-admin-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #bbf7d0;
+  border-radius: 18px;
+  background: #f0fdf4;
+}
 
+.materials-admin-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .75rem;
+}
+
+.materials-admin-header h4 {
+  margin: 0;
+  color: #14532d;
+}
+
+.materials-admin-header p {
+  display: block;
+  margin-top: .3rem;
+  color: #64748b;
+  font-size: .9rem;
+}
+
+.materials-total {
+  text-align: right;
+}
+
+.materials-total span {
+  display: block;
+  color: #64748b;
+  font-size: .75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.materials-total strong {
+  color: #0b1680;
+  font-size: 1.1rem;
+}
+
+.material-status-tag {
+  margin-bottom: .8rem;
+}
+
+.materials-admin-list {
+  display: grid;
+  gap: .65rem;
+}
+
+.material-admin-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .75rem;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+}
+
+.material-admin-item strong,
+.material-admin-item span {
+  display: block;
+}
+
+.material-admin-item span {
+  color: #64748b;
+  font-size: .85rem;
+}
+
+.material-numbers {
+  text-align: right;
+}
+
+.material-numbers strong {
+  color: #0b1680;
+}
+.material-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin: .8rem 0;
+}
 @media (max-width: 720px) {
   .report-header {
     flex-direction: column;

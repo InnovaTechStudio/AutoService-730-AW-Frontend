@@ -69,6 +69,12 @@ export const useTaskStore = defineStore('task', {
                 customerExplanation: reportData.customerExplanation,
                 internalObservation: reportData.internalObservation,
                 evidenceRegistered: reportData.evidenceRegistered,
+
+                requiredMaterials: reportData.requiredMaterials || [],
+                usedMaterials: reportData.usedMaterials || [],
+                materialsTotal: Number(reportData.materialsTotal || 0),
+                materialRequestStatus: reportData.usedMaterials?.length ? 'Materiales solicitados' : 'Sin materiales',
+
                 adminReviewStatus: 'Enviado al Administrador',
                 customerReportStatus: 'No visible'
             });
@@ -85,10 +91,17 @@ export const useTaskStore = defineStore('task', {
         async completeTaskFromMechanic(id, reportData) {
             const response = await http.patch(`/tasks/${id}`, {
                 status: 'Completada',
+
                 technicalDiagnosis: reportData.technicalDiagnosis,
                 customerExplanation: reportData.customerExplanation,
                 internalObservation: reportData.internalObservation,
                 evidenceRegistered: reportData.evidenceRegistered,
+
+                requiredMaterials: reportData.requiredMaterials || [],
+                usedMaterials: reportData.usedMaterials || [],
+                materialsTotal: Number(reportData.materialsTotal || 0),
+                materialRequestStatus: reportData.usedMaterials?.length ? 'Materiales utilizados' : 'Sin materiales',
+
                 adminReviewStatus: 'Enviado al Administrador',
                 customerReportStatus: 'Visible para Cliente',
                 completedAt: new Date().toISOString()
@@ -102,5 +115,19 @@ export const useTaskStore = defineStore('task', {
 
             return response.data;
         }
+
+    },
+    async updateMaterialRequestStatus(id, materialRequestStatus) {
+        const response = await http.patch(`/tasks/${id}`, {
+            materialRequestStatus
+        });
+
+        const index = this.tasks.findIndex(task => String(task.id) === String(id));
+
+        if (index !== -1) {
+            this.tasks.splice(index, 1, createTask(response.data));
+        }
+
+        return response.data;
     }
 });

@@ -1,18 +1,13 @@
 import axios from 'axios';
 
 const publicHttp = axios.create({
-    // Corregido: Se quitó el slash (/) extra al final de la URL
-    baseURL: 'https://autoservice-api.ddns.net',
+    baseURL: 'http://localhost:3000',
     headers: { 'Content-type': 'application/json' }
 });
 
-/**
- * Service to handle customer tracking operations.
- */
 export const TrackingService = {
     async getOrderByCode(trackingCode) {
         try {
-            // Lógica robusta restaurada de main
             const response = await publicHttp.get(`/work-orders/${trackingCode}`);
             return [response.data];
         } catch (error) {
@@ -29,23 +24,20 @@ export const TrackingService = {
 
     async getTasks(workOrderId) {
         try {
-            // Parseo avanzado restaurado de main (esto soluciona que no carguen las fotos)
             const response = await publicHttp.get(`/tasks?workOrderId=${workOrderId}`);
-            let tasksArray = [];
+            const data = response.data;
 
-            if (Array.isArray(response.data)) {
-                tasksArray = response.data;
-            } else if (response.data && Array.isArray(response.data.data)) {
-                tasksArray = response.data.data;
-            } else if (typeof response.data === 'object' && response.data !== null) {
-                tasksArray = [response.data];
-            } else {
-                return [];
+            if (Array.isArray(data)) {
+                return data.filter(task => String(task.workOrderId) === String(workOrderId));
             }
 
-            return tasksArray.filter(task => String(task.workOrderId) === String(workOrderId));
+            if (data && Array.isArray(data.data)) {
+                return data.data.filter(task => String(task.workOrderId) === String(workOrderId));
+            }
+
+            return [];
         } catch (error) {
-            console.error("Error fetching tasks:", error);
+            console.error('Error fetching tasks:', error);
             return [];
         }
     },
@@ -56,7 +48,7 @@ export const TrackingService = {
             const data = response.data;
             return Array.isArray(data) ? data : (data.data || []);
         } catch (error) {
-            console.error("Error fetching history:", error);
+            console.error('Error fetching history:', error);
             return [];
         }
     }

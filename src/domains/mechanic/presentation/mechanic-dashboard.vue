@@ -4,7 +4,8 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../auth/application/auth.store';
 import { useTaskStore } from '../../workshop-operations/application/task.store';
 import { useWorkOrderStore } from '../../workshop-operations/application/work-order.store';
-
+import { useInventoryStore } from '../../inventory-management/application/inventory.store';
+import InputNumber from 'primevue/inputnumber';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
@@ -18,6 +19,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const taskStore = useTaskStore();
 const workOrderStore = useWorkOrderStore();
+const inventoryStore = useInventoryStore();
 
 const selectedTask = ref(null);
 const selectedStatus = ref(null);
@@ -35,7 +37,8 @@ onMounted(async () => {
 
   await Promise.all([
     taskStore.fetchTasksByMechanic(mechanicId),
-    workOrderStore.fetchWorkOrders()
+    workOrderStore.fetchWorkOrders(),
+    inventoryStore.fetchInventory()
   ]);
 });
 
@@ -81,12 +84,16 @@ const getReport = (task) => {
       technicalDiagnosis: task.technicalDiagnosis || '',
       customerExplanation: task.customerExplanation || '',
       internalObservation: task.internalObservation || '',
-      evidenceRegistered: task.evidenceRegistered || ''
+      evidenceRegistered: task.evidenceRegistered || '',
+      requiredMaterials: task.requiredMaterials || [],
+      usedMaterials: task.usedMaterials || [],
+      materialsTotal: Number(task.materialsTotal || 0)
     };
   }
 
   return mechanicReports[task.id];
 };
+
 
 const selectTask = (task) => {
   selectedTask.value = task;
@@ -112,19 +119,88 @@ const saveTechnicalReport = async () => {
 const completeTask = async () => {
   if (!selectedTask.value) return;
 
+  const report = getReport(selectedTask.value);
+
   await taskStore.completeTaskFromMechanic(
       selectedTask.value.id,
-      getReport(selectedTask.value)
+      report
   );
 
+  if (report.usedMaterials?.length) {
+    await Promise.all(
+        report.usedMaterials.map(material =>
+            inventoryStore.discountStock(
+                material.inventoryItemId,
+                material.quantity
+            )
+        )
+    );
+  }
+
+  await inventoryStore.fetchInventory();
+
   selectedTask.value.status = 'Completada';
-  alert('Tarea completada y visible para el cliente');
+
+  alert('Tarea completada, materiales descontados del inventario y reporte visible para el cliente');
 };
+
+
 
 const logout = () => {
   authStore.logout();
   router.push('/login');
 };
+
+const addMaterialToSelectedTask = (item) => {
+  if (!selectedTask.value) return;
+
+  const report = getReport(selectedTask.value);
+
+  if (!report.usedMaterials) {
+    report.usedMaterials = [];
+  }
+
+  const exists = report.usedMaterials.find(material => material.inventoryItemId === item.id);
+
+  if (exists) {
+    exists.quantity += 1;
+    exists.subtotal = exists.quantity * exists.unitPrice;
+  } else {
+    report.usedMaterials.push({
+      inventoryItemId: item.id,
+      name: item.name,
+      brand: item.brand,
+      quantity: 1,
+      unitPrice: item.unitPrice,
+      subtotal: item.unitPrice
+    });
+  }
+
+  report.materialsTotal = calculateMaterialsTotal(report.usedMaterials);
+};
+
+const updateMaterialQuantity = (material) => {
+  material.subtotal = Number(material.quantity || 0) * Number(material.unitPrice || 0);
+
+  const report = getReport(selectedTask.value);
+  report.materialsTotal = calculateMaterialsTotal(report.usedMaterials);
+};
+
+const removeMaterial = (materialId) => {
+  const report = getReport(selectedTask.value);
+
+  report.usedMaterials = report.usedMaterials.filter(
+      material => material.inventoryItemId !== materialId
+  );
+
+  report.materialsTotal = calculateMaterialsTotal(report.usedMaterials);
+};
+
+const calculateMaterialsTotal = (materials = []) => {
+  return materials.reduce((total, material) => total + Number(material.subtotal || 0), 0);
+};
+
+
 </script>
 
 <template>
@@ -316,6 +392,68 @@ const logout = () => {
                     v-model="getReport(selectedTask).evidenceRegistered"
                     placeholder="Ejemplo: Foto de fuga hidráulica registrada"
                 />
+              </div>
+              <div class="materials-section">
+                <div class="materials-header">
+                  <div>
+                    <h3>Materiales utilizados</h3>
+                    <p>Selecciona materiales desde el inventario del taller.</p>
+                  </div>
+
+                  <strong>S/. {{ getReport(selectedTask).materialsTotal?.toFixed(2) || '0.00' }}</strong>
+                </div>
+
+                <div class="inventory-options">
+                  <button
+                      v-for="item in inventoryStore.availableItems"
+                      :key="item.id"
+                      type="button"
+                      class="inventory-option"
+                      @click="addMaterialToSelectedTask(item)"
+                  >
+                    <img :src="item.image" :alt="item.name" />
+
+                    <div>
+                      <strong>{{ item.name }}</strong>
+                      <span>{{ item.brand }} · S/. {{ item.unitPrice.toFixed(2) }}</span>
+                      <small>Stock: {{ item.stock }}</small>
+                    </div>
+                  </button>
+                </div>
+
+                <div
+                    v-if="getReport(selectedTask).usedMaterials?.length"
+                    class="selected-materials"
+                >
+                  <div
+                      v-for="material in getReport(selectedTask).usedMaterials"
+                      :key="material.inventoryItemId"
+                      class="selected-material"
+                  >
+                    <div>
+                      <strong>{{ material.name }}</strong>
+                      <span>{{ material.brand }} · S/. {{ material.unitPrice.toFixed(2) }}</span>
+                    </div>
+
+                    <InputNumber
+                        v-model="material.quantity"
+                        :min="1"
+                        showButtons
+                        class="quantity-input"
+                        @update:model-value="updateMaterialQuantity(material)"
+                    />
+
+                    <strong>S/. {{ material.subtotal.toFixed(2) }}</strong>
+
+                    <Button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        text
+                        rounded
+                        @click="removeMaterial(material.inventoryItemId)"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -632,7 +770,110 @@ const logout = () => {
   border-radius: 16px;
   background: #ffffff;
 }
+.materials-section {
+  grid-column: 1 / -1;
+  padding: 1rem;
+  border: 1px solid #e8edf5;
+  border-radius: 20px;
+  background: #f8fafc;
+}
 
+.materials-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.materials-header h3 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.materials-header p {
+  margin: .25rem 0 0;
+  color: #64748b;
+}
+
+.materials-header strong {
+  color: #0b1680;
+  font-size: 1.2rem;
+}
+
+.inventory-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .75rem;
+}
+
+.inventory-option {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  padding: .75rem;
+  border: 1px solid #dbe3ef;
+  border-radius: 16px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.inventory-option:hover {
+  border-color: #0b1680;
+}
+
+.inventory-option img {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.inventory-option strong,
+.inventory-option span,
+.inventory-option small {
+  display: block;
+}
+
+.inventory-option span,
+.inventory-option small {
+  color: #64748b;
+}
+
+.selected-materials {
+  display: grid;
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+.selected-material {
+  display: grid;
+  grid-template-columns: 1fr 120px 100px auto;
+  gap: .75rem;
+  align-items: center;
+  padding: .75rem;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.selected-material span {
+  display: block;
+  color: #64748b;
+}
+
+.quantity-input {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .inventory-options {
+    grid-template-columns: 1fr;
+  }
+
+  .selected-material {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 1200px) {
   .mechanic-header,
   .workspace-grid {

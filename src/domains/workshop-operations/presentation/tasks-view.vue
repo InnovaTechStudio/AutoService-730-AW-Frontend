@@ -160,7 +160,9 @@ const deleteTask = async (task) => {
 const onStatusChange = async (task, newStatus) => {
   await taskStore.updateTaskStatus(task.id, newStatus);
 };
-
+const onMaterialStatusChange = async (task, newMaterialStatus) => {
+  await taskStore.updateMaterialRequestStatus(task.id, newMaterialStatus);
+};
 const goToWorkOrder = (workOrderId) => {
   if (workOrderId) {
     router.push(`/work-orders/${workOrderId}`);
@@ -239,6 +241,7 @@ const goToWorkOrder = (workOrderId) => {
           :task="task"
           :status-options="statusOptions"
           @status-change="onStatusChange"
+          @material-status-change="onMaterialStatusChange"
           @edit="editTask"
           @delete="deleteTask"
           @go-order="goToWorkOrder"
