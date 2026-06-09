@@ -48,7 +48,7 @@
     "form": {
       "registerTitle": "Registrar nuevo Cliente",
       "dniPlaceholder": "12345678",
-      "dni" : "DNI",
+      "dni": "DNI",
       "phone": "Teléfono",
       "fullName": "Nombre Completo",
       "email": "Correo",
@@ -387,7 +387,7 @@
     },
     "statusOptions": {
       "completed": "Completada",
-      "inProgress": "En Progreso",
+      "inProgress": "En Proceso",
       "pending": "Pendiente"
     },
     "summary": {
@@ -625,59 +625,50 @@
     "loading": "Cargando órdenes...",
     "newButton": "Nueva orden",
     "statusOptions": {
-      "cancelled": "Cancelado",
-      "completed": "Finalizado",
-      "inProgress": "En Proceso",
-      "pending": "Pendiente"
+      "pending": "Pendiente",
+      "in_progress": "En Proceso",
+      "finished": "Lista para entrega",
+      "delivered": "Entregada",
+      "cancelled": "Cancelada"
     },
     "summary": {
       "completed": "Completadas",
       "inProgress": "En progreso",
       "riskDelay": "Riesgo de retraso",
-      "total": "Total órdenes"
+      "total": "Total órdenes",
+      "finished": "Finalizado",
+      "delivered": "Entregado"
     },
-    "title": "Órdenes de trabajo",
-    "workOrderDetail": {
-      "title": "Orden #{code}",
-      "initialDescription": "Descripción Inicial",
-      "actions": {
-        "back": "Volver"
-      },
-      "tasks": {
-        "title": "Diagnóstico y Tareas",
-        "addTask": "Agregar Tarea",
-        "empty": "Aún no hay tareas registradas.",
-        "columns": {
-          "task": "Tarea",
-          "status": "Estado",
-          "labor": "Mano de Obra"
-        }
-      },
-      "quote": {
-        "title": "Cotización Automática"
-      }
-    }
+    "title": "Órdenes de trabajo"
   },
   "layout": {
     "brand": "AutoService"
   },
-  "workOrderDetail":{
-    "actions":{
+  "workOrderDetail": {
+    "actions": {
       "back": "Volver"
     },
     "initialDescription": "Descripción inicial",
     "tasks": {
       "title": "Tareas de la Orden",
+      "addTask": "Agregar Tarea",
+      "empty": "Aún no hay tareas registradas.",
       "columns": {
         "task": "Tarea",
         "status": "Estado",
-        "labor": "Costo"
-      }
+        "labor": "Costo",
+        "materials": "Materiales"
+      },
+      "noMaterials": "Ninguno"
     },
     "quote": {
       "title": "Costo total de la Orden"
     },
-    "title": "Detalle de la orden de trabajo"
+    "title": "Detalle de la orden de trabajo",
+    "validation": {
+      "readyMessage": "El mecánico ha marcado esta orden como finalizada. Lista para validación.",
+      "deliverButton": "Validar y Entregar Vehículo"
+    }
   },
   "mechanicOrder": {
     "noTasks": "Sin Tareas",
@@ -690,10 +681,14 @@
     "diagnosisPlaceholder": "Ingrese el diagnóstico",
     "newTask": "Nueva Tarea",
     "tasks": "Tareas",
-    "dialog":{
+    "dialog": {
       "newTask": "Nueva Tarea",
       "description": "Descripción",
-      "save": "Crear"
+      "save": "Crear",
+      "descriptionPlaceholder": "Descripción de la tarea",
+      "priority": "Prioridad",
+      "laborPrice": "Costo mano de obra",
+      "estimatedTime": "Tiempo estimado"
     }
   },
   "taskStatus": {
@@ -714,4 +709,3 @@
     "cancelled": "Cancelado"
   }
 }
-
