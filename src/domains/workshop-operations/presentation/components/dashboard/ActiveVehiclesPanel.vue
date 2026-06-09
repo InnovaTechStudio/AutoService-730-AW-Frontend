@@ -60,15 +60,19 @@ defineEmits(['view-vehicles']);
           <div class="vehicle-info">
             <div class="vehicle-top">
               <div>
-                <h3>
-                  {{ vehicle.name }}
+                <span class="order-code">{{ vehicle.orderCode }}</span>
+                <h3 class="plate-text">
+                  {{ vehicle.plate }}
                 </h3>
+                <small class="model-text">{{ vehicle.name }}</small>
 
-                <Tag
-                    :value="vehicle.status"
-                    :severity="vehicle.severity"
-                    rounded
-                />
+                <div class="mt-1">
+                  <Tag
+                      :value="vehicle.status"
+                      :severity="vehicle.severity"
+                      rounded
+                  />
+                </div>
               </div>
 
               <strong>
@@ -163,4 +167,26 @@ defineEmits(['view-vehicles']);
   height: 8px;
   margin-top: 0.75rem;
 }
+.order-code {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  display: block;
+}
+
+.plate-text {
+  margin: 0 !important;
+  font-size: 1.1rem !important;
+  color: #0f172a;
+}
+
+.model-text {
+  display: block;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.mt-1 { margin-top: 0.25rem; }
 </style>

@@ -154,9 +154,6 @@ const getOrderProgress = (orderId) => {
   );
 };
 
-/**
- * Vista resumida de vehículos activos.
- */
 const activeVehiclePreview = computed(() => {
   const activeOrders = workOrderStore.workOrders.filter((order) =>
       isStatusActive(order.status)
@@ -174,6 +171,9 @@ const activeVehiclePreview = computed(() => {
 
         return {
           id: vehicle.id || order.id,
+          // CAMBIO: Ahora enviamos el código de la orden y la placa
+          orderCode: order.trackingCode || `WO-${order.id}`,
+          plate: vehicle.plate || t('dashboard.defaults.plate'),
           name: `${vehicle.brand || t('dashboard.defaults.vehicle')} ${vehicle.model || ''}`,
           status:
               progress === 100
