@@ -404,67 +404,50 @@
     "welcome": "Bienvenido,"
   },
   "tracking": {
-    "states": {
-      "pending": "Pendiente",
-      "pending_diagnosis": "Pendiente de Diagnóstico",
-      "in_progress": "En Proceso",
-      "finished": "Finalizado",
-      "delivered": "Entregado",
-      "cancelled": "Cancelado"
+    "title": "Rastrea tu Vehículo",
+    "subtitle": "Ingresa el código de tu orden de trabajo para ver el estado de la reparación en tiempo real.",
+    "notFound": "No se encontró ninguna orden con este código. Verifica que esté bien escrito.",
+    "errorConnection": "Hubo un error de conexión al buscar la orden. Inténtalo más tarde.",
+    "backButton": "Buscar otra orden",
+    "yourVehicle": "Tu vehículo",
+    "progress": "Progreso de la reparación",
+    "tasksTitle": "Detalle de Tareas y Materiales",
+    "materialsUsed": "Materiales a utilizar",
+    "labor": "Mano de obra",
+    "totalCost": "Costo Total Estimado",
+    "statusMessages": {
+      "pending": "Tu vehículo se encuentra registrado en {workshop} y está en la cola de diagnóstico.",
+      "in_progress": "¡Manos a la obra! Nuestros mecánicos de {workshop} están trabajando en tu auto en este momento.",
+      "finished": "¡Trabajo completado! Tu auto se encuentra en {workshop} en la fase de control de calidad final. Listo para entrega.",
+      "delivered": "El vehículo ha sido retirado de {workshop}. ¡Gracias por confiar en nuestro servicio!",
+      "cancelled": "Esta orden de reparación ha sido cancelada por el taller."
     },
-    "billing": {
-      "entryDate": "Fecha de Ingreso",
-      "estimatedDelivery": "Entrega Estimada",
-      "paid": "Servicio Pagado",
-      "title": "Resumen de Facturación",
-      "total": "Monto Total"
-    },
-    "connectionError": "Error de conexión. Por favor, inténtelo más tarde.",
-    "costDisclaimer": "Los precios mostrados son estimaciones y pueden variar tras la inspección final.",
-    "description": "Ingrese su código de seguimiento para ver el estado de su vehículo y el informe de servicio.",
-    "detail": {
-      "vehicleReady": "Vehículo listo para recoger"
-    },
-    "history": {
-      "recommendation": "Recomendación",
-      "subtitle": "Servicios anteriores registrados en nuestra red.",
-      "title": "Historial de Mantenimiento"
-    },
-    "invalidCode": "Código de seguimiento inválido. Por favor, verifique e intente de nuevo.",
-    "payNow": "Pagar Ahora",
-    "placeholder": "Ingrese el código de seguimiento",
-    "print": {
-      "brandModel": "Marca y Modelo",
-      "brandSubtitle": "Red de Talleres Especializados",
-      "currentStatus": "Estado Actual",
-      "customerDetail": "Detalle para el Cliente",
-      "disclaimer": "Este documento es un resumen informativo generado por AutoService y no constituye un comprobante fiscal.",
-      "entryDate": "Fecha de Ingreso",
-      "estimatedCost": "Costo Estimado",
-      "estimatedDelivery": "Entrega Estimada",
-      "issueDate": "Fecha de Emisión",
-      "noObservations": "Sin observaciones adicionales",
-      "noReport": "Servicios en progreso. Aún no se ha emitido un informe final.",
-      "plate": "Placa",
-      "reportTitle": "Informe de Servicio",
-      "task": "Tarea",
-      "tasksSummary": "Resumen de Tareas",
-      "trackingCode": "Código de Seguimiento",
-      "vehicleData": "Datos del Vehículo"
-    },
-    "progress": {
-      "finalPhase": "En fase de revisión final",
-      "inProgress": "Trabajo técnico en progreso",
-      "pendingDiagnosis": "Esperando diagnóstico"
-    },
-    "search": "Buscar",
-    "serviceReport": {
-      "empty": "El informe técnico detallado aparecerá aquí una vez que los trabajos sean auditados por el gerente del taller.",
-      "subtitle": "Detalles de tareas completadas y verificadas por nuestro equipo.",
-      "title": "Informe Técnico de Servicio",
-      "viewEvidence": "Ver foto de evidencia"
-    },
-    "title": "Siga su servicio"
+    "welcomeTitle": "AutoService",
+    "welcomeSubtitle": "Bienvenido. Ingresa el código de la orden que te brindó tu taller para poder trackear tu vehículo en tiempo real.",
+    "inputPlaceholder": "Ingresa el código de tu orden aquí",
+    "searchButton": "Buscar Mi Orden",
+    "greeting": "¡Hola, {name}!",
+    "payment": {
+      "payButton": "Proceder al Pago en Línea",
+      "downloadReceipt": "Descargar Comprobante",
+      "dialogTitle": "Pasarela de Pago Simulada",
+      "selectMethod": "Selecciona un método de pago",
+      "card": "Tarjeta de Crédito / Débito",
+      "qr": "Pago con Código QR",
+      "cash": "Pago en Efectivo en Taller",
+      "cardNumber": "Número de Tarjeta",
+      "expiry": "Fecha de Vencimiento (MM/AA)",
+      "cvv": "Código CVV",
+      "cancel": "Cancelar",
+      "confirmAction": "Confirmar Selección",
+      "payAction": "Pagar S/. {total}",
+      "qrInstructions": "Escanea este código QR desde la aplicación móvil de tu banco de preferencia para completar la transferencia.",
+      "cashMessage": "Al confirmar, se notificará al sistema del taller que realizarás el pago de manera presencial en efectivo al momento de recoger el vehículo.",
+      "successTitle": "¡Transacción Simulada con Éxito!",
+      "successSubtitleOnline": "Tu pago ha sido registrado de manera correcta en el sistema. El taller procederá con el cierre administrativo.",
+      "successSubtitleCash": "Se ha registrado tu preferencia de pago en efectivo. Puedes acercarte al taller por tu vehículo.",
+      "close": "Entendido"
+    }
   },
   "vehicleDetail": {
     "delivery": "Entrega",
