@@ -1,454 +1,717 @@
 {
-  "nav": {
-    "dashboard": "Dashboard",
-    "customers": "Customers",
-    "vehicles": "Vehicles",
-    "workOrders": "Work Orders",
-    "tasks": "Tasks",
-    "mechanics": "Mechanics",
-    "controlPanel": "Control Panel"
+  "actions": {
+    "deleteMechanic": "Deactivate",
+    "editProfile": "Edit Profile",
+    "cancel": "Cancel"
   },
-  "topbar": {
-    "welcome": "Welcome,",
-    "admin": "Administrator",
-    "logout": "Log Out"
+  "auth": {
+    "loginError": "Invalid credentials or connection error",
+    "registerError": "Error registering the workshop"
   },
-  "login": {
-    "title": "AutoService",
-    "subtitle": "Comprehensive management for automotive workshops.",
-    "welcome": "Welcome",
-    "adminMode": "Admin Mode",
-    "description": "Enter your credentials to continue",
-    "email": "Email Address",
-    "password": "Password",
-    "submit": "Sign In",
-    "error": "Invalid credentials"
+  "common": {
+    "action": "Action",
+    "code": "Code",
+    "language": "Language",
+    "loading": "Loading...",
+    "name": "Name",
+    "noAssigned": "Unassigned",
+    "notRegistered": "Not registered",
+    "notFound": "Not found",
+    "phone": "Phone",
+    "status": "Status",
+    "unassigned": "Unassigned",
+    "undefined": "Undefined",
+    "currencyPrefix": "S/.",
+    "vehicle": "Vehicle"
+
+  },
+  "customer": {
+    "dni": "National ID",
+    "email": "Email",
+    "fullName": "Full Name",
+    "phone": "Phone"
+  },
+  "customers": {
+    "columns": {
+      "actions": "ACTIONS",
+      "dni": "ID",
+      "email": "EMAIL",
+      "fullName": "FULL NAME",
+      "phone": "PHONE"
+    },
+    "description": "Manage workshop customers",
+    "errors": {
+      "createError": "Error creating customer",
+      "deleteError": "Error deleting customer",
+      "updateError": "Error updating customer"
+    },
+    "eyebrow": "Customer Management",
+    "form": {
+      "registerTitle": "Register a New Client",
+      "dniPlaceholder": "12345678",
+      "dni" : "DNI",
+      "phone": "Phone",
+      "fullName": "Full Name",
+      "email": "Email",
+      "emailPlaceholder": "customer{'@'}email.com",
+      "fullNamePlaceholder": "e.g. John Smith",
+      "phonePlaceholder": "+51 999 999 999",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "registerButton": "Register Customer",
+    "search": "Search customer...",
+    "title": "Registered customers",
+    "totalRegistered": "Total registered"
   },
   "dashboard": {
-    "eyebrow": "Operational dashboard",
-    "title": "Workshop Dashboard",
+    "defaults": {
+      "vehicle": "Vehicle"
+    },
+    "vehicleStatus": {
+      "qaReady": "Ready for Quality Audit",
+      "inRepair": "Under Repair"
+    },
+    "charts": {
+      "weeklyIncomeLabel": "Weekly Income"
+    },
     "description": "Monitor active vehicles, ongoing work orders, revenue, and weekly performance from a single view.",
-    "newOrder": "New order",
-    "viewOrders": "View orders",
+    "eyebrow": "Operational dashboard",
     "metrics": {
-      "activeVehicles": "Active vehicles",
-      "activeVehiclesSub": "Currently being serviced",
       "activeOrders": "Active orders",
       "activeOrdersSub": "Services in progress",
+      "activeVehicles": "Active vehicles",
+      "activeVehiclesSub": "Currently being serviced",
       "completed": "Completed",
       "completedSub": "Completed orders",
       "projectedRevenue": "Projected revenue",
       "projectedRevenueSub": "Based on active orders"
     },
+    "newOrder": "New order",
     "panels": {
       "activeVehicles": {
-        "title": "Active vehicles",
         "subtitle": "Prioritize services by status and progress.",
+        "title": "Active vehicles",
         "viewAll": "View all"
       },
-      "weeklyIncome": {
-        "title": "Weekly income",
-        "subtitle": "Total accumulated this week.",
-        "comparison": "+12.5% vs last week",
-        "comparisonDetail": "Better performance from completed services"
+      "frequentServices": {
+        "brakeRepair": "Brake Repair",
+        "oilChange": "Oil Change",
+        "servicesCount": "{count} services completed",
+        "subtitle": "Most in-demand services.",
+        "title": "Frequent services",
+        "tireRotation": "Tire Rotation"
       },
       "recentOrders": {
-        "title": "Recent activity",
-        "subtitle": "Latest recorded orders.",
+        "amount": "Amount",
         "code": "Code",
         "status": "Status",
-        "amount": "Amount"
+        "subtitle": "Latest recorded orders.",
+        "title": "Recent activity"
       },
-      "frequentServices": {
-        "title": "Frequent services",
-        "subtitle": "Most in-demand services.",
-        "servicesCount": "{count} services completed",
-        "oilChange": "Oil Change",
-        "tireRotation": "Tire Rotation",
-        "brakeRepair": "Brake Repair"
+      "weeklyIncome": {
+        "comparison": "+12.5% vs last week",
+        "comparisonDetail": "Better performance from completed services",
+        "subtitle": "Total accumulated this week.",
+        "title": "Weekly income"
       }
-    }
+    },
+    "title": "Workshop Dashboard",
+    "viewOrders": "View orders"
   },
-  "customers": {
-    "eyebrow": "Customer Management",
-    "title": "Registered customers",
-    "description": "Manage workshop customers",
-    "totalRegistered": "Total registered",
-    "registerButton": "Register Customer",
-    "search": "Search customer...",
-    "columns": {
-      "fullName": "FULL NAME",
-      "dni": "ID",
-      "email": "EMAIL",
-      "phone": "PHONE",
-      "actions": "ACTIONS"
-    },
-    "form": {
-      "newRecord": "NEW RECORD",
-      "editTitle": "Edit Customer",
-      "registerTitle": "Register Customer",
-      "fullName": "FULL NAME",
-      "fullNamePlaceholder": "e.g. John Smith",
-      "dni": "ID / DNI",
-      "dniPlaceholder": "12345678",
-      "phone": "PHONE",
-      "phonePlaceholder": "+51 999 999 999",
-      "email": "EMAIL",
-      "emailPlaceholder": "customer@email.com",
-      "statusTitle": "Customer Status",
-      "statusDesc": "The customer can receive workshop services.",
-      "active": "ACTIVE",
-      "cancel": "Cancel",
-      "save": "Save Customer",
-      "update": "Update Customer"
-    },
-    "delete": {
-      "title": "Delete customer?",
-      "description": "This action cannot be undone.",
-      "cancel": "Cancel",
-      "confirm": "Delete"
-    }
+  "delete": {
+    "cancel": "Cancel",
+    "confirm": "Delete",
+    "description": "This action cannot be undone.",
+    "title": "Delete customer?"
   },
-  "vehicles": {
-    "eyebrow": "Fleet management",
-    "title": "Registered vehicles",
-    "description": "View, filter, and manage vehicles linked to workshop services.",
-    "addButton": "Add vehicle",
-    "summary": {
-      "total": "Total registered",
-      "inWorkshop": "In workshop",
-      "ready": "Ready"
+  "form": {
+    "active": "ACTIVE",
+    "cancel": "Cancel",
+    "dni": "ID / DNI",
+    "dniPlaceholder": "12345678",
+    "editTitle": "Edit Customer",
+    "email": "EMAIL",
+    "emailPlaceholder": "customer{'@'}email.com",
+    "fullName": "FULL NAME",
+    "fullNamePlaceholder": "e.g. John Smith",
+    "newRecord": "NEW RECORD",
+    "phone": "PHONE",
+    "phonePlaceholder": "+51 999 999 999",
+    "registerTitle": "Register Customer",
+    "save": "Save Customer",
+    "statusDesc": "The customer can receive workshop services.",
+    "statusTitle": "Customer Status",
+    "update": "Update Customer"
+  },
+  "inventory": {
+    "categories": {
+      "spare_part": "Spare Part",
+      "oil": "Oil",
+      "supply": "Supply",
+      "tool": "Tool"
     },
-    "loading": "Loading vehicles...",
-    "empty": {
-      "title": "No vehicles found",
-      "description": "Try changing the filter or register a new vehicle."
-    },
-    "filters": {
-      "searchPlaceholder": "Search by plate, owner, brand or model...",
-      "statusPlaceholder": "Filter by status"
-    },
-    "statusOptions": {
-      "inWorkshop": "In Workshop",
-      "ready": "Ready",
-      "delivered": "Delivered"
-    },
-    "card": {
-      "viewDetails": "View details"
-    },
+    "deleteConfirm": "Delete {name} from inventory?",
+    "description": "Control spare parts, oils and supplies for task assignment.",
+    "editTitle": "Edit item",
+    "eyebrow": "Warehouse",
     "form": {
-      "editTitle": "Edit vehicle",
-      "newTitle": "New vehicle",
-      "owner": "Owner customer",
-      "plate": "Plate",
-      "status": "Status",
       "brand": "Brand",
-      "model": "Model",
-      "year": "Year",
-      "yearPlaceholder": "e.g. 2024",
-      "color": "Color",
-      "colorPlaceholder": "e.g. Blue",
-      "image": "Vehicle image",
-      "imagePlaceholder": "https://...",
-      "selectCustomer": "Select a customer",
-      "cancel": "Cancel",
-      "save": "Save"
+      "brandPlaceholder": "e.g. Bosch",
+      "category": "Category",
+      "minStock": "Minimum stock",
+      "name": "Item name",
+      "namePlaceholder": "e.g. Oil Filter X",
+      "stock": "Current stock",
+      "unitPrice": "Unit price"
+    },
+    "newButton": "New item",
+    "newTitle": "New item",
+    "searchPlaceholder": "Search by SKU or Name...",
+    "table": {
+      "actions": "Actions",
+      "category": "Category",
+      "item": "Item",
+      "price": "Sale price",
+      "sku": "SKU",
+      "stock": "Stock / Min"
+    },
+    "title": "Inventory Management",
+    "units": "pcs."
+  },
+  "login": {
+    "description": "Enter your credentials to continue",
+    "email": "Email",
+    "emailPlaceholder": "workshop{'@'}email.com",
+    "hasAccount": "Already have an account?",
+    "loginHere": "Login here",
+    "noWorkshop": "Don't have a workshop yet?",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "registerButton": "Create Workshop",
+    "registerDescription": "Enter the details to create your environment",
+    "registerHeroSubtitle": "Create your admin account and organize orders, mechanics, and clients in one place.",
+    "registerHeroTitle": "Start managing your Workshop",
+    "registerHere": "Register your Workshop here",
+    "registerTitle": "Register Workshop",
+    "submit": "Sign In",
+    "subtitle": "Access your account to manage your workshop",
+    "title": "Login",
+    "welcome": "Welcome",
+    "workshopName": "Workshop Name",
+    "workshopPlaceholder": "e.g. MotorSport Juárez"
+  },
+  "mechanic": {
+    "capacity": {
+      "available": "Available",
+      "full": "At Limit",
+      "high": "High Load"
+    },
+    "workload": {
+      "label": "Active Tasks"
     }
   },
-  "vehicleDetail": {
-    "technicalDetail": "Technical detail",
-    "description": "Technical review of the vehicle, owner, related work orders and linked tasks.",
-    "loading": "Loading vehicle detail...",
-    "operationalProgress": "Operational progress",
-    "owner": "Owner",
-    "lastOrder": "Last work order",
-    "estimatedDelivery": "Estimated delivery",
-    "viewOrder": "View order",
-    "noOrders": "This vehicle has no related work orders yet.",
-    "relatedOrders": "Related work orders",
-    "orderHistory": "Vehicle operational history inside the workshop.",
-    "entryDate": "Entry date",
-    "delivery": "Delivery",
-    "relatedTasks": "Related tasks",
-    "taskDescription": "Technical tasks related to vehicle work orders.",
-    "noTasks": "No tasks registered for this vehicle."
-  },
-  "workOrders": {
-    "eyebrow": "Workshop operations",
-    "title": "Work orders",
-    "description": "Track service progress, detect delays, and access detailed order information.",
-    "newButton": "New order",
-    "summary": {
-      "total": "Total orders",
-      "inProgress": "In progress",
-      "riskDelay": "Delay risk",
-      "completed": "Completed"
-    },
-    "loading": "Loading orders...",
-    "empty": {
-      "title": "No orders found",
-      "description": "Try changing the filter or create a new order."
-    },
-    "filters": {
-      "searchPlaceholder": "Search by code, plate or customer...",
-      "statusPlaceholder": "Filter by status"
-    },
-    "statusOptions": {
-      "pending": "Pending",
-      "inProgress": "In Progress",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    },
-    "card": {
-      "arrival": "Arrival",
-      "delivery": "Delivery",
-      "taskProgress": "Task progress",
-      "riskBadge": "Delay risk",
-      "viewDetail": "View detail"
-    },
-    "create": {
-      "title": "Register New Work Order",
-      "generalData": "General Data",
-      "vehicle": "Vehicle",
-      "selectPlate": "Select Plate",
-      "ownerCustomer": "Owner Customer",
-      "description": "Problem Description",
-      "estimatedDate": "Estimated Date",
-      "totalPrice": "Total Price (S/.)",
-      "assignedTasks": "Assigned Tasks",
-      "addTask": "Add Task",
-      "taskDescription": "Description",
-      "assignedMechanic": "Assigned Mechanic",
-      "select": "Select",
-      "noTasks": "You haven't added tasks. Add at least one.",
-      "cancel": "Cancel",
-      "saveOrder": "Save Complete Order",
-      "validationError": "You must select a vehicle and add at least one task."
-    },
-    "detail": {
-      "subtitle": "Complete work order management",
-      "description": "Description",
-      "arrival": "Arrival",
-      "delivery": "Delivery",
-      "orderTotal": "Order Total",
-      "updateAmount": "Update repair total amount",
-      "assignedTasks": "Assigned Tasks",
-      "manageProgress": "Manage work progress",
-      "newTask": "New Task",
-      "task": "Task",
-      "mechanic": "Mechanic",
-      "status": "Status",
-      "unassigned": "Unassigned",
-      "taskDialog": {
-        "title": "New Task",
-        "description": "Description",
-        "descPlaceholder": "Describe the task",
-        "mechanic": "Mechanic",
-        "selectMechanic": "Select a mechanic",
-        "cancel": "Cancel",
-        "save": "Save"
-      },
-      "qaChecklist": "Validation Checklist",
-      "qaSubtitle": "Final control before vehicle delivery",
-      "qaApproved": "QA Approved",
-      "qaPending": "QA Pending",
-      "tasksCompleted": "All tasks completed",
-      "sparePartsChecked": "Spare parts checked",
-      "diagnosisValidated": "Diagnosis validated",
-      "cleaningDone": "Cleaning completed",
-      "finalTestDone": "Final test completed",
-      "vehicleReady": "Vehicle is ready for delivery",
-      "pendingValidations": "Validations pending before delivery",
-      "readyDelivery": "Ready for Delivery",
-      "pendingValidation": "Pending Validation",
-      "mechanicNotFound": "Mechanic not found"
-    }
-  },
-  "tasks": {
-    "eyebrow": "Operational control",
-    "title": "Task board",
-    "description": "Manage tasks per order, assign mechanics, and update real service progress.",
-    "newButton": "New task",
-    "summary": {
-      "total": "Total tasks",
-      "pending": "Pending",
-      "inProgress": "In progress",
-      "completed": "Completed"
-    },
-    "loading": "Loading tasks...",
-    "empty": {
-      "title": "No tasks found",
-      "description": "Try changing filters or register a new task."
-    },
-    "filters": {
-      "searchPlaceholder": "Search by description, order or mechanic...",
-      "statusPlaceholder": "Status",
-      "mechanicPlaceholder": "Mechanic"
-    },
-    "card": {
-      "estimatedHours": "{hours} h estimated",
-      "updateStatus": "Update status",
-      "viewOrder": "Order"
-    },
-    "dialog": {
-      "editTitle": "Edit task",
-      "newTitle": "New task",
-      "workOrder": "Work order",
-      "selectOrder": "Select order",
-      "description": "Description",
-      "descPlaceholder": "e.g. Oil change",
-      "assignedMechanic": "Assigned mechanic",
-      "selectMechanic": "Select mechanic",
-      "status": "Status",
-      "priority": "Priority",
-      "estimatedTime": "Estimated time",
-      "cancel": "Cancel",
-      "save": "Save"
-    },
-    "statusOptions": {
-      "pending": "Pending",
-      "inProgress": "In Progress",
-      "completed": "Completed"
-    },
-    "priorityOptions": {
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High",
-      "critical": "Critical"
-    }
+  "mechanicDashboard": {
+    "assignedOrders": "Assigned Orders",
+    "completed": "Completed",
+    "description": "Manage diagnostics, tasks and repair costs.",
+    "empty": "You have no assigned orders.",
+    "eyebrow": "Mechanic Workspace",
+    "inProgress": "In Progress",
+    "labor": "Labor",
+    "logout": "Log out",
+    "pending": "Pending",
+    "shiftActive": "Active shift",
+    "tasks": "Tasks",
+    "tasksCompletedLabel": "tasks completed",
+    "title": "My Assigned Orders",
+    "viewOrder": "View Order"
   },
   "mechanics": {
-    "eyebrow": "Staff coordination",
-    "title": "Mechanics management",
+    "actions": {
+      "new": "Add mechanic",
+      "cancel": "Cancel",
+      "create": "Create"
+    },
+    "card": {
+      "activeTasks": "Active tasks",
+      "confirmDelete": "Delete {name}?",
+      "delete": "Delete",
+      "edit": "Edit",
+      "effectiveness": "Effectiveness",
+      "workload": "Workload"
+      },
     "description": "Manage specialties, availability, and workload for more precise task assignment.",
-    "registerButton": "Register mechanic",
-    "summary": {
-      "total": "Total mechanics",
-      "available": "Available",
-      "highLoad": "High load"
+    "dialog": {
+      "cancel": "Cancel",
+      "fullName": "Full name",
+      "maxCapacity": "Maximum task capacity",
+      "registerTitle": "Register mechanic",
+      "save": "Save",
+      "selectSpecialty": "Select specialty",
+      "specialty": "Specialty",
+      "usernamePlaceholder": "name",
+      "username": "Mechanic Account",
+      "usernameHelp": "name + last name recommended",
+      "password": "Password"
     },
-    "loading": "Loading mechanics...",
     "empty": {
-      "title": "No mechanics found",
-      "description": "Try changing the filter or register a new member."
+      "description": "Try changing the filter or register a new member.",
+      "title": "No mechanics found"
     },
+    "eyebrow": "Staff coordination",
     "filters": {
       "searchPlaceholder": "Search by name or specialty...",
       "specialtyPlaceholder": "Filter by specialty"
     },
+    "loading": "Loading mechanics...",
+    "registerButton": "Register mechanic",
     "specialties": {
-      "general": "General Mechanics",
-      "electrical": "Electrical",
-      "bodywork": "Bodywork and Paint",
-      "electronics": "Electronics",
+      "general": "General Mechanic",
+      "electrical": "Automotive Electrician",
       "brakes": "Brakes and Suspension",
-      "engine": "Engine and Transmission"
+      "tires": "Tire Technician"
     },
+    "summary": {
+      "available": "Available",
+      "highLoad": "High load",
+      "total": "Total mechanics"
+    },
+    "title": "Mechanics management",
     "workloadStatus": {
       "atMax": "At max",
-      "highLoad": "High load",
-      "available": "Available"
-    },
-    "card": {
-      "activeTasks": "Active tasks",
-      "effectiveness": "Effectiveness",
-      "workload": "Workload",
-      "edit": "Edit",
-      "delete": "Delete",
-      "confirmDelete": "Delete {name}?"
-    },
-    "dialog": {
-      "editTitle": "Edit mechanic",
-      "registerTitle": "Register mechanic",
-      "fullName": "Full name",
-      "specialty": "Specialty",
-      "selectSpecialty": "Select specialty",
-      "maxCapacity": "Maximum task capacity",
-      "cancel": "Cancel",
-      "save": "Save"
+      "available": "Available",
+      "highLoad": "High load"
     }
   },
-  "tracking": {
-    "title": "Track Your Vehicle",
-    "description": "Enter the code provided by the workshop to view your service status in real time.",
-    "serviceCode": "Service Code",
-    "placeholder": "Ex: AS-1001A",
-    "search": "Search",
-    "invalidCode": "The entered code does not exist or is incorrect.",
-    "connectionError": "Problems connecting to the server. Check your connection.",
-    "serviceTasks": "Service Tasks",
-    "noEvidence": "No visual evidence",
-    "visualEvidence": "VISUAL EVIDENCE",
-    "estimatedCost": "ESTIMATED TOTAL COST",
-    "costDisclaimer": "Subject to changes according to diagnosis.",
-    "payNow": "Make Payment",
-    "serviceTimes": "SERVICE TIMES",
-    "entryDate": "ENTRY DATE",
-    "estimatedDelivery": "ESTIMATED DELIVERY",
-    "vehicleEntered": "Vehicle Entered",
-    "payment": {
-      "title": "Payment Process",
-      "total": "Total to pay",
-      "card": "Card",
-      "cash": "Cash",
-      "cardNumber": "Card number",
-      "date": "Date",
-      "scanQr": "Scan the QR to pay",
-      "confirm": "Confirm Payment",
-      "success": "Payment made with {method}"
-    }
+  "nav": {
+    "controlPanel": "Control Panel",
+    "customers": "Customers",
+    "dashboard": "Dashboard",
+    "mechanics": "Mechanics",
+    "tasks": "Tasks",
+    "vehicles": "Vehicles",
+    "workOrders": "Work Orders",
+    "inventory": "Inventory and Spare Parts"
   },
   "payment": {
-    "title": "Payment Process",
-    "total": "Total to pay",
+    "card": "Card",
     "cardNumber": "Card number",
     "cardNumberPlaceholder": "1234 5678 9012 3456",
-    "date": "Date",
-    "datePlaceholder": "MM/YY",
+    "cash": "Cash",
+    "confirm": "Confirm Payment",
     "cvv": "CVV",
     "cvvPlaceholder": "123",
+    "date": "Date",
+    "datePlaceholder": "MM/YY",
     "scanQR": "Scan QR to pay",
-    "confirm": "Confirm Payment",
-    "cash": "Cash",
-    "card": "Card",
-    "success": "Payment made with {method}"
-  },
-  "common": {
-    "loading": "Loading...",
-    "noAssigned": "Unassigned",
-    "notFound": "Not found",
-    "language": "Language",
-    "name": "Name",
-    "phone": "Phone",
-    "notRegistered": "Not registered",
-    "unassigned": "Unassigned",
-    "code": "Code",
-    "undefined": "Undefined",
-    "status": "Status",
-    "action": "Action"
+    "success": "Payment made with {method}",
+    "title": "Payment Process",
+    "total": "Total to pay"
   },
   "status": {
-    "pending": "Pending",
+    "completed": "Completed",
     "inProgress": "In Progress",
+    "pending": "Pending"
+  },
+  "tasks": {
+    "fallbacks": {
+      "notAvailable": "N/A",
+      "unknown": "Unknown",
+      "unassigned": "Unassigned",
+      "notFound": "Not found",
+      "noDescription": "Task without description"
+    },
+    "messages": {
+      "deleteConfirmation": "Delete task \"{description}\"?"
+    },
+    "review": {
+      "dialogTitle": "Task audit",
+      "technicalDiagnosis": "Technical diagnosis",
+      "customerExplanation": "Customer explanation",
+      "internalObservation": "Internal observation",
+      "evidence": "Evidence",
+      "requestedMaterials": "Requested Materials (Requisition)",
+      "partsSubtotal": "Parts subtotal:",
+      "rejectButton": "Reject (Return to Mechanic)",
+      "approveButton": "Approve Costs and Task",
+      "notRegistered": "Not registered"
+    },
+    "card": {
+      "imageAlt": "Task",
+      "estimatedTime": "{hours} h est.",
+      "reviewRequired": "Requires review",
+      "approvedVisible": "Approved and visible to customer",
+      "activeWork": "Work in progress",
+      "pendingStart": "Pending start"
+    },
+    "actions": {
+      "review": "Review",
+      "viewOrder": "View Order",
+      "saveChanges": "Save changes",
+      "create": "Create task",
+      "cancel": "Cancel"
+    },
+    "description": "Manage tasks per order, assign mechanics, and update real service progress.",
+    "dialog": {
+      "editTitle": "Edit Task and Materials",
+      "createTitle": "New Task and Assignment",
+      "workOrder": "Work Order",
+      "selectWorkOrder": "Select work order...",
+      "description": "Task Description",
+      "descriptionPlaceholder": "Example: Front brake pad replacement",
+      "assignedMechanic": "Assigned Mechanic",
+      "selectMechanic": "Assign mechanic...",
+      "laborCost": "Labor Cost (S/.)",
+      "partsTitle": "Parts and Supplies",
+      "searchInventory": "Search inventory...",
+      "emptyParts": "No parts assigned to this task.",
+      "totalCost": "Calculated Total Task Cost:"
+    },
+    "empty": {
+      "description": "Try changing filters or register a new task.",
+      "title": "No tasks found"
+    },
+    "eyebrow": "Operational control",
+    "filters": {
+      "mechanicPlaceholder": "Mechanic",
+      "searchPlaceholder": "Search by description, order or mechanic...",
+      "statusPlaceholder": "Status"
+    },
+    "loading": "Loading tasks...",
+    "newButton": "New task",
+    "priorityOptions": {
+      "critical": "Critical",
+      "high": "High",
+      "low": "Low",
+      "medium": "Medium"
+    },
+    "statusOptions": {
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "pending": "Pending"
+    },
+    "summary": {
+      "completed": "Completed",
+      "inProgress": "In progress",
+      "pending": "Pending",
+      "total": "Total tasks"
+    },
+    "title": "Task board"
+  },
+  "topbar": {
+    "admin": "Administrator",
+    "logout": "Log Out",
+    "welcome": "Welcome,"
+  },
+  "tracking": {
+    "states": {
+      "pending": "Pending",
+      "pending_diagnosis": "Pending Diagnosis",
+      "in_progress": "In Progress",
+      "finished": "Finished",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "billing": {
+      "entryDate": "Entry Date",
+      "estimatedDelivery": "Estimated Delivery",
+      "paid": "Service Paid",
+      "title": "Billing Summary",
+      "total": "Total Amount"
+    },
+    "connectionError": "Connection error. Please try again later.",
+    "costDisclaimer": "Prices shown are estimates and may vary after final inspection.",
+    "description": "Enter your tracking code to see the status of your vehicle and service report.",
+    "detail": {
+      "vehicleReady": "Vehicle ready for pickup"
+    },
+    "history": {
+      "recommendation": "Recommendation",
+      "subtitle": "Previous services recorded in our network.",
+      "title": "Maintenance History"
+    },
+    "invalidCode": "Invalid tracking code. Please verify and try again.",
+    "payNow": "Pay Now",
+    "placeholder": "Enter tracking code",
+    "print": {
+      "brandModel": "Brand and Model",
+      "brandSubtitle": "Network of Specialized Workshops",
+      "currentStatus": "Current Status",
+      "customerDetail": "Customer-facing Detail",
+      "disclaimer": "This document is an informational summary generated by AutoService and is not a fiscal receipt.",
+      "entryDate": "Entry Date",
+      "estimatedCost": "Estimated Cost",
+      "estimatedDelivery": "Estimated Delivery",
+      "issueDate": "Issue Date",
+      "noObservations": "No additional observations",
+      "noReport": "Services in progress. No final report issued yet.",
+      "plate": "Plate",
+      "reportTitle": "Service Report",
+      "task": "Task",
+      "tasksSummary": "Summary of Tasks",
+      "trackingCode": "Tracking Code",
+      "vehicleData": "Vehicle Data"
+    },
+    "progress": {
+      "finalPhase": "In final review phase",
+      "inProgress": "Technical work in progress",
+      "pendingDiagnosis": "Waiting for diagnosis"
+    },
+    "search": "Search",
+    "serviceReport": {
+      "empty": "The detailed technical report will appear here once works are audited by the workshop manager.",
+      "subtitle": "Details of completed tasks verified by our team.",
+      "title": "Technical Service Report",
+      "viewEvidence": "View evidence photo"
+    },
+    "title": "Track your service"
+  },
+  "vehicleDetail": {
+    "delivery": "Delivery",
+    "description": "Technical review of the vehicle, owner, related work orders and linked tasks.",
+    "entryDate": "Entry date",
+    "estimatedDelivery": "Estimated delivery",
+    "lastOrder": "Last work order",
+    "loading": "Loading vehicle detail...",
+    "noOrders": "This vehicle has no related work orders yet.",
+    "noTasks": "No tasks registered for this vehicle.",
+    "notDefined": "Not defined",
+    "notRegistered": "Not registered",
+    "operationalProgress": "Operational progress",
+    "orderHistory": "Vehicle operational history inside the workshop.",
+    "orderLabel": "Order",
+    "owner": "Owner",
+    "relatedOrders": "Related work orders",
+    "relatedTasks": "Related tasks",
+    "taskDescription": "Technical tasks related to vehicle work orders.",
+    "technicalDetail": "Technical detail",
+    "unassigned": "Unassigned",
+    "viewOrder": "View order"
+  },
+  "vehicles": {
+    "addButton": "Add vehicle",
+    "card": {
+      "progress": "Progress",
+      "viewDetails": "View details"
+    },
+    "description": "View, filter, and manage vehicles linked to workshop services.",
+    "empty": {
+      "description": "Try changing the filter or register a new vehicle.",
+      "title": "No vehicles found"
+    },
+    "errors": {
+      "create": "Error creating vehicle",
+      "load": "Error loading vehicles",
+      "update": "Error updating vehicle"
+    },
+    "eyebrow": "Fleet management",
+    "filters": {
+      "searchPlaceholder": "Search vehicle...",
+      "sortPlaceholder": "Sort by",
+      "statusPlaceholder": "Filter by status"
+    },
+    "form": {
+      "brand": "Brand",
+      "cancel": "Cancel",
+      "color": "Color",
+      "colorPlaceholder": "e.g. Blue",
+      "editTitle": "Edit vehicle",
+      "image": "Vehicle image",
+      "imagePlaceholder": "https://...",
+      "model": "Model",
+      "newTitle": "New vehicle",
+      "owner": "Owner customer",
+      "plate": "Plate",
+      "save": "Save",
+      "selectCustomer": "Select a customer",
+      "selectImage": "Select image",
+      "status": "Status",
+      "year": "Year",
+      "yearPlaceholder": "e.g. 2024"
+    },
+    "loading": "Loading vehicles...",
+    "sortOptions": {
+      "progressAsc": "Lowest progress",
+      "progressDesc": "Highest progress"
+    },
+    "statusOptions": {
+      "in_workshop": "In Workshop",
+      "ready": "Ready",
+      "delivered": "Delivered"
+    },
+    "summary": {
+      "inWorkshop": "In workshop",
+      "ready": "Ready",
+      "total": "Total registered"
+    },
+    "title": "Registered vehicles"
+  },
+  "workOrders": {
+    "defaults": {
+      "vehicle": "Vehicle"
+    },
+    "card": {
+      "arrival": "Arrival",
+      "delivery": "Delivery",
+      "riskBadge": "Delay risk",
+      "taskProgress": "Task progress",
+      "viewDetail": "View detail",
+      "total": "Total"
+    },
+    "create": {
+      "title": "New Vehicle Reception",
+      "description": "Register vehicle intake quickly. Diagnosis and tasks will be assigned by the mechanic.",
+      "vehicle": "Vehicle (Search by plate or model)",
+      "vehiclePlaceholder": "Example: ABC-123",
+      "customer": "Assigned Customer",
+      "customerPlaceholder": "Will be auto-filled",
+      "mechanic": "Responsible Mechanic",
+      "mechanicPlaceholder": "Select Mechanic",
+      "estimatedDate": "Estimated Delivery Date",
+      "datePlaceholder": "Select date",
+      "problemDescription": "Problem Description (Customer report)",
+      "problemPlaceholder": "Example: Brake noise, requires general inspection...",
+      "createButton": "Create Work Order",
+      "customerNotFound": "Customer not found"
+    },
+    "description": "Track service progress, detect delays, and access detailed order information.",
+    "detail": {
+      "arrival": "Arrival",
+      "assignedTasks": "Assigned Tasks",
+      "cleaningDone": "Cleaning completed",
+      "delivery": "Delivery",
+      "description": "Description",
+      "diagnosisValidated": "Diagnosis validated",
+      "finalTestDone": "Final test completed",
+      "manageProgress": "Manage work progress",
+      "mechanic": "Mechanic",
+      "mechanicNotFound": "Mechanic not found",
+      "newTask": "New Task",
+      "orderTotal": "Order Total",
+      "pendingValidation": "Pending Validation",
+      "pendingValidations": "Validations pending before delivery",
+      "qaApproved": "QA Approved",
+      "qaChecklist": "Validation Checklist",
+      "qaPending": "QA Pending",
+      "qaSubtitle": "Final control before vehicle delivery",
+      "readyDelivery": "Ready for Delivery",
+      "sparePartsChecked": "Spare parts checked",
+      "status": "Status",
+      "task": "Task",
+      "taskDialog": {
+        "cancel": "Cancel",
+        "descPlaceholder": "Describe the task",
+        "description": "Description",
+        "mechanic": "Mechanic",
+        "save": "Save",
+        "selectMechanic": "Select a mechanic",
+        "title": "New Task"
+      },
+      "tasksCompleted": "All tasks completed",
+      "unassigned": "Unassigned",
+      "updateAmount": "Update repair total amount",
+      "subtitle": "Complete work order management",
+      "vehicleReady": "Vehicle is ready for delivery"
+    },
+    "empty": {
+      "description": "Try changing the filter or create a new order.",
+      "title": "No orders found"
+    },
+    "eyebrow": "Workshop operations",
+    "filters": {
+      "searchPlaceholder": "Search by code, plate or customer...",
+      "statusPlaceholder": "Filter by status"
+    },
+    "loading": "Loading orders...",
+    "newButton": "New order",
+    "statusOptions": {
+      "cancelled": "Cancelled",
+      "completed": "Finished",
+      "inProgress": "In Progress",
+      "pending": "Pending"
+    },
+    "summary": {
+      "completed": "Completed",
+      "inProgress": "In progress",
+      "riskDelay": "Delay risk",
+      "total": "Total orders"
+    },
+    "title": "Work orders",
+    "workOrderDetail": {
+      "title": "Order #{code}",
+      "initialDescription": "Initial Description",
+      "actions": {
+        "back": "Back"
+      },
+      "tasks": {
+        "title": "Diagnosis and Tasks",
+        "addTask": "Add Task",
+        "empty": "No tasks registered yet.",
+        "columns": {
+          "task": "Task",
+          "status": "Status",
+          "labor": "Labor"
+        }
+      },
+      "quote": {
+        "title": "Automatic Quote"
+      }
+    }
+  },
+  "layout": {
+    "brand": "AutoService"
+  },
+  "workOrderDetail":{
+    "actions":{
+      "back": "Back"
+    },
+    "initialDescription": "Initial Description",
+    "tasks": {
+      "title": "Order's Tasks",
+      "columns": {
+        "task": "Task",
+        "status": "Status",
+        "labor": "Cost"
+      }
+    },
+    "quote": {
+      "title": "Total Cost of the Order"
+    },
+    "title": "Work Order Detail"
+  },
+  "mechanicOrder": {
+    "noTasks": "No Tasks",
+    "totalLabor": "Total Cost",
+    "tasksLabel": "Tasks",
+    "progress": "Progress",
+    "order": "Order",
+    "manageDescription": "Orders's Information",
+    "diagnosis": "Diagnosis",
+    "diagnosisPlaceholder": "Enter the diagnosis",
+    "newTask": "New Task",
+    "tasks": "Tasks",
+    "dialog":{
+      "newTask": "New Task",
+      "description": "Description",
+      "save": "Create"
+    }
+  },
+  "taskStatus": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
     "completed": "Completed"
   },
-  "mechanicDashboard": {
-    "eyebrow": "Mechanic Workspace",
-    "title": "My assigned tasks",
-    "description": "Update the progress of your tasks to sync progress with the administrator dashboard.",
-    "logout": "Log out",
+  "priorities": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "orderStatus": {
     "pending": "Pending",
-    "inProgress": "In progress",
-    "completed": "Completed",
-    "updateStatus": "Update status",
-    "viewOrder": "View order",
-    "emptyTitle": "You have no assigned tasks",
-    "emptyDescription": "When the administrator assigns tasks to you, they will appear here.",
-    "noOrder": "No order",
-    "statuses": {
-      "pending": "Pending",
-      "inProgress": "In Progress",
-      "completed": "Completed"
-    }
+    "in_progress": "In Progress",
+    "finished": "Finished",
+    "cancelled": "Cancelled"
   }
 }

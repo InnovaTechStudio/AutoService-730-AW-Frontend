@@ -12,8 +12,8 @@
  * - Maintaining the list of customers in a reactive state
  */
 import { defineStore } from 'pinia';
-import { CustomerService } from '../infrastructure/customer.service';
-import {Customer} from "../domain/customer.entity.js";
+import { CustomerService } from '../infrastructure/customer.service.js';
+import { Customer } from '../domain/customer.entity.js';
 
 /**
  * Customer Management Store using Pinia.
@@ -23,35 +23,28 @@ import {Customer} from "../domain/customer.entity.js";
  * @property {boolean} loading - Loading state for async operations
  */
 export const useCustomerStore = defineStore('customer', {
-
     state: () => ({
         customers: [],
-        loading: false
+        loading: false,
+        error: null
     }),
 
     actions: {
         /**
          * Fetches all customers from the backend and updates the store.
          *
-         * Each customer is transformed using the Customer entity to ensure
-         * data consistency and business rules are applied.
-         *
          * @returns {Promise<void>}
          */
         async fetchCustomers() {
             this.loading = true;
-
             try {
                 const response = await CustomerService.getAll();
-
-                this.customers = response.data.map(customer =>
-                    Customer(customer)
-                );
-
+                this.customers = response.data.map(customer => Customer(customer));
             } finally {
                 this.loading = false;
             }
         },
+
         /**
          * Creates a new customer and adds it to the store.
          *
@@ -59,19 +52,19 @@ export const useCustomerStore = defineStore('customer', {
          * @returns {Promise<Object>} The newly created customer (as entity)
          */
         async addCustomer(customer) {
-
-            // normalizar antes de enviar
-            const newCustomer = Customer(customer);
-
-            const response = await CustomerService.create(newCustomer);
-
-            // normalizar respuesta
-            const savedCustomer = Customer(response.data);
-
-            this.customers.push(savedCustomer);
-
-            return savedCustomer;
+            try {
+                const newCustomer = Customer(customer);
+                const response = await CustomerService.create(newCustomer);
+                const savedCustomer = Customer(response.data);
+                this.customers.push(savedCustomer);
+                return savedCustomer;
+            } catch (error) {
+                this.error = t('customers.errors.createError');
+                console.error(this.error, error);
+                throw error;
+            }
         },
+
         /**
          * Updates an existing customer's information.
          *
@@ -80,27 +73,22 @@ export const useCustomerStore = defineStore('customer', {
          * @returns {Promise<void>}
          */
         async updateCustomer(id, customerData) {
-
+            const { t } = useI18n();
             try {
-
                 const updatedCustomer = Customer(customerData);
-
                 const response = await CustomerService.update(id, updatedCustomer);
-
                 const customerFromApi = Customer(response.data);
-
-                const index = this.customers.findIndex(
-                    c => String(c.id) === String(id)
-                );
-
+                const index = this.customers.findIndex(c => String(c.id) === String(id));
                 if (index !== -1) {
                     this.customers.splice(index, 1, customerFromApi);
                 }
-
             } catch (error) {
-                console.error('Error al actualizar cliente:', error);
+                this.error = 'customers.errors.updateError';
+                console.error(this.error, error);
+                throw error;
             }
         },
+
         /**
          * Deletes a customer by ID and removes it from the local state.
          *
@@ -108,17 +96,13 @@ export const useCustomerStore = defineStore('customer', {
          * @returns {Promise<void>}
          */
         async deleteCustomer(id) {
-
+            const { t } = useI18n();
             try {
-
                 await CustomerService.delete(id);
-
-                this.customers = this.customers.filter(
-                    c => String(c.id) !== String(id)
-                );
-
+                this.customers = this.customers.filter(c => String(c.id) !== String(id));
             } catch (error) {
-                console.error('Error al eliminar cliente:', error);
+                this.error = 'customers.errors.deleteError';
+                console.error(this.error, error);
             }
         }
     }

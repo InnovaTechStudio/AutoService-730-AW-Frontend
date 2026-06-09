@@ -2,9 +2,9 @@
  * @file customer.entity.js
  * @description **Customer Entity**
  *
- * This file defines the Customer domain entity.
- * In Domain-Driven Design (DDD), an Entity represents a core business object
- * with identity and encapsulates the business rules and data structure for customers.
+ * Defines the Customer domain entity following Domain-Driven Design (DDD).
+ * An Entity represents a core business object with identity and encapsulates
+ * business rules and data structure for customers.
  *
  * The Customer entity acts as a factory function that normalizes and validates
  * customer data coming from forms, API responses, or local state.
@@ -13,9 +13,9 @@
 /**
  * Creates a normalized Customer entity.
  *
- * This factory function ensures consistency in customer data structure throughout the application.
- * It provides default values for missing properties, preventing undefined errors and maintaining
- * data integrity across layers (Presentation → Application → Infrastructure).
+ * Ensures consistency in customer data structure throughout the application.
+ * Provides default values for missing properties, preventing undefined errors
+ * and maintaining data integrity across layers (Presentation → Application → Infrastructure).
  *
  * @param {Object} [data={}] - Raw customer data (from form, API, or database)
  * @param {string|number|null} [data.id] - Unique identifier for the customer
@@ -28,48 +28,29 @@
  * @returns {Object} A normalized Customer entity with guaranteed properties
  *
  * @example
- * // Creating a new customer
  * const newCustomer = Customer({
  *   fullName: "Juan Pérez",
  *   dni: "72345678",
  *   email: "juan.perez@email.com",
  *   phone: "987654321"
  * });
- *
- * // Normalizing API response
- * const customerFromApi = Customer(apiResponse.data);
  */
 export const Customer = (data = {}) => ({
-    /**
-     * Unique identifier of the customer.
-     * Can be null for new customers before they are saved to the backend.
-     * @type {string|number|null}
-     */
+    /** @type {string|number|null} Unique identifier of the customer */
     id: data.id || null,
-    /**
-     * ID of the workshop this customer is associated with.
-     * Important for multi-workshop environments.
-     * @type {string}
-     */
+
+    /** @type {string} ID of the workshop this customer is associated with */
     workshopId: data.workshopId || '',
-    /**
-     * Customer's complete name.
-     * @type {string}
-     */
+
+    /** @type {string} Customer's complete name */
     fullName: data.fullName || '',
-    /**
-     * National identification document number (DNI, Passport, etc.).
-     * @type {string}
-     */
+
+    /** @type {string} National identification document number (DNI, Passport, etc.) */
     dni: data.dni || '',
-    /**
-     * Customer's email address for communications and notifications.
-     * @type {string}
-     */
+
+    /** @type {string} Customer's email address */
     email: data.email || '',
-    /**
-     * Customer's contact phone number.
-     * @type {string}
-     */
+
+    /** @type {string} Customer's contact phone number */
     phone: data.phone || ''
 });

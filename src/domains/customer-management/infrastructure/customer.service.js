@@ -11,7 +11,7 @@
  * - Abstract the HTTP client implementation (Axios via http-common)
  * - Provide a clean interface for the Customer Store to consume
  */
-import http from '../../../shared/infrastructure/http-common';
+import http from '../../../shared/infrastructure/http-common.js';
 
 /**
  * Customer Service object containing all API operations for customers.

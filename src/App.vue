@@ -1,5 +1,8 @@
 <script setup>
-import { useRouter } from 'vue-router'
+/**
+ * Root application component.
+ * Renders current route view.
+ */
 </script>
 
 <template>

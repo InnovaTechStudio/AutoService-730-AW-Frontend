@@ -1,32 +1,31 @@
+/**
+ * Shared Axios HTTP client configuration.
+ * Adds default headers and authentication token interceptor.
+ */
+
 import axios from 'axios';
 
 const http = axios.create({
-    baseURL: 'https://autoservice-api.ddns.net/',
-    headers: { 'Content-type': 'application/json' }
+    baseURL: 'http://localhost:5024/api/v1',
+    headers: {
+        'Content-Type': 'application/json'
+    }
 });
 
-http.interceptors.request.use((config) => {
-    const user = JSON.parse(localStorage.getItem('user'));
+/**
+ * Injects JWT token into outgoing requests.
+ */
+http.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
 
-    if (!user || config.url.includes('/workshops')) {
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+
         return config;
-    }
-
-    const workshopId = user.role === 'mechanic'
-        ? user.workshopId
-        : user.id;
-
-    if (!workshopId) {
-        return config;
-    }
-
-    if (config.method === 'get') {
-        config.params = { ...config.params, workshopId };
-    } else if (['post', 'put', 'patch'].includes(config.method)) {
-        config.data = { ...config.data, workshopId };
-    }
-
-    return config;
-});
+    },
+    (error) => Promise.reject(error)
+);
 
 export default http;

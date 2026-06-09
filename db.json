@@ -310,19 +310,18 @@
   "work-orders": [
     {
       "id": "WO-1",
-      "trackingCode": "AS-1001A",
-      "vehicleId": "V-1",
-      "customerId": "C-1",
-      "description": "Mantenimiento 10k y frenos",
+      "trackingCode": "AS-MVS5O",
+      "vehicleId": null,
+      "customerId": null,
+      "description": "",
       "status": "En Proceso",
-      "startDate": "2026-05-08",
-      "estimatedDate": "2026-05-10",
-      "price": 789,
+      "startDate": "2026-06-02",
+      "estimatedDate": "",
+      "price": 791,
       "workshopId": "WS-1"
     },
     {
       "id": "WO-2",
-      "workshopId": "WS-1",
       "trackingCode": "AS-1002B",
       "vehicleId": "V-2",
       "customerId": "C-2",
@@ -330,7 +329,15 @@
       "status": "Finalizado",
       "startDate": "2026-05-05",
       "estimatedDate": "2026-05-07",
-      "price": 250
+      "price": 250,
+      "qaChecklist": {
+        "tasksCompleted": true,
+        "sparePartsChecked": true,
+        "diagnosisValidated": true,
+        "cleaningDone": true,
+        "finalTestDone": true
+      },
+      "workshopId": "WS-1"
     },
     {
       "id": "WO-3",
@@ -429,15 +436,20 @@
       "workshopId": "WS-1"
     },
     {
-      "id": "aKKsBScNUcQ",
-      "trackingCode": "AS-AYOBD",
-      "vehicleId": "V-2",
-      "customerId": "C-2",
+      "price": 500,
+      "workshopId": "WS-1",
+      "id": "aKKsBScNUcQ"
+    },
+    {
+      "id": "2HRVPoCmKvc",
+      "trackingCode": "AS-YE766",
+      "vehicleId": "V-1",
+      "customerId": "C-1",
       "description": "",
       "status": "En Proceso",
-      "startDate": "2026-05-13",
-      "estimatedDate": "2026-07-09",
-      "price": 500,
+      "startDate": "2026-06-02",
+      "estimatedDate": "",
+      "price": 0,
       "workshopId": "WS-1"
     }
   ],
@@ -451,15 +463,16 @@
       "mechanicId": "M-1",
       "priority": "Alta",
       "estimatedTime": "2 horas",
-      "price": 180,
       "photo": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3",
       "technicalDiagnosis": "Desgaste en el aceite ",
       "customerExplanation": "se recomienda cambio de marca de aceite",
       "internalObservation": "Se recomienda vender la marca de aceite ayudin",
       "evidenceRegistered": "",
-      "adminReviewStatus": "Enviado al Administrador",
+      "adminReviewStatus": "Aprobado",
       "customerReportStatus": "Visible para Cliente",
-      "completedAt": "2026-05-13T04:36:42.531Z"
+      "laborPrice": 0,
+      "parts": [],
+      "price": 0
     },
     {
       "id": "T-M1-002",
@@ -651,9 +664,28 @@
       "customerExplanation": "chocaste ps",
       "internalObservation": "Comprar luna especifica de marca ",
       "evidenceRegistered": "",
-      "adminReviewStatus": "Enviado al Administrador",
-      "customerReportStatus": "No visible",
+      "adminReviewStatus": "Aprobado",
+      "customerReportStatus": "Visible para Cliente",
       "completedAt": "2026-05-13T05:09:46.681Z"
+    },
+    {
+      "id": "AUTGcAOyVnI",
+      "workshopId": "WS-1",
+      "workOrderId": "2HRVPoCmKvc",
+      "description": "a",
+      "status": "Pendiente",
+      "mechanicId": "EHnAzVg7obo",
+      "priority": "Media",
+      "estimatedTime": "No definido",
+      "price": 0,
+      "photo": "",
+      "technicalDiagnosis": "",
+      "customerExplanation": "",
+      "internalObservation": "",
+      "evidenceRegistered": "",
+      "adminReviewStatus": "Sin enviar",
+      "customerReportStatus": "No visible",
+      "completedAt": null
     }
   ],
   "vehicle-history": [

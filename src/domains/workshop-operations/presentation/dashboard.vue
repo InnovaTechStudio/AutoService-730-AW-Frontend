@@ -1,10 +1,16 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+/**
+ * @file AdminDashboardPage.vue
+ * @description Dashboard principal para administración de órdenes y métricas.
+ */
+
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+
 import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
-import { useWorkOrderStore } from '../../workshop-operations/application/work-order.store';
-import { useTaskStore } from '../../workshop-operations/application/task.store';
+import { useWorkOrderStore } from '../application/work-order.store.js';
+import { useTaskStore } from '../application/task.store.js';
 
 import DashboardHeader from './components/dashboard/DashboardHeader.vue';
 import DashboardMetricCard from './components/dashboard/DashboardMetricCard.vue';
@@ -13,115 +19,327 @@ import WeeklyIncomePanel from './components/dashboard/WeeklyIncomePanel.vue';
 import RecentOrdersPanel from './components/dashboard/RecentOrdersPanel.vue';
 import FrequentServicesPanel from './components/dashboard/FrequentServicesPanel.vue';
 
-const { t } = useI18n();
+// ── CONSTANTS FOR DOMAIN LOGIC ───────────────────────────
+/** Standardized system work order states */
+const ORDER_STATUS = {
+  PENDING: 'PENDING',
+  PENDING_DIAGNOSIS: 'PENDING_DIAGNOSIS',
+  IN_PROGRESS: 'IN_PROGRESS',
+  FINISHED: 'FINISHED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED'
+};
+
+/** Standardized system task states */
+const TASK_STATUS = {
+  COMPLETED: 'COMPLETED'
+};
+
+const { t, locale } = useI18n();
+
 const router = useRouter();
+
 const vehicleStore = useVehicleStore();
 const workOrderStore = useWorkOrderStore();
 const taskStore = useTaskStore();
 
-const fallbackVehicleImages = [
-  'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=300&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1542362567-b07e54358753?w=300&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=300&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=300&auto=format&fit=crop'
-];
+const fallbackImage =
+    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=300&auto=format&fit=crop';
 
-const vehiclesInWorkshop = computed(() =>
-    vehicleStore.vehicles.filter((vehicle) => vehicle.status !== 'Entregado').length
-);
-
-const activeOrders = computed(() =>
-    workOrderStore.workOrders.filter((order) => order.status === 'En Proceso').length
-);
-
-const completedOrders = computed(() =>
-    workOrderStore.workOrders.filter((order) =>
-        ['Finalizado', 'Completado', 'Listo'].includes(order.status)
-    ).length
-);
-
-const projectedIncome = computed(() =>
-    workOrderStore.workOrders
-        .filter((order) => order.status !== 'Cancelado')
-        .reduce((acc, order) => acc + (parseFloat(order.price) || 0), 0)
-);
-
-const weeklyIncome = computed(() => projectedIncome.value || 1500);
-
-const recentOrders = computed(() =>
-    [...workOrderStore.workOrders].reverse().slice(0, 5)
-);
-
-const activeVehiclePreview = computed(() => {
-  const vehicles = vehicleStore.vehicles.length
-      ? vehicleStore.vehicles
-      : [
-        { id: 1, brand: 'Audi', model: 'A4 Premium', status: 'En Proceso' },
-        { id: 2, brand: 'BMW', model: 'X5', status: 'Pendiente' },
-        { id: 3, brand: 'Tesla', model: 'Model 3', status: 'Completado' }
-      ];
-
-  return vehicles
-      .filter((vehicle) => vehicle.status !== 'Entregado')
-      .slice(0, 4)
-      .map((vehicle, index) => ({
-        id: vehicle.id || index,
-        name: `${vehicle.brand || vehicle.make || 'Vehicle'} ${vehicle.model || ''}`,
-        status: vehicle.status || 'Pendiente',
-        severity: getVehicleSeverity(vehicle.status),
-        progress: getProgressByStatus(vehicle.status),
-        image: vehicle.image || fallbackVehicleImages[index % fallbackVehicleImages.length]
-      }));
-});
-
-const frequentServices = computed(() => [
-  { name: t('dashboard.panels.frequentServices.oilChange') || 'Cambio de aceite', count: 12, amount: 540, progress: 86, icon: 'pi pi-cog' },
-  { name: t('dashboard.panels.frequentServices.brakeRepair') || 'Reparación de frenos', count: 8, amount: 820, progress: 68, icon: 'pi pi-wrench' },
-  { name: t('dashboard.panels.frequentServices.tireRotation') || 'Rotación de neumáticos', count: 5, amount: 140, progress: 44, icon: 'pi pi-refresh' }
-]);
-
-const weeklyIncomeData = ref({
-  labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
-  datasets: [
-    {
-      label: 'Ingresos',
-      data: [380, 520, 460, 610, 900, 300],
-      backgroundColor: ['#dbeafe', '#bfdbfe', '#dbeafe', '#bfdbfe', '#0b1680', '#e5e7eb'],
-      borderRadius: 12
-    }
-  ]
-});
-
-const barChartOptions = ref({
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { grid: { display: false }, ticks: { color: '#64748b' } },
-    y: { grid: { color: '#eef2f7' }, ticks: { display: false }, border: { display: false } }
+onMounted(async () => {
+  try {
+    await Promise.all([
+      vehicleStore.fetchVehicles(),
+      workOrderStore.fetchWorkOrders(),
+      taskStore.fetchAllTasks()
+    ]);
+  } catch (error) {
+    console.error(error);
   }
 });
 
-const getProgressByStatus = (status) => {
-  if (['Completado', 'Finalizado', 'Listo'].includes(status)) return 100;
-  if (['En Proceso', 'En Taller'].includes(status)) return 65;
-  if (status === 'Pendiente') return 10;
-  return 35;
-};
+/**
+ * Determina si una orden está activa basándose en constantes estándar.
+ *
+ * @param {string} status
+ * @returns {boolean}
+ */
+const isStatusActive = (status) =>
+    [
+      ORDER_STATUS.PENDING,
+      ORDER_STATUS.PENDING_DIAGNOSIS,
+      ORDER_STATUS.IN_PROGRESS
+    ].includes(status);
 
-const getVehicleSeverity = (status) => {
-  if (['Completado', 'Finalizado', 'Listo'].includes(status)) return 'success';
-  if (['En Proceso', 'En Taller'].includes(status)) return 'info';
-  if (status === 'Pendiente') return 'warning';
-  return 'secondary';
-};
+/**
+ * Determina si una orden está completada u operacionalmente cerrada basándose en constantes estándar.
+ *
+ * @param {string} status
+ * @returns {boolean}
+ */
+const isStatusCompleted = (status) =>
+    [
+      ORDER_STATUS.FINISHED,
+      ORDER_STATUS.DELIVERED
+    ].includes(status);
 
-onMounted(async () => {
-  await Promise.all([
-    vehicleStore.fetchVehicles(),
-    workOrderStore.fetchWorkOrders(),
-    taskStore.fetchAllTasks()
-  ]);
+/**
+ * Vehículos únicos actualmente en taller.
+ */
+const vehiclesInWorkshop = computed(() => {
+  const activeOrders = workOrderStore.workOrders.filter((order) =>
+      isStatusActive(order.status)
+  );
+
+  const uniqueVehicleIds = new Set(
+      activeOrders.map((order) => order.vehicleId)
+  );
+
+  return uniqueVehicleIds.size;
 });
+
+/**
+ * Cantidad de órdenes activas.
+ */
+const activeOrdersCount = computed(() =>
+    workOrderStore.workOrders.filter((order) =>
+        isStatusActive(order.status)
+    ).length
+);
+
+/**
+ * Cantidad de órdenes completadas.
+ */
+const completedOrdersCount = computed(() =>
+    workOrderStore.workOrders.filter((order) =>
+        isStatusCompleted(order.status)
+    ).length
+);
+
+/**
+ * Ingreso proyectado total.
+ * Excluye los estados anulados/cancelados del sistema.
+ */
+const projectedIncome = computed(() =>
+    workOrderStore.workOrders
+        .filter((order) => order.status !== ORDER_STATUS.CANCELLED)
+        .reduce(
+            (accumulator, order) =>
+                accumulator + (parseFloat(order.price) || 0),
+            0
+        )
+);
+
+/**
+ * Calcula el progreso de tareas de una orden utilizando códigos globales.
+ *
+ * @param {string|number} orderId
+ * @returns {number}
+ */
+const getOrderProgress = (orderId) => {
+  const tasks = taskStore.tasks.filter(
+      (task) => String(task.workOrderId) === String(orderId)
+  );
+
+  if (!tasks.length) {
+    return 0;
+  }
+
+  const completedTasks = tasks.filter(
+      (task) => task.status === TASK_STATUS.COMPLETED
+  ).length;
+
+  return Math.round(
+      (completedTasks / tasks.length) * 100
+  );
+};
+
+/**
+ * Vista resumida de vehículos activos.
+ */
+const activeVehiclePreview = computed(() => {
+  const activeOrders = workOrderStore.workOrders.filter((order) =>
+      isStatusActive(order.status)
+  );
+
+  return activeOrders
+      .slice(0, 4)
+      .map((order) => {
+        const vehicle =
+            vehicleStore.vehicles.find(
+                (v) => String(v.id) === String(order.vehicleId)
+            ) || {};
+
+        const progress = getOrderProgress(order.id);
+
+        return {
+          id: vehicle.id || order.id,
+          name: `${vehicle.brand || t('dashboard.defaults.vehicle')} ${vehicle.model || ''}`,
+          status:
+              progress === 100
+                  ? t('dashboard.vehicleStatus.qaReady')
+                  : t('dashboard.vehicleStatus.inRepair'),
+          severity: progress === 100 ? 'success' : 'info',
+          progress,
+          image: vehicle.image || fallbackImage
+        };
+      })
+      .sort((a, b) => b.progress - a.progress);
+});
+
+/**
+ * Servicios más frecuentes.
+ */
+const frequentServices = computed(() => {
+  const taskMap = {};
+
+  taskStore.tasks.forEach((task) => {
+    const serviceName = task.description;
+
+    if (!serviceName) {
+      return;
+    }
+
+    if (!taskMap[serviceName]) {
+      taskMap[serviceName] = {
+        name: serviceName,
+        count: 0,
+        amount: 0
+      };
+    }
+
+    taskMap[serviceName].count += 1;
+    taskMap[serviceName].amount += task.laborPrice || 0;
+  });
+
+  const sortedServices = Object.values(taskMap)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+
+  const maxCount = sortedServices[0]?.count || 1;
+
+  const icons = [
+    'pi pi-cog',
+    'pi pi-wrench',
+    'pi pi-bolt'
+  ];
+
+  return sortedServices.map((service, index) => ({
+    ...service,
+    progress: Math.round((service.count / maxCount) * 100),
+    icon: icons[index % icons.length]
+  }));
+});
+
+/**
+ * Datos de ingresos semanales.
+ */
+const weeklyIncomeData = computed(() => {
+  const labels = [];
+  const data = [];
+
+  let totalWeek = 0;
+
+  for (let i = 5; i >= 0; i -= 1) {
+    const currentDate = new Date();
+
+    currentDate.setDate(currentDate.getDate() - i);
+
+    labels.push(
+        currentDate
+            .toLocaleDateString(locale.value, {
+              weekday: 'short'
+            })
+            .replace('.', '')
+            .toUpperCase()
+    );
+
+    const dateString =
+        currentDate.toISOString().split('T')[0];
+
+    const dayTotal = workOrderStore.workOrders
+        .filter((order) => order.startDate === dateString)
+        .reduce(
+            (sum, order) =>
+                sum + (parseFloat(order.price) || 0),
+            0
+        );
+
+    data.push(dayTotal);
+    totalWeek += dayTotal;
+  }
+
+  return {
+    total: totalWeek,
+    chartData: {
+      labels,
+      datasets: [
+        {
+          label: t('dashboard.charts.weeklyIncomeLabel'),
+          data,
+          backgroundColor: [
+            '#dbeafe',
+            '#bfdbfe',
+            '#dbeafe',
+            '#bfdbfe',
+            '#0b1680',
+            '#e5e7eb'
+          ],
+          borderRadius: 12
+        }
+      ]
+    }
+  };
+});
+
+/**
+ * Configuración del gráfico de barras.
+ */
+const barChartOptions = ref({
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      callbacks: {
+        label: (context) =>
+            `${t('common.currencyPrefix')} ${context.raw}`
+      }
+    }
+  },
+  scales: {
+    x: {
+      grid: {
+        display: false
+      },
+      ticks: {
+        color: '#64748b',
+        font: {
+          weight: 'bold'
+        }
+      }
+    },
+    y: {
+      grid: {
+        color: '#eef2f7',
+        borderDash: [5, 5]
+      },
+      border: {
+        display: false
+      }
+    }
+  }
+});
+
+/**
+ * Últimas órdenes registradas.
+ */
+const recentOrders = computed(() =>
+    [...workOrderStore.workOrders]
+        .reverse()
+        .slice(0, 5)
+);
 </script>
 
 <template>
@@ -139,23 +357,26 @@ onMounted(async () => {
           icon="pi pi-car"
           color="blue"
       />
+
       <DashboardMetricCard
           :title="t('dashboard.metrics.activeOrders')"
-          :value="activeOrders"
+          :value="activeOrdersCount"
           :subtitle="t('dashboard.metrics.activeOrdersSub')"
           icon="pi pi-file-edit"
           color="indigo"
       />
+
       <DashboardMetricCard
           :title="t('dashboard.metrics.completed')"
-          :value="completedOrders"
+          :value="completedOrdersCount"
           :subtitle="t('dashboard.metrics.completedSub')"
           icon="pi pi-check-circle"
           color="green"
       />
+
       <DashboardMetricCard
           :title="t('dashboard.metrics.projectedRevenue')"
-          :value="`S/. ${projectedIncome}`"
+          :value="`${t('common.currencyPrefix')} ${projectedIncome}`"
           :subtitle="t('dashboard.metrics.projectedRevenueSub')"
           icon="pi pi-wallet"
           color="violet"
@@ -167,42 +388,57 @@ onMounted(async () => {
           :vehicles="activeVehiclePreview"
           @view-vehicles="router.push('/vehicles')"
       />
+
       <WeeklyIncomePanel
-          :weeklyIncome="weeklyIncome"
-          :chartData="weeklyIncomeData"
+          :weeklyIncome="weeklyIncomeData.total"
+          :chartData="weeklyIncomeData.chartData"
           :chartOptions="barChartOptions"
       />
+
       <RecentOrdersPanel
           :orders="recentOrders"
           @view-orders="router.push('/work-orders')"
       />
-      <FrequentServicesPanel :services="frequentServices" />
+
+      <FrequentServicesPanel
+          :services="frequentServices"
+      />
     </div>
   </section>
 </template>
 
 <style scoped>
-.admin-dashboard { min-height: 100%; }
+.admin-dashboard {
+  min-height: 100%;
+  padding-bottom: 2rem;
+}
 
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1.35fr 0.9fr;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 @media (max-width: 1200px) {
-  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .dashboard-grid { grid-template-columns: 1fr; }
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
-  .kpi-grid { grid-template-columns: 1fr; }
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
