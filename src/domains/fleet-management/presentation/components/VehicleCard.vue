@@ -3,43 +3,33 @@
  * @file VehicleCard.vue
  * @description **Vehicle Card Component**
  *
- * Reusable card component used to display individual vehicles in a grid or list view.
- * Part of the **Fleet Management** domain - Presentation Layer.
+ * Displays a single vehicle's information in a card format.
+ * Includes image, metadata, progress indicator, and action buttons.
  *
- * This component shows key vehicle information, progress, status, and provides
- * actions to edit or view detailed information.
+ * Props:
+ * - vehicle: Object containing vehicle data
+ *
+ * Emits:
+ * - edit: Triggered when the edit button is clicked
+ * - view-detail: Triggered when the details button is clicked
  */
+
 import Button from 'primevue/button';
 import ProgressBar from 'primevue/progressbar';
 import Tag from 'primevue/tag';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-defineProps({
-  /**
-   * Vehicle data object (processed/enriched by parent component).
-   * Expected shape includes: name, owner, plate, year, color, status, severity, progress, image, raw.
-   * @type {Object}
-   */
-  vehicle: Object });
-defineEmits([
-  /**
-   * Emitted when user clicks the edit button.
-   * @event edit
-   * @type {Object} The raw vehicle object
-   */
-    'edit',
-  /**
-   * Emitted when user clicks the "View Details" button.
-   * @event view-detail
-   * @type {Object} The raw vehicle object
-   */
-  'view-detail']);
+defineProps({ vehicle: Object });
+defineEmits(['edit', 'view-detail']);
 </script>
 
 <template>
   <article class="vehicle-card">
-    <img :src="vehicle.image" :alt="vehicle.name" class="vehicle-image" />
+    <div class="image-wrapper">
+      <img :src="vehicle.image" :alt="vehicle.name" class="vehicle-image" />
+      <Tag :value="vehicle.status" :severity="vehicle.severity" rounded class="status-badge" />
+    </div>
 
     <div class="vehicle-content">
       <div class="vehicle-header">
@@ -56,31 +46,42 @@ defineEmits([
         <span><i class="pi pi-palette"></i>{{ vehicle.color }}</span>
       </div>
 
-      <div class="vehicle-status">
-        <Tag :value="vehicle.status" :severity="vehicle.severity" rounded />
-        <strong>{{ vehicle.progress }}%</strong>
+      <div class="vehicle-progress-container">
+        <div class="progress-label">
+          <span>{{ t('vehicles.card.progress') }}</span>
+          <strong>{{ vehicle.progress }}%</strong>
+        </div>
+        <ProgressBar :value="vehicle.progress" :showValue="false" class="vehicle-progress" />
       </div>
 
-      <ProgressBar :value="vehicle.progress" :showValue="false" class="vehicle-progress" />
-
-      <Button :label="t('vehicles.card.viewDetails')" icon="pi pi-arrow-right" icon-pos="right" outlined class="details-button" @click="$emit('view-detail', vehicle.raw)"/>
+      <Button
+          :label="t('vehicles.card.viewDetails')"
+          icon="pi pi-arrow-right"
+          icon-pos="right"
+          outlined
+          class="details-button"
+          @click="$emit('view-detail', vehicle.raw)"
+      />
     </div>
   </article>
 </template>
 
 <style scoped>
-.vehicle-card { display: grid; grid-template-columns: 150px 1fr; gap: 1rem; padding: 1rem; border: 1px solid #e8edf5; border-radius: 24px; background: #ffffff; box-shadow: 0 12px 28px rgba(15,23,42,0.06); }
-.vehicle-image { width: 100%; height: 145px; border-radius: 18px; object-fit: cover; background: #e2e8f0; }
-.vehicle-content { min-width: 0; }
-.vehicle-header { display: flex; justify-content: space-between; gap: 1rem; }
+.vehicle-card { display: flex; flex-direction: column; padding: 1rem; border: 1px solid #e8edf5; border-radius: 24px; background: #ffffff; box-shadow: 0 12px 28px rgba(15,23,42,0.06); transition: transform 0.2s; }
+.vehicle-card:hover { transform: translateY(-2px); }
+.image-wrapper { position: relative; width: 100%; height: 180px; margin-bottom: 1rem; }
+.vehicle-image { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; background: #e2e8f0; }
+.status-badge { position: absolute; top: 0.8rem; right: 0.8rem; }
+.vehicle-content { display: flex; flex-direction: column; flex: 1; }
+.vehicle-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
 .vehicle-header h3 { margin: 0; color: #0f172a; font-size: 1.15rem; }
-.vehicle-header p { margin: 0.25rem 0 0; color: #64748b; }
-.vehicle-meta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin: 1rem 0; color: #64748b; font-size: 0.92rem; }
-.vehicle-meta span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.vehicle-header p { margin: 0.25rem 0 0; color: #64748b; font-size: 0.9rem; }
+.vehicle-meta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 1.2rem; color: #64748b; font-size: 0.92rem; }
+.vehicle-meta span { display: inline-flex; align-items: center; gap: 0.4rem; background: #f8fafc; padding: 0.4rem 0.8rem; border-radius: 8px; }
 .vehicle-meta i { color: #0b1680; }
-.vehicle-status { display: flex; justify-content: space-between; align-items: center; }
-.vehicle-status strong { color: #0b1680; }
-.vehicle-progress { height: 8px; margin: 0.8rem 0 1rem; }
-.details-button { width: 100%; border-radius: 14px; }
-@media (max-width: 720px) { .vehicle-card { grid-template-columns: 1fr; } .vehicle-image { height: 190px; } }
+.vehicle-progress-container { margin-bottom: 1.2rem; }
+.progress-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.9rem; color: #64748b; }
+.progress-label strong { color: #0b1680; }
+.vehicle-progress { height: 8px; }
+.details-button { width: 100%; border-radius: 14px; margin-top: auto; }
 </style>

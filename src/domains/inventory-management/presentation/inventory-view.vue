@@ -1,293 +1,339 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+/**
+ * Inventory management view:
+ * - CRUD inventory items
+ * - Filtering by SKU/name
+ * - Stock status visualization
+ */
+
+import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useInventoryStore } from '../application/inventory.store';
 
-import Card from 'primevue/card';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import Dropdown from 'primevue/dropdown';
+import InputNumber from 'primevue/inputnumber';
+import Select from 'primevue/select';
+import Dialog from 'primevue/dialog';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Tag from 'primevue/tag';
 
-import InventoryCard from './components/InventoryCard.vue';
-import InventoryFormDialog from './components/InventoryFormDialog.vue';
+// ── CONSTANTS FOR DOMAIN LOGIC ───────────────────────────
+/** Standardized system inventory categories */
+const INVENTORY_CATEGORIES = {
+  SPARE_PART: 'SPARE_PART',
+  OIL: 'OIL',
+  SUPPLY: 'SUPPLY',
+  TOOL: 'TOOL'
+};
+
+const { t } = useI18n();
 
 const inventoryStore = useInventoryStore();
 
 const search = ref('');
-const selectedCategory = ref(null);
-const dialogVisible = ref(false);
-const selectedItem = ref(null);
+const displayDialog = ref(false);
+const itemForm = ref({});
 
-const categories = computed(() => {
-  const unique = [...new Set(inventoryStore.items.map(item => item.category))];
+/**
+ * Inventory categories mapped with dynamic structural translations
+ */
+const categories = computed(() => [
+  { value: INVENTORY_CATEGORIES.SPARE_PART, label: t('inventory.categories.spare_part') },
+  { value: INVENTORY_CATEGORIES.OIL, label: t('inventory.categories.oil') },
+  { value: INVENTORY_CATEGORIES.SUPPLY, label: t('inventory.categories.supply') },
+  { value: INVENTORY_CATEGORIES.TOOL, label: t('inventory.categories.tool') }
+]);
 
-  return [
-    { label: 'Todas', value: null },
-    ...unique.map(category => ({ label: category, value: category }))
-  ];
+onMounted(() => {
+  inventoryStore.fetchItems();
 });
 
+/**
+ * Filters inventory items by name or SKU.
+ */
 const filteredItems = computed(() => {
-  return inventoryStore.items.filter(item => {
-    const text = `${item.name} ${item.brand} ${item.category}`.toLowerCase();
-    const matchesSearch = text.includes(search.value.toLowerCase());
-    const matchesCategory = !selectedCategory.value || item.category === selectedCategory.value;
+  const term = search.value.toLowerCase().trim();
 
-    return matchesSearch && matchesCategory;
-  });
+  return inventoryStore.items.filter(item =>
+      item.name.toLowerCase().includes(term) ||
+      item.sku.toLowerCase().includes(term)
+  );
 });
 
-const totalItems = computed(() => inventoryStore.items.length);
-const lowStockCount = computed(() => inventoryStore.lowStockItems.length);
-const totalStockValue = computed(() =>
-    inventoryStore.items.reduce((total, item) => total + item.stock * item.unitPrice, 0)
-);
-
-const openNewDialog = () => {
-  selectedItem.value = null;
-  dialogVisible.value = true;
+/**
+ * Returns severity color based on stock level.
+ */
+const getStockSeverity = (item) => {
+  if (item.stock === 0) return 'danger';
+  if (item.stock <= item.minStock) return 'warning';
+  return 'success';
 };
 
-const openEditDialog = (item) => {
-  selectedItem.value = item;
-  dialogVisible.value = true;
+/**
+ * Resolves technical category domain value to localized interface text.
+ * @param {string} categoryValue - Domain code key in uppercase
+ * @returns {string} Translated category label
+ */
+const getCategoryLabel = (categoryValue) => {
+  const key = String(categoryValue).toLowerCase();
+  return t(`inventory.categories.${key}`);
 };
 
-const saveItem = async (itemData) => {
-  if (itemData.id) {
-    await inventoryStore.updateItem(itemData.id, itemData);
+const openNew = () => {
+  itemForm.value = {
+    name: '',
+    category: INVENTORY_CATEGORIES.SPARE_PART,
+    brand: '',
+    unitPrice: 0,
+    stock: 10,
+    minStock: 3
+  };
+  displayDialog.value = true;
+};
+
+const editItem = (item) => {
+  itemForm.value = { ...item };
+  displayDialog.value = true;
+};
+
+const saveItem = async () => {
+  if (!itemForm.value.name) return;
+
+  if (itemForm.value.id) {
+    await inventoryStore.updateItem(itemForm.value.id, itemForm.value);
   } else {
-    await inventoryStore.addItem(itemData);
+    await inventoryStore.addItem(itemForm.value);
   }
 
-  dialogVisible.value = false;
-  selectedItem.value = null;
+  displayDialog.value = false;
 };
 
-onMounted(async () => {
-  await inventoryStore.fetchInventory();
-});
+const deleteItem = async (item) => {
+  if (confirm(`${t('inventory.deleteConfirm', { name: item.name })}`)) {
+    await inventoryStore.deleteItem(item.id);
+  }
+};
 </script>
 
 <template>
   <section class="inventory-page">
-    <header class="inventory-header">
+    <div class="page-header">
       <div>
-        <span class="eyebrow">Inventario del taller</span>
-        <h1>Herramientas y materiales</h1>
-        <p>
-          Administra repuestos, materiales, marcas, precios y stock disponible para los servicios del taller.
-        </p>
+        <span class="eyebrow">{{ t('inventory.eyebrow') }}</span>
+        <h1>{{ t('inventory.title') }}</h1>
+        <p>{{ t('inventory.description') }}</p>
       </div>
 
       <Button
-          label="Nuevo material"
+          :label="t('inventory.newButton')"
           icon="pi pi-plus"
-          severity="success"
-          class="new-button"
-          @click="openNewDialog"
+          class="add-button"
+          @click="openNew"
       />
-    </header>
+    </div>
 
-    <section class="summary-grid">
-      <Card class="summary-card">
-        <template #content>
-          <span>Total productos</span>
-          <strong>{{ totalItems }}</strong>
-          <small>Registrados en inventario</small>
-        </template>
-      </Card>
+    <div class="toolbar">
+      <div class="search-box">
+        <i class="pi pi-search search-icon"></i>
+        <InputText
+            v-model="search"
+            :placeholder="t('inventory.searchPlaceholder')"
+        />
+      </div>
+    </div>
 
-      <Card class="summary-card">
-        <template #content>
-          <span>Stock bajo</span>
-          <strong>{{ lowStockCount }}</strong>
-          <small>Requieren reposición</small>
-        </template>
-      </Card>
+    <div class="table-card">
+      <DataTable
+          :value="filteredItems"
+          responsiveLayout="scroll"
+          :loading="inventoryStore.loading"
+          class="custom-table"
+      >
+        <Column field="sku" :header="t('inventory.table.sku')" style="font-weight: 700; color: #0b1680;" />
 
-      <Card class="summary-card">
-        <template #content>
-          <span>Valor de inventario</span>
-          <strong>S/. {{ totalStockValue.toFixed(2) }}</strong>
-          <small>Según stock actual</small>
-        </template>
-      </Card>
-    </section>
+        <Column :header="t('inventory.table.item')">
+          <template #body="{ data }">
+            <div class="item-name">
+              <strong>{{ data.name }}</strong>
+              <span>{{ data.brand }}</span>
+            </div>
+          </template>
+        </Column>
 
-    <Card class="filters-card">
-      <template #content>
-        <div class="filters-row">
-          <span class="p-input-icon-left search-box">
-            <i class="pi pi-search"></i>
-            <InputText
-                v-model="search"
-                placeholder="Buscar por material, marca o categoría"
-                class="w-full"
+        <Column :header="t('inventory.table.category')">
+          <template #body="{ data }">
+            <Tag :value="getCategoryLabel(data.category)" severity="secondary" rounded />
+          </template>
+        </Column>
+
+        <Column :header="t('inventory.table.stock')">
+          <template #body="{ data }">
+            <Tag
+                :value="`${data.stock} ${t('inventory.units')}`"
+                :severity="getStockSeverity(data)"
+                rounded
             />
-          </span>
+          </template>
+        </Column>
 
-          <Dropdown
-              v-model="selectedCategory"
-              :options="categories"
-              option-label="label"
-              option-value="value"
-              placeholder="Filtrar categoría"
-              class="category-filter"
+        <Column :header="t('inventory.table.price')">
+          <template #body="{ data }">
+            <strong>S/. {{ data.unitPrice.toFixed(2) }}</strong>
+          </template>
+        </Column>
+
+        <Column :header="t('inventory.table.actions')" alignFrozen="right">
+          <template #body="{ data }">
+            <div class="actions">
+              <Button icon="pi pi-pencil" text rounded severity="info" @click="editItem(data)" />
+              <Button icon="pi pi-trash" text rounded severity="danger" @click="deleteItem(data)" />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
+
+    <Dialog
+        v-model:visible="displayDialog"
+        :header="itemForm.id ? t('inventory.editTitle') : t('inventory.newTitle')"
+        :modal="true"
+        :style="{ width: '450px' }"
+        class="p-fluid"
+    >
+      <div class="form-grid">
+        <div class="field">
+          <label>
+            {{ t('inventory.form.name') }}
+            <span class="required">*</span>
+          </label>
+
+          <InputText
+              v-model.trim="itemForm.name"
+              :placeholder="t('inventory.form.namePlaceholder')"
           />
         </div>
+
+        <div class="row-grid">
+          <div class="field">
+            <label>{{ t('inventory.form.category') }}</label>
+            <Select
+                v-model="itemForm.category"
+                :options="categories"
+                optionLabel="label"
+                optionValue="value"
+            />
+          </div>
+
+          <div class="field">
+            <label>{{ t('inventory.form.brand') }}</label>
+            <InputText
+                v-model.trim="itemForm.brand"
+                :placeholder="t('inventory.form.brandPlaceholder')"
+            />
+          </div>
+        </div>
+
+        <div class="row-grid">
+          <div class="field">
+            <label>{{ t('inventory.form.stock') }}</label>
+            <InputNumber v-model="itemForm.stock" :min="0" showButtons />
+          </div>
+
+          <div class="field">
+            <label>{{ t('inventory.form.minStock') }}</label>
+            <InputNumber v-model="itemForm.minStock" :min="0" showButtons />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>{{ t('inventory.form.unitPrice') }}</label>
+          <InputNumber v-model="itemForm.unitPrice" mode="currency" currency="PEN" />
+        </div>
+      </div>
+
+      <template #footer>
+        <Button :label="t('common.cancel')" text severity="secondary" @click="displayDialog = false" />
+        <Button :label="t('common.save')" icon="pi pi-save" @click="saveItem" />
       </template>
-    </Card>
-
-    <section class="inventory-grid">
-      <InventoryCard
-          v-for="item in filteredItems"
-          :key="item.id"
-          :item="item"
-          @edit="openEditDialog"
-      />
-    </section>
-
-    <InventoryFormDialog
-        v-model:visible="dialogVisible"
-        :item="selectedItem"
-        @save="saveItem"
-    />
+    </Dialog>
   </section>
 </template>
 
 <style scoped>
-.inventory-page {
-  min-height: 100vh;
-  padding: 2rem;
-  background: #f8fafc;
-  color: #0f172a;
-}
-
-.inventory-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
+.inventory-page { min-height: 100%; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
 
 .eyebrow {
   color: #0b1680;
-  font-weight: 900;
-  letter-spacing: .08em;
+  font-size: 0.78rem;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.inventory-header h1 {
-  margin: .35rem 0;
+.page-header h1 {
+  margin: 0;
   color: #0f172a;
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
+  font-size: 2.2rem;
+  line-height: 1.1;
 }
 
-.inventory-header p {
-  max-width: 780px;
-  color: #64748b;
-  font-size: 1rem;
-}
+.page-header p { margin: 0.5rem 0 0; color: #64748b; }
 
-.new-button {
-  min-width: 190px;
-  height: 48px;
-  border-radius: 16px;
-  font-weight: 800;
-}
+.add-button { background: #0b1680; border-radius: 12px; }
 
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.2rem;
-  margin-bottom: 1.2rem;
-}
-
-.summary-card,
-.filters-card {
-  border: 1px solid #e8edf5;
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
-}
-
-.summary-card span {
-  color: #64748b;
-  font-weight: 800;
-}
-
-.summary-card strong {
-  display: block;
-  margin: .45rem 0 .25rem;
-  color: #0b1680;
-  font-size: 2rem;
-  line-height: 1;
-}
-
-.summary-card small {
-  color: #94a3b8;
-}
-
-.filters-card {
-  margin-bottom: 1.5rem;
-}
-
-.filters-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+.toolbar { margin-bottom: 1.5rem; }
 
 .search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 400px;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  color: #9ca3af;
+  z-index: 10;
+}
+
+.search-box :deep(.p-inputtext) {
   flex: 1;
+  border: none;
+  padding-left: 2.5rem;
 }
 
-.search-box :deep(input),
-.category-filter {
-  height: 46px;
-  border-radius: 14px;
+.table-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #e8edf5;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
-.category-filter {
-  width: 260px;
-}
+.item-name { display: flex; flex-direction: column; gap: 0.2rem; }
+.item-name strong { color: #1e293b; }
+.item-name span { font-size: 0.8rem; color: #64748b; }
 
-.inventory-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(260px, 1fr));
-  gap: 1.2rem;
-}
+.actions { display: flex; gap: 0.5rem; }
 
-@media (max-width: 1200px) {
-  .inventory-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.form-grid { display: flex; flex-direction: column; gap: 1rem; padding-top: 0.5rem; }
 
-  .summary-grid {
-    grid-template-columns: 1fr;
-  }
-}
+.row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-@media (max-width: 720px) {
-  .inventory-page {
-    padding: 1rem;
-  }
+.field { display: flex; flex-direction: column; gap: 0.4rem; }
 
-  .inventory-header,
-  .filters-row {
-    flex-direction: column;
-  }
+.field label { font-size: 0.85rem; font-weight: 700; color: #374151; }
 
-  .new-button,
-  .category-filter {
-    width: 100%;
-  }
+.required { color: #ef4444; }
 
-  .inventory-grid {
-    grid-template-columns: 1fr;
-  }
-}
+:deep(.p-inputtext),
+:deep(.p-inputnumber) { border-radius: 10px; }
 </style>

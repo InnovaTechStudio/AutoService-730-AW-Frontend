@@ -3,62 +3,77 @@
  * @file VehicleFilters.vue
  * @description **Vehicle Filters Component**
  *
- * Reusable filter bar for the vehicles list page. Allows users to:
- * - Search vehicles by plate, brand, model, owner, etc.
- * - Filter vehicles by status (In Workshop, Ready, Delivered)
+ * Provides search, status filter, and sorting options for vehicles.
  *
- * This component uses Vue's `v-model` pattern through `defineProps` + `defineEmits`
- * for two-way data binding with the parent component.
+ * Props:
+ * - search: Current search query string
+ * - status: Selected status filter
+ * - sortBy: Selected sort option
+ * - statusOptions: Array of available status filter options
+ * - sortOptions: Array of available sort options
  *
- * Part of the **Fleet Management** domain - Presentation Layer.
+ * Emits:
+ * - update:search
+ * - update:status
+ * - update:sortBy
  */
+
 import InputText from 'primevue/inputtext';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
 defineProps({
   search: String,
-
   status: [String, null],
-
-  statusOptions: Array
+  sortBy: [String, null],
+  statusOptions: Array,
+  sortOptions: Array
 });
 
-/**
- * Events emitted to parent component for two-way binding.
- */
-defineEmits(['update:search', 'update:status']);
+defineEmits(['update:search', 'update:status', 'update:sortBy']);
 </script>
 
 <template>
   <div class="vehicle-filters">
-    <span class="p-input-icon-left search-box">
-      <i class="pi pi-search"></i>
+    <div class="search-box">
+      <i class="pi pi-search search-icon"></i>
       <InputText
           :model-value="search"
           :placeholder="t('vehicles.filters.searchPlaceholder')"
           @update:model-value="$emit('update:search', $event)"
       />
-    </span>
+    </div>
 
-    <Dropdown
+    <Select
         :model-value="status"
         :options="statusOptions"
-        option-label="label"
-        option-value="value"
+        optionLabel="label"
+        optionValue="value"
         :placeholder="t('vehicles.filters.statusPlaceholder')"
         show-clear
-        class="status-filter"
+        class="filter-select"
         @update:model-value="$emit('update:status', $event)"
+    />
+
+    <Select
+        :model-value="sortBy"
+        :options="sortOptions"
+        optionLabel="label"
+        optionValue="value"
+        :placeholder="t('vehicles.filters.sortPlaceholder')"
+        show-clear
+        class="filter-select"
+        @update:model-value="$emit('update:sortBy', $event)"
     />
   </div>
 </template>
 
 <style scoped>
-.vehicle-filters { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-.search-box { flex: 1; min-width: 280px; }
-.search-box :deep(.p-inputtext) { width: 100%; border-radius: 16px; }
-.status-filter { min-width: 220px; }
+.vehicle-filters { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+.search-box { position: relative; display: flex; align-items: center; flex: 1; min-width: 280px; }
+.search-icon { position: absolute; left: 1.2rem; color: #9ca3af; z-index: 10; pointer-events: none; }
+.search-box :deep(.p-inputtext) { width: 100%; border-radius: 16px; padding-left: 2.8rem; }
+.filter-select { min-width: 200px; border-radius: 16px; }
 </style>

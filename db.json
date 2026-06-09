@@ -140,43 +140,33 @@
   "work-orders": [
     {
       "id": "WO-1",
-      "workshopId": "WS-1",
-      "trackingCode": "AS-1001A",
-      "customerId": "C-1",
-      "customerName": "Juan Pérez",
-      "vehicleId": "V-1",
-      "vehiclePlate": "ABC-123",
-      "vehicleName": "Toyota Yaris 2020",
+      "trackingCode": "AS-MVS5O",
+      "vehicleId": null,
+      "customerId": null,
+      "description": "",
       "status": "En Proceso",
-      "startDate": "2026-05-10",
-      "estimatedDate": "2026-05-20",
-      "price": 320,
-      "serviceTotal": 320,
-      "materialsTotal": 140,
-      "totalAmount": 460,
-      "progress": 50,
-      "isRisk": false,
-      "description": "Mantenimiento preventivo y revisión de frenos"
+      "startDate": "2026-06-02",
+      "estimatedDate": "",
+      "price": 791,
+      "workshopId": "WS-1"
     },
     {
       "id": "WO-2",
-      "workshopId": "WS-1",
       "trackingCode": "AS-1002B",
       "customerId": "C-2",
-      "customerName": "María Gómez",
-      "vehicleId": "V-2",
-      "vehiclePlate": "XYZ-987",
-      "vehicleName": "Honda Civic 2022",
-      "status": "Listo",
-      "startDate": "2026-05-07",
-      "estimatedDate": "2026-05-14",
-      "price": 450,
-      "serviceTotal": 450,
-      "materialsTotal": 180,
-      "totalAmount": 630,
-      "progress": 100,
-      "isRisk": false,
-      "description": "Servicio de cambio de aceite y filtros"
+      "description": "Falla eléctrica en tablero",
+      "status": "Finalizado",
+      "startDate": "2026-05-05",
+      "estimatedDate": "2026-05-07",
+      "price": 250,
+      "qaChecklist": {
+        "tasksCompleted": true,
+        "sparePartsChecked": true,
+        "diagnosisValidated": true,
+        "cleaningDone": true,
+        "finalTestDone": true
+      },
+      "workshopId": "WS-1"
     },
     {
       "id": "WO-3",
@@ -225,21 +215,38 @@
       "customerId": "C-4",
       "description": "Problema en el nucleo de poder",
       "status": "En Proceso",
-      "startDate": "2026-06-08",
-      "estimatedDate": "2026-07-05",
-      "price": 500,
-      "workshopId": "WS-2"
+      "startDate": "2026-05-10",
+      "estimatedDate": "2026-05-20",
+      "price": 900,
+      "workshopId": "WS-1"
     },
     {
-      "id": "MTDlw6pnKtQ",
-      "trackingCode": "AS-PQ2RM",
-      "vehicleId": "V-3",
-      "customerId": "C-3",
-      "description": "Problemas con el aceite ",
+      "id": "DbaUmc13M8U",
+      "trackingCode": "AS-PVN2G",
+      "vehicleId": "V-1",
+      "customerId": "C-1",
+      "description": "Problema con el aceite",
       "status": "En Proceso",
-      "startDate": "2026-06-08",
-      "estimatedDate": "2026-07-15",
+      "startDate": "2026-05-11",
+      "estimatedDate": "2026-06-04",
       "price": 100,
+      "workshopId": "WS-1"
+    },
+    {
+      "price": 500,
+      "workshopId": "WS-1",
+      "id": "aKKsBScNUcQ"
+    },
+    {
+      "id": "2HRVPoCmKvc",
+      "trackingCode": "AS-YE766",
+      "vehicleId": "V-1",
+      "customerId": "C-1",
+      "description": "",
+      "status": "En Proceso",
+      "startDate": "2026-06-02",
+      "estimatedDate": "",
+      "price": 0,
       "workshopId": "WS-1"
     }
   ],
@@ -254,38 +261,17 @@
       "mechanicId": "M-1",
       "mechanicName": "Roberto Sánchez",
       "priority": "Alta",
-      "estimatedTime": "2 h",
-      "price": 120,
-      "photo": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=900&auto=format&fit=crop",
-      "technicalDiagnosis": "Las pastillas delanteras presentan desgaste considerable y pérdida de eficiencia al frenar.",
-      "customerExplanation": "Los frenos delanteros estaban gastados. Se recomienda reemplazarlos para mantener una conducción segura.",
-      "internalObservation": "Validar con administración la reposición de pastillas Toyota antes de cerrar la orden.",
-      "evidenceRegistered": "Foto de pastillas desgastadas registrada",
-      "adminReviewStatus": "Enviado al Administrador",
+      "estimatedTime": "2 horas",
+      "photo": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3",
+      "technicalDiagnosis": "Desgaste en el aceite ",
+      "customerExplanation": "se recomienda cambio de marca de aceite",
+      "internalObservation": "Se recomienda vender la marca de aceite ayudin",
+      "evidenceRegistered": "",
+      "adminReviewStatus": "Aprobado",
       "customerReportStatus": "Visible para Cliente",
-      "completedAt": "2026-05-16T10:35:00.000Z",
-      "requiredMaterials": [
-        {
-          "inventoryItemId": "INV-2",
-          "name": "Pastillas de freno delanteras",
-          "brand": "Bosch",
-          "quantity": 1,
-          "unitPrice": 140,
-          "subtotal": 140
-        }
-      ],
-      "usedMaterials": [
-        {
-          "inventoryItemId": "INV-2",
-          "name": "Pastillas de freno delanteras",
-          "brand": "Bosch",
-          "quantity": 1,
-          "unitPrice": 140,
-          "subtotal": 140
-        }
-      ],
-      "materialsTotal": 140,
-      "materialRequestStatus": "Aprobado"
+      "laborPrice": 0,
+      "parts": [],
+      "price": 0
     },
     {
       "id": "T-2",
@@ -465,34 +451,21 @@
       "estimatedTime": "No definido",
       "price": 0,
       "photo": "",
-      "technicalDiagnosis": "Desgaste en el aceite",
-      "customerExplanation": "Se recomienda cambios de marca",
-      "internalObservation": "Se necesitara una buena marca de aceite ay que el carro es ultimo modelo",
-      "evidenceRegistered": "Foto de aceite",
-      "requiredMaterials": [],
-      "usedMaterials": [
-        {
-          "inventoryItemId": "INV-1",
-          "name": "Aceite sintético 5W-30",
-          "brand": "Mobil",
-          "quantity": 1,
-          "unitPrice": 85,
-          "subtotal": 85
-        }
-      ],
-      "materialsTotal": 85,
-      "materialRequestStatus": "Materiales utilizados",
-      "adminReviewStatus": "Enviado al Administrador",
+      "technicalDiagnosis": "luna rota por  posible choque ",
+      "customerExplanation": "chocaste ps",
+      "internalObservation": "Comprar luna especifica de marca ",
+      "evidenceRegistered": "",
+      "adminReviewStatus": "Aprobado",
       "customerReportStatus": "Visible para Cliente",
-      "completedAt": "2026-06-08T17:20:23.285Z"
+      "completedAt": "2026-05-13T05:09:46.681Z"
     },
     {
-      "id": "YAZW2wcMyKc",
+      "id": "AUTGcAOyVnI",
       "workshopId": "WS-1",
-      "workOrderId": "WO-1",
-      "description": "Cambio de algo",
-      "status": "Completada",
-      "mechanicId": "M-1",
+      "workOrderId": "2HRVPoCmKvc",
+      "description": "a",
+      "status": "Pendiente",
+      "mechanicId": "EHnAzVg7obo",
       "priority": "Media",
       "estimatedTime": "No definido",
       "price": 0,
@@ -501,202 +474,9 @@
       "customerExplanation": "",
       "internalObservation": "",
       "evidenceRegistered": "",
-      "requiredMaterials": [],
-      "usedMaterials": [
-        {
-          "inventoryItemId": "INV-2",
-          "name": "Pastillas de freno delanteras",
-          "brand": "Bosch",
-          "quantity": 1,
-          "unitPrice": 140,
-          "subtotal": 140
-        },
-        {
-          "inventoryItemId": "INV-3",
-          "name": "Bujías iridium",
-          "brand": "NGK",
-          "quantity": 1,
-          "unitPrice": 45,
-          "subtotal": 45
-        },
-        {
-          "inventoryItemId": "INV-6",
-          "name": "Amortiguador delantero",
-          "brand": "Monroe",
-          "quantity": 1,
-          "unitPrice": 220,
-          "subtotal": 220
-        }
-      ],
-      "materialsTotal": 405,
-      "materialRequestStatus": "Materiales utilizados",
-      "adminReviewStatus": "Enviado al Administrador",
-      "customerReportStatus": "Visible para Cliente",
-      "completedAt": "2026-06-08T17:23:05.686Z"
-    }
-  ],
-  "inventory-items": [
-    {
-      "id": "INV-1",
-      "workshopId": "WS-1",
-      "name": "Aceite sintético 5W-30",
-      "category": "Lubricante",
-      "brand": "Mobil",
-      "compatibleVehicleBrands": [
-        "Toyota",
-        "Honda",
-        "Nissan",
-        "Hyundai",
-        "Kia"
-      ],
-      "unitPrice": 85,
-      "stock": 8,
-      "minStock": 4,
-      "image": "https://images.unsplash.com/photo-1635438145277-3c2f7a70c41b?w=900&auto=format&fit=crop",
-      "status": "Disponible",
-      "location": "Estante A1",
-      "lastUpdated": "2026-06-08T18:18:19.437Z"
-    },
-    {
-      "id": "INV-2",
-      "workshopId": "WS-1",
-      "name": "Pastillas de freno delanteras",
-      "category": "Frenos",
-      "brand": "Bosch",
-      "compatibleVehicleBrands": [
-        "Toyota",
-        "Honda",
-        "Nissan"
-      ],
-      "unitPrice": 140,
-      "stock": 4,
-      "minStock": 3,
-      "image": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=900&auto=format&fit=crop",
-      "status": "Disponible",
-      "location": "Estante B2",
-      "lastUpdated": "2026-06-08T17:23:05.718Z"
-    },
-    {
-      "id": "INV-3",
-      "workshopId": "WS-1",
-      "name": "Bujías iridium",
-      "category": "Encendido",
-      "brand": "NGK",
-      "compatibleVehicleBrands": [
-        "Toyota",
-        "Honda",
-        "Nissan",
-        "Ford"
-      ],
-      "unitPrice": 45,
-      "stock": 11,
-      "minStock": 6,
-      "image": "https://images.unsplash.com/photo-1635786541194-d3a4492f1f1a?w=900&auto=format&fit=crop",
-      "status": "Disponible",
-      "location": "Estante C1",
-      "lastUpdated": "2026-06-08T17:23:05.718Z"
-    },
-    {
-      "id": "INV-4",
-      "workshopId": "WS-1",
-      "name": "Filtro de aceite",
-      "category": "Filtros",
-      "brand": "Mann Filter",
-      "compatibleVehicleBrands": [
-        "Toyota",
-        "Honda",
-        "Nissan",
-        "Ford"
-      ],
-      "unitPrice": 35,
-      "stock": 3,
-      "minStock": 5,
-      "image": "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=900&auto=format&fit=crop",
-      "status": "Bajo stock",
-      "location": "Estante A2",
-      "lastUpdated": "2026-05-16"
-    },
-    {
-      "id": "INV-5",
-      "workshopId": "WS-1",
-      "name": "Filtro de aire",
-      "category": "Filtros",
-      "brand": "Mann Filter",
-      "compatibleVehicleBrands": [
-        "Toyota",
-        "Honda",
-        "Nissan",
-        "Ford",
-        "Kia"
-      ],
-      "unitPrice": 65,
-      "stock": 6,
-      "minStock": 4,
-      "image": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=900&auto=format&fit=crop",
-      "status": "Disponible",
-      "location": "Estante A3",
-      "lastUpdated": "2026-06-08T16:34:03.379Z"
-    },
-    {
-      "id": "INV-6",
-      "workshopId": "WS-1",
-      "name": "Amortiguador delantero",
-      "category": "Suspensión",
-      "brand": "Monroe",
-      "compatibleVehicleBrands": [
-        "Toyota",
-        "Nissan",
-        "Ford"
-      ],
-      "unitPrice": 220,
-      "stock": 1,
-      "minStock": 2,
-      "image": "https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=900&auto=format&fit=crop",
-      "status": "Disponible",
-      "location": "Zona S1",
-      "lastUpdated": "2026-06-08T17:23:05.718Z"
-    },
-    {
-      "id": "INV-7",
-      "workshopId": "WS-1",
-      "name": "Escáner automotriz OBD2",
-      "category": "Herramienta",
-      "brand": "Launch",
-      "compatibleVehicleBrands": [
-        "Toyota",
-        "Honda",
-        "Nissan",
-        "Ford",
-        "Kia",
-        "Hyundai",
-        "BMW"
-      ],
-      "unitPrice": 0,
-      "stock": 1,
-      "minStock": 1,
-      "image": "https://images.unsplash.com/photo-1581092919535-7146ff1a590b?w=900&auto=format&fit=crop",
-      "status": "Herramienta operativa",
-      "location": "Gabinete técnico",
-      "lastUpdated": "2026-05-16"
-    },
-    {
-      "id": "INV-8",
-      "workshopId": "WS-2",
-      "name": "Aceite sintético 10W-40",
-      "category": "Lubricante",
-      "brand": "Castrol",
-      "compatibleVehicleBrands": [
-        "Ford",
-        "Chevrolet",
-        "Toyota"
-      ],
-      "unitPrice": 95,
-      "stock": 10,
-      "minStock": 4,
-      "image": "https://images.unsplash.com/photo-1635438145277-3c2f7a70c41b?w=900&auto=format&fit=crop",
-      "status": "Disponible",
-      "location": "Estante A1",
-      "lastUpdated": "2026-05-16"
+      "adminReviewStatus": "Sin enviar",
+      "customerReportStatus": "No visible",
+      "completedAt": null
     }
   ],
   "vehicle-history": [

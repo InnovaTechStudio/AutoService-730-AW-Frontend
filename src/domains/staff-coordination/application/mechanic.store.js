@@ -1,26 +1,27 @@
 /**
  * @file mechanic.store.js
- * @description **Mechanic Store (Pinia)**
+ * @description Mechanic Store (Pinia)
  *
- * This store manages all mechanic-related state and business operations in the AutoService application.
- * It belongs to the **Staff Coordination** domain and follows the Domain-Driven Design (DDD) architecture:
- * - Application Layer: Orchestrates use cases and coordinates between the Presentation layer and Infrastructure services.
+ * Manages mechanic state and operations in the AutoService application.
+ * Domain: Staff Coordination (DDD)
+ * - Acts as application layer orchestrating data between UI and infrastructure services.
  *
  * Responsibilities:
- * - Fetching mechanics from the backend
- * - Adding, updating, and deleting mechanics
- * - Maintaining a reactive list of mechanics for task assignment and staff management
+ * - Fetch mechanics from backend
+ * - Create, update, delete mechanics
+ * - Maintain reactive mechanic list for assignment and management
  */
+
 import { defineStore } from 'pinia';
 import { MechanicService } from '../infrastructure/mechanic.service';
 import { createMechanic } from '../domain/mechanic.entity';
 
 /**
- * Mechanic Store definition using Pinia.
+ * Mechanic store (Pinia)
  *
  * @typedef {Object} MechanicStoreState
- * @property {Array<Object>} mechanics - List of all mechanics
- * @property {boolean} loading - Loading state for async operations
+ * @property {Array<Object>} mechanics
+ * @property {boolean} loading
  */
 export const useMechanicStore = defineStore('mechanic', {
     state: () => ({
@@ -28,45 +29,45 @@ export const useMechanicStore = defineStore('mechanic', {
         loading: false
     }),
 
-    /**
-     * Fetches all mechanics from the backend and updates the store.
-     *
-     * Each raw mechanic from the API is transformed using the `createMechanic`
-     * factory function to ensure data consistency and apply domain rules.
-     *
-     * @returns {Promise<void>}
-     */
     actions: {
+        /**
+         * Fetch all mechanics from backend
+         * @returns {Promise<void>}
+         */
         async fetchMechanics() {
             this.loading = true;
+
             try {
                 const response = await MechanicService.getAll();
-                this.mechanics = response.data.map(m => createMechanic(m));
+                this.mechanics = response.data.map(createMechanic);
             } finally {
                 this.loading = false;
             }
         },
 
         /**
-         * Creates a new mechanic and adds it to the store.
-         *
-         * @param {Object} mechanicData - Raw mechanic data (from form)
-         * @returns {Promise<Object>} The created mechanic returned from the API
+         * Add a new mechanic
+         * @param {Object} mechanicData
+         * @returns {Promise<Object>}
          */
         async addMechanic(mechanicData) {
-            const response = await MechanicService.create(createMechanic(mechanicData));
+            const payload = createMechanic(mechanicData);
+            const response = await MechanicService.create(payload);
+
             this.mechanics.push(response.data);
+            return response.data;
         },
 
         /**
-         * Updates an existing mechanic's information.
-         *
-         * @param {string|number} id - ID of the mechanic to update
-         * @param {Object} mechanicData - Updated mechanic data
+         * Update an existing mechanic
+         * @param {string|number} id
+         * @param {Object} mechanicData
          * @returns {Promise<void>}
          */
         async updateMechanic(id, mechanicData) {
-            const response = await MechanicService.update(id, createMechanic(mechanicData));
+            const payload = createMechanic(mechanicData);
+            const response = await MechanicService.update(id, payload);
+
             const index = this.mechanics.findIndex(m => String(m.id) === String(id));
 
             if (index !== -1) {
@@ -75,9 +76,8 @@ export const useMechanicStore = defineStore('mechanic', {
         },
 
         /**
-         * Deletes a mechanic by ID and removes it from the local state.
-         *
-         * @param {string|number} id - ID of the mechanic to delete
+         * Delete mechanic by ID
+         * @param {string|number} id
          * @returns {Promise<void>}
          */
         async deleteMechanic(id) {

@@ -1,147 +1,124 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../auth/application/auth.store';
-import { useTaskStore } from '../../workshop-operations/application/task.store';
+import { useVehicleStore } from '../../fleet-management/application/vehicle.store';
 import { useWorkOrderStore } from '../../workshop-operations/application/work-order.store';
-import { useInventoryStore } from '../../inventory-management/application/inventory.store';
-import InputNumber from 'primevue/inputnumber';
-import Card from 'primevue/card';
-import Button from 'primevue/button';
-import Tag from 'primevue/tag';
-import Dropdown from 'primevue/dropdown';
-import Textarea from 'primevue/textarea';
-import InputText from 'primevue/inputtext';
-import ProgressBar from 'primevue/progressbar';
-import Avatar from 'primevue/avatar';
+import { useTaskStore } from '../../workshop-operations/application/task.store';
 
+// ── CONSTANTS FOR DOMAIN LOGIC ───────────────────────────
+/** Standardized system order states */
+const ORDER_STATUS = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  FINISHED: 'FINISHED'
+};
+
+/** Standardized system task states */
+const TASK_STATUS = {
+  COMPLETED: 'COMPLETED'
+};
+
+const { t } = useI18n();
 const router = useRouter();
+
 const authStore = useAuthStore();
-const taskStore = useTaskStore();
+const vehicleStore = useVehicleStore();
 const workOrderStore = useWorkOrderStore();
-const inventoryStore = useInventoryStore();
-
-const selectedTask = ref(null);
-const selectedStatus = ref(null);
-const mechanicReports = reactive({});
-
-const statusOptions = [
-  { label: 'Todas', value: null },
-  { label: 'Pendiente', value: 'Pendiente' },
-  { label: 'En Proceso', value: 'En Proceso' },
-  { label: 'Completada', value: 'Completada' }
-];
+const taskStore = useTaskStore();
 
 onMounted(async () => {
-  const mechanicId = authStore.mechanicId || authStore.user?.mechanicId || 'M-1';
-
   await Promise.all([
-    taskStore.fetchTasksByMechanic(mechanicId),
+    vehicleStore.fetchVehicles(),
     workOrderStore.fetchWorkOrders(),
-    inventoryStore.fetchInventory()
+    taskStore.fetchAllTasks()
   ]);
 });
 
-const myTasks = computed(() => taskStore.tasks);
+const currentMechanic = computed(() => ({
+  fullName: authStore.user?.email || 'Mechanic',
+  specialty: 'Technician'
+}));
 
-const filteredTasks = computed(() => {
-  if (!selectedStatus.value) return myTasks.value;
-  return myTasks.value.filter(task => task.status === selectedStatus.value);
-});
+const myOrders = computed(() =>
+    workOrderStore.workOrders.filter(
+        order =>
+            String(order.mechanicId) === String(authStore.mechanicId)
+    )
+);
 
-const pendingTasks = computed(() => myTasks.value.filter(t => t.status === 'Pendiente').length);
-const progressTasks = computed(() => myTasks.value.filter(t => t.status === 'En Proceso').length);
-const completedTasks = computed(() => myTasks.value.filter(t => t.status === 'Completada').length);
+/** Filters assigned orders matching the standard pending status */
+const pendingOrders = computed(() =>
+    myOrders.value.filter(order =>
+        order.status === ORDER_STATUS.PENDING
+    ).length
+);
 
-const generalProgress = computed(() => {
-  if (!myTasks.value.length) return 0;
-  return Math.round((completedTasks.value / myTasks.value.length) * 100);
-});
+/** Filters assigned orders matching the standard in progress status */
+const inProgressOrders = computed(() =>
+    myOrders.value.filter(order =>
+        order.status === ORDER_STATUS.IN_PROGRESS
+    ).length
+);
 
-const getOrder = (workOrderId) => {
-  return workOrderStore.workOrders.find(order => String(order.id) === String(workOrderId));
+/** Filters assigned orders matching the standard finished status */
+const completedOrders = computed(() =>
+    myOrders.value.filter(order =>
+        order.status === ORDER_STATUS.FINISHED
+    ).length
+);
+
+const getVehicleDetails = vehicleId => {
+  const vehicle = vehicleStore.vehicles.find(
+      v => String(v.id) === String(vehicleId)
+  );
+
+  if (!vehicle) return t('common.vehicle');
+
+  return `${vehicle.brand} ${vehicle.model}`;
 };
 
-const getOrderCode = (workOrderId) => {
-  return getOrder(workOrderId)?.trackingCode || 'Sin orden';
+const getTaskCount = orderId => {
+  return taskStore.tasks.filter(
+      task => String(task.workOrderId) === String(orderId)
+  ).length;
 };
 
-const getSeverity = (status) => {
-  if (status === 'Completada') return 'success';
-  if (status === 'En Proceso') return 'info';
+const getLaborTotal = orderId => {
+  const tasks = taskStore.tasks.filter(
+      task => String(task.workOrderId) === String(orderId)
+  );
+
+  return tasks.reduce(
+      (sum, task) => sum + Number(task.laborPrice || 0),
+      0
+  );
+};
+
+/**
+ * Maps system standard status codes to PrimeVue severity contexts
+ * @param {string} status - Clean domain code status
+ * @returns {string} Severity flavor string
+ */
+const getSeverity = status => {
+  if (status === ORDER_STATUS.FINISHED) return 'success';
+  if (status === ORDER_STATUS.IN_PROGRESS) return 'info';
   return 'warning';
 };
 
-const getIconClass = (status) => {
-  if (status === 'Completada') return 'pi pi-check-circle';
-  if (status === 'En Proceso') return 'pi pi-cog';
-  return 'pi pi-clock';
+/**
+ * Resolves technical status codes to translation keys dynamically
+ * @param {string} status - Clean domain code status
+ * @returns {string} Translated interface string
+ */
+const getStatusLabel = status => {
+  const key = String(status).toLowerCase();
+  return t(`orderStatus.${key}`);
 };
 
-const getReport = (task) => {
-  if (!mechanicReports[task.id]) {
-    mechanicReports[task.id] = {
-      technicalDiagnosis: task.technicalDiagnosis || '',
-      customerExplanation: task.customerExplanation || '',
-      internalObservation: task.internalObservation || '',
-      evidenceRegistered: task.evidenceRegistered || '',
-      requiredMaterials: task.requiredMaterials || [],
-      usedMaterials: task.usedMaterials || [],
-      materialsTotal: Number(task.materialsTotal || 0)
-    };
-  }
-
-  return mechanicReports[task.id];
-};
-
-
-const selectTask = (task) => {
-  selectedTask.value = task;
-  getReport(task);
-};
-
-const startTask = async (task) => {
-  await taskStore.updateTaskStatus(task.id, 'En Proceso');
-  task.status = 'En Proceso';
-};
-
-const saveTechnicalReport = async () => {
-  if (!selectedTask.value) return;
-
-  await taskStore.updateMechanicTechnicalReport(
-      selectedTask.value.id,
-      getReport(selectedTask.value)
-  );
-
-  alert('Actualización técnica enviada al administrador');
-};
-
-const completeTask = async () => {
-  if (!selectedTask.value) return;
-
-  const report = getReport(selectedTask.value);
-
-  await taskStore.completeTaskFromMechanic(
-      selectedTask.value.id,
-      report
-  );
-
-  if (report.usedMaterials?.length) {
-    await Promise.all(
-        report.usedMaterials.map(material =>
-            inventoryStore.discountStock(
-                material.inventoryItemId,
-                material.quantity
-            )
-        )
-    );
-  }
-
-  await inventoryStore.fetchInventory();
-
-  selectedTask.value.status = 'Completada';
-
-  alert('Tarea completada, materiales descontados del inventario y reporte visible para el cliente');
+const goToOrder = orderId => {
+  router.push(`/mechanic/order/${orderId}`);
 };
 
 
@@ -151,777 +128,343 @@ const logout = () => {
   router.push('/login');
 };
 
-const addMaterialToSelectedTask = (item) => {
-  if (!selectedTask.value) return;
-
-  const report = getReport(selectedTask.value);
-
-  if (!report.usedMaterials) {
-    report.usedMaterials = [];
-  }
-
-  const exists = report.usedMaterials.find(material => material.inventoryItemId === item.id);
-
-  if (exists) {
-    exists.quantity += 1;
-    exists.subtotal = exists.quantity * exists.unitPrice;
-  } else {
-    report.usedMaterials.push({
-      inventoryItemId: item.id,
-      name: item.name,
-      brand: item.brand,
-      quantity: 1,
-      unitPrice: item.unitPrice,
-      subtotal: item.unitPrice
-    });
-  }
-
-  report.materialsTotal = calculateMaterialsTotal(report.usedMaterials);
+/** Calculates tasks matching the global system completion code */
+const getCompletedTasks = orderId => {
+  return taskStore.tasks.filter(
+      t =>
+          String(t.workOrderId) === String(orderId) &&
+          t.status === TASK_STATUS.COMPLETED
+  ).length;
 };
 
-const updateMaterialQuantity = (material) => {
-  material.subtotal = Number(material.quantity || 0) * Number(material.unitPrice || 0);
-
-  const report = getReport(selectedTask.value);
-  report.materialsTotal = calculateMaterialsTotal(report.usedMaterials);
+const getTotalTasks = orderId => {
+  return taskStore.tasks.filter(
+      t => String(t.workOrderId) === String(orderId)
+  ).length;
 };
 
-const removeMaterial = (materialId) => {
-  const report = getReport(selectedTask.value);
+const getProgress = orderId => {
+  const total = getTotalTasks(orderId);
+  if (!total) return 0;
 
-  report.usedMaterials = report.usedMaterials.filter(
-      material => material.inventoryItemId !== materialId
+  return Math.round(
+      (getCompletedTasks(orderId) / total) * 100
   );
-
-  report.materialsTotal = calculateMaterialsTotal(report.usedMaterials);
 };
-
-const calculateMaterialsTotal = (materials = []) => {
-  return materials.reduce((total, material) => total + Number(material.subtotal || 0), 0);
-};
-
-
 </script>
 
 <template>
   <section class="mechanic-page">
+
     <header class="mechanic-header">
+
       <div>
-        <span class="eyebrow">Workspace del Mecánico</span>
-        <h1>Mis tareas asignadas</h1>
-        <p>Registra diagnósticos técnicos, actualiza avances y genera información clara para el Cliente.</p>
+        <span class="eyebrow">
+          {{ t('mechanicDashboard.eyebrow') }}
+        </span>
+
+        <h1>
+          {{ t('mechanicDashboard.title') }}
+        </h1>
+
+        <p>
+          {{ t('mechanicDashboard.description') }}
+        </p>
       </div>
 
       <Card class="profile-card">
         <template #content>
+
           <div class="profile-content">
-            <Avatar icon="pi pi-users" size="large" shape="circle" />
+
+            <Avatar
+                icon="pi pi-user"
+                size="large"
+                shape="circle"
+            />
+
             <div>
-              <strong>{{ authStore.user?.name || 'Roberto Sánchez' }}</strong>
-              <span>Mecánico General</span>
-              <small>Turno activo</small>
+              <strong>
+                {{ currentMechanic.fullName }}
+              </strong>
+
+              <span>
+                {{ currentMechanic.specialty }}
+              </span>
+
+              <small>
+                {{ t('mechanicDashboard.shiftActive') }}
+              </small>
             </div>
+
           </div>
+
         </template>
       </Card>
+
     </header>
 
     <section class="summary-grid">
+
       <Card class="summary-card">
         <template #content>
-          <span>Pendientes</span>
-          <strong>{{ pendingTasks }}</strong>
-          <small>Tareas por iniciar</small>
+          <span>{{ t('mechanicDashboard.pending') }}</span>
+          <strong>{{ pendingOrders }}</strong>
         </template>
       </Card>
 
       <Card class="summary-card">
         <template #content>
-          <span>En proceso</span>
-          <strong>{{ progressTasks }}</strong>
-          <small>Trabajo activo</small>
+          <span>{{ t('mechanicDashboard.inProgress') }}</span>
+          <strong>{{ inProgressOrders }}</strong>
         </template>
       </Card>
 
       <Card class="summary-card">
         <template #content>
-          <span>Completadas</span>
-          <strong>{{ completedTasks }}</strong>
-          <small>Listas para revisión</small>
+          <span>{{ t('mechanicDashboard.completed') }}</span>
+          <strong>{{ completedOrders }}</strong>
         </template>
       </Card>
 
-      <Card class="summary-card progress-card">
-        <template #content>
-          <div class="progress-head">
-            <span>Avance general</span>
-            <strong>{{ generalProgress }}%</strong>
-          </div>
-          <ProgressBar :value="generalProgress" :showValue="false" class="general-progress" />
-        </template>
-      </Card>
     </section>
 
-    <section class="workspace-grid">
-      <Card class="tasks-panel">
-        <template #content>
-          <div class="panel-header">
-            <div>
-              <h2>Tareas del día</h2>
-              <p>Filtra y actualiza el estado real del servicio.</p>
+    <Card class="orders-card">
+
+      <template #content>
+
+        <div class="section-header">
+          <h2>{{ t('mechanicDashboard.assignedOrders') }}</h2>
+        </div>
+
+        <div v-if="myOrders.length" class="orders-grid">
+
+          <article
+              v-for="order in myOrders"
+              :key="order.id"
+              class="order-card"
+          >
+
+            <div class="order-top">
+
+              <Tag
+                  :value="order.trackingCode"
+                  severity="secondary"
+              />
+
+              <Tag
+                  :value="getStatusLabel(order.status)"
+                  :severity="getSeverity(order.status)"
+              />
+
             </div>
 
-            <Dropdown
-                v-model="selectedStatus"
-                :options="statusOptions"
-                option-label="label"
-                option-value="value"
-                placeholder="Filtrar estado"
-                class="status-filter"
-            />
-          </div>
+            <h3>
+              {{ getVehicleDetails(order.vehicleId) }}
+            </h3>
 
-          <div class="task-list">
-            <article
-                v-for="task in filteredTasks"
-                :key="task.id"
-                :class="['mini-task-card', { active: selectedTask?.id === task.id }]"
-                @click="selectTask(task)"
-            >
-              <div class="task-icon">
-                <i :class="getIconClass(task.status)"></i>
+            <p class="description">
+              {{ order.description }}
+            </p>
+
+            <div class="progress-block">
+
+              <div class="progress-label">
+                {{ getCompletedTasks(order.id) }}
+                /
+                {{ getTotalTasks(order.id) }}
+                {{ t('mechanicDashboard.tasksCompletedLabel') }}
               </div>
 
-              <div class="mini-task-content">
-                <Tag :value="getOrderCode(task.workOrderId)" severity="secondary" rounded />
-                <h3>{{ task.description }}</h3>
-                <p>Orden asociada al servicio técnico del vehículo.</p>
-
-                <div class="mini-meta">
-                  <span><i class="pi pi-flag"></i>{{ task.priority || 'Media' }}</span>
-                  <span><i class="pi pi-clock"></i>{{ task.estimatedTime || '2 h estimadas' }}</span>
-                </div>
-
-                <Tag :value="task.status" :severity="getSeverity(task.status)" rounded />
-              </div>
-
-              <Button
-                  label="Trabajar"
-                  icon="pi pi-arrow-right"
-                  icon-pos="right"
-                  outlined
-                  rounded
-                  @click.stop="selectTask(task)"
+              <ProgressBar
+                  :value="getProgress(order.id)"
+                  style="height:8px"
               />
-            </article>
-          </div>
-        </template>
-      </Card>
 
-      <Card class="detail-panel">
-        <template #content>
-          <div v-if="!selectedTask" class="empty-detail">
-            <i class="pi pi-users"></i>
-            <h2>Selecciona una tarea</h2>
-            <p>Aquí registrarás el diagnóstico técnico, la explicación para el Cliente, observaciones internas y evidencia simulada.</p>
-          </div>
+            </div>
 
-          <div v-else class="task-detail">
-            <div class="detail-header">
+            <div class="order-metrics">
+
               <div>
-                <Tag :value="getOrderCode(selectedTask.workOrderId)" severity="secondary" rounded />
-                <h2>{{ selectedTask.description }}</h2>
-                <p>Estado actual del servicio técnico.</p>
+                <small>{{ t('mechanicDashboard.tasks') }}</small>
+                <strong>{{ getTaskCount(order.id) }}</strong>
               </div>
 
-              <Tag :value="selectedTask.status" :severity="getSeverity(selectedTask.status)" rounded />
+              <div>
+                <small>{{ t('mechanicDashboard.labor') }}</small>
+                <strong>S/ {{ getLaborTotal(order.id) }}</strong>
+              </div>
+
             </div>
 
-            <div class="detail-actions">
-              <Button
-                  v-if="selectedTask.status === 'Pendiente'"
-                  label="Iniciar tarea"
-                  icon="pi pi-play"
-                  severity="warning"
-                  outlined
-                  @click="startTask(selectedTask)"
-              />
+            <Button
+                :label="t('mechanicDashboard.viewOrder')"
+                icon="pi pi-eye"
+                fluid
+                @click="goToOrder(order.id)"
+            />
 
-              <Button
-                  label="Ver orden"
-                  icon="pi pi-external-link"
-                  outlined
-                  @click="router.push(`/work-orders/${selectedTask.workOrderId}`)"
-              />
-            </div>
+          </article>
 
-            <div class="form-grid">
-              <div class="field">
-                <label>Diagnóstico técnico</label>
-                <Textarea
-                    v-model="getReport(selectedTask).technicalDiagnosis"
-                    rows="4"
-                    autoResize
-                    placeholder="Ejemplo: desgaste en pastillas delanteras..."
-                />
-              </div>
+        </div>
 
-              <div class="field">
-                <label>Explicación para Cliente</label>
-                <Textarea
-                    v-model="getReport(selectedTask).customerExplanation"
-                    rows="4"
-                    autoResize
-                    placeholder="Ejemplo: se recomienda cambio por seguridad..."
-                />
-              </div>
+        <div v-else class="empty-state">
+          {{ t('mechanicDashboard.empty') }}
+        </div>
 
-              <div class="field">
-                <label>Observación interna para Administrador</label>
-                <Textarea
-                    v-model="getReport(selectedTask).internalObservation"
-                    rows="3"
-                    autoResize
-                    placeholder="Observaciones internas para coordinación..."
-                />
-              </div>
+      </template>
 
-              <div class="field">
-                <label>Evidencia simulada</label>
-                <InputText
-                    v-model="getReport(selectedTask).evidenceRegistered"
-                    placeholder="Ejemplo: Foto de fuga hidráulica registrada"
-                />
-              </div>
-              <div class="materials-section">
-                <div class="materials-header">
-                  <div>
-                    <h3>Materiales utilizados</h3>
-                    <p>Selecciona materiales desde el inventario del taller.</p>
-                  </div>
-
-                  <strong>S/. {{ getReport(selectedTask).materialsTotal?.toFixed(2) || '0.00' }}</strong>
-                </div>
-
-                <div class="inventory-options">
-                  <button
-                      v-for="item in inventoryStore.availableItems"
-                      :key="item.id"
-                      type="button"
-                      class="inventory-option"
-                      @click="addMaterialToSelectedTask(item)"
-                  >
-                    <img :src="item.image" :alt="item.name" />
-
-                    <div>
-                      <strong>{{ item.name }}</strong>
-                      <span>{{ item.brand }} · S/. {{ item.unitPrice.toFixed(2) }}</span>
-                      <small>Stock: {{ item.stock }}</small>
-                    </div>
-                  </button>
-                </div>
-
-                <div
-                    v-if="getReport(selectedTask).usedMaterials?.length"
-                    class="selected-materials"
-                >
-                  <div
-                      v-for="material in getReport(selectedTask).usedMaterials"
-                      :key="material.inventoryItemId"
-                      class="selected-material"
-                  >
-                    <div>
-                      <strong>{{ material.name }}</strong>
-                      <span>{{ material.brand }} · S/. {{ material.unitPrice.toFixed(2) }}</span>
-                    </div>
-
-                    <InputNumber
-                        v-model="material.quantity"
-                        :min="1"
-                        showButtons
-                        class="quantity-input"
-                        @update:model-value="updateMaterialQuantity(material)"
-                    />
-
-                    <strong>S/. {{ material.subtotal.toFixed(2) }}</strong>
-
-                    <Button
-                        icon="pi pi-trash"
-                        severity="danger"
-                        text
-                        rounded
-                        @click="removeMaterial(material.inventoryItemId)"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="save-row">
-              <Button
-                  label="Guardar actualización"
-                  icon="pi pi-save"
-                  severity="info"
-                  outlined
-                  @click="saveTechnicalReport"
-              />
-
-              <Button
-                  label="Completar tarea"
-                  icon="pi pi-check"
-                  severity="success"
-                  @click="completeTask"
-              />
-            </div>
-          </div>
-        </template>
-      </Card>
-    </section>
+    </Card>
 
     <Button
-        label="Cerrar sesión"
+        :label="t('mechanicDashboard.logout')"
         icon="pi pi-sign-out"
         severity="danger"
         outlined
         class="logout-button"
         @click="logout"
     />
+
   </section>
 </template>
 
 <style scoped>
-.mechanic-page {
-  min-height: 100vh;
-  padding: 2rem;
-  background: #f8fafc;
-  color: #0f172a;
+.mechanic-page{
+  min-height:100vh;
+  padding:2rem;
+  background:#f8fafc;
 }
 
-.mechanic-header {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 1.5rem;
-  align-items: start;
-  margin-bottom: 1.5rem;
+.mechanic-header{
+  display:grid;
+  grid-template-columns:1fr 320px;
+  gap:1.5rem;
+  margin-bottom:1.5rem;
 }
 
-.eyebrow {
-  color: #0b1680;
-  font-weight: 900;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+.eyebrow{
+  color:#0b1680;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
 }
 
-.mechanic-header h1 {
-  margin: .3rem 0;
-  font-size: clamp(2.2rem, 5vw, 3.3rem);
-  line-height: 1;
-  letter-spacing: -0.05em;
+.mechanic-header h1{
+  margin:.4rem 0;
+  font-size:3rem;
 }
 
-.mechanic-header p {
-  color: #64748b;
-  font-size: 1rem;
+.mechanic-header p{
+  color:#64748b;
 }
 
-.profile-card,
-.summary-card,
-.tasks-panel,
-.detail-panel {
-  border-radius: 26px;
-  border: 1px solid #edf2f7;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+.profile-card{
+  border-radius:24px;
 }
 
-.profile-content {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
+.profile-content{
+  display:flex;
+  gap:1rem;
+  align-items:center;
 }
 
-.profile-content strong,
-.profile-content span,
-.profile-content small {
-  display: block;
+.profile-content span{
+  display:block;
+  color:#64748b;
 }
 
-.profile-content strong {
-  color: #0f172a;
+.profile-content small{
+  color:#16a34a;
+  font-weight:700;
 }
 
-.profile-content span {
-  color: #64748b;
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1rem;
+  margin-bottom:1.5rem;
 }
 
-.profile-content small {
-  margin-top: .25rem;
-  color: #16a34a;
-  font-weight: 800;
+.summary-card strong{
+  display:block;
+  margin-top:.5rem;
+  font-size:2rem;
+  color:#0b1680;
 }
 
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.2rem;
-  margin-bottom: 1.5rem;
+.orders-card{
+  border-radius:24px;
 }
 
-.summary-card span {
-  color: #64748b;
-  font-weight: 800;
+.section-header{
+  margin-bottom:1rem;
 }
 
-.summary-card strong {
-  display: block;
-  margin: .35rem 0;
-  color: #0b1680;
-  font-size: 2.2rem;
-  line-height: 1;
+.orders-grid{
+  display:grid;
+  gap:1rem;
 }
 
-.summary-card small {
-  color: #94a3b8;
+.order-card{
+  border:1px solid #e2e8f0;
+  border-radius:20px;
+  padding:1rem;
+  background:white;
 }
 
-.progress-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.order-top{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:1rem;
 }
 
-.general-progress {
-  height: 8px;
-  margin-top: 1rem;
+.order-card h3{
+  margin:0 0 .5rem;
 }
 
-.workspace-grid {
-  display: grid;
-  grid-template-columns: 1.25fr .75fr;
-  gap: 1.5rem;
-  align-items: start;
+.description{
+  color:#64748b;
 }
 
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+.order-metrics{
+  display:flex;
+  justify-content:space-between;
+  margin:1rem 0;
 }
 
-.panel-header h2 {
-  margin: 0;
-  color: #0f172a;
+.order-metrics small{
+  display:block;
+  color:#64748b;
 }
 
-.panel-header p {
-  margin: .35rem 0 0;
-  color: #64748b;
+.order-metrics strong{
+  font-size:1.1rem;
 }
 
-.status-filter {
-  width: 200px;
+.empty-state{
+  padding:2rem;
+  text-align:center;
+  color:#64748b;
 }
 
-.task-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.1rem;
+.logout-button{
+  position:fixed;
+  right:2rem;
+  bottom:2rem;
 }
 
-.mini-task-card {
-  display: grid;
-  grid-template-columns: 44px 1fr auto;
-  gap: 1rem;
-  align-items: start;
-  padding: 1rem;
-  border: 1px solid #e8edf5;
-  border-radius: 22px;
-  background: #ffffff;
-  cursor: pointer;
-  transition: .2s ease;
+@media(max-width:900px){
+  .mechanic-header{ grid-template-columns:1fr; }
+  .summary-grid{ grid-template-columns:1fr; }
 }
 
-.mini-task-card:hover,
-.mini-task-card.active {
-  border-color: #0b1680;
-  box-shadow: 0 14px 28px rgba(11, 22, 128, 0.09);
-  transform: translateY(-2px);
+.progress-block{
+  margin:1rem 0;
 }
 
-.task-icon {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: #dbeafe;
-  color: #0b1680;
-  font-size: 1.2rem;
-}
-
-.mini-task-content h3 {
-  margin: .5rem 0 .25rem;
-  font-size: 1rem;
-  color: #0f172a;
-}
-
-.mini-task-content p {
-  margin: 0 0 .8rem;
-  color: #64748b;
-  font-size: .9rem;
-}
-
-.mini-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .7rem;
-  margin-bottom: .8rem;
-  color: #64748b;
-  font-size: .85rem;
-}
-
-.mini-meta span {
-  display: inline-flex;
-  gap: .35rem;
-  align-items: center;
-}
-
-.detail-panel {
-  min-height: 520px;
-  position: sticky;
-  top: 1rem;
-}
-
-.empty-detail {
-  min-height: 450px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  color: #64748b;
-}
-
-.empty-detail i {
-  color: #0b1680;
-  font-size: 2.5rem;
-}
-
-.empty-detail h2 {
-  margin: .75rem 0 .25rem;
-  color: #0f172a;
-}
-
-.empty-detail p {
-  max-width: 390px;
-}
-
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.detail-header h2 {
-  margin: .65rem 0 .25rem;
-  color: #0f172a;
-}
-
-.detail-header p {
-  margin: 0;
-  color: #64748b;
-}
-
-.detail-actions {
-  display: flex;
-  gap: .75rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.2rem;
-}
-
-.form-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.field label {
-  display: block;
-  margin-bottom: .45rem;
-  color: #64748b;
-  font-weight: 800;
-}
-
-.field :deep(textarea),
-.field :deep(input) {
-  width: 100%;
-  border-radius: 14px;
-}
-
-.save-row {
-  display: flex;
-  gap: .75rem;
-  margin-top: 1.3rem;
-  flex-wrap: wrap;
-}
-
-.logout-button {
-  position: fixed;
-  right: 2rem;
-  bottom: 2rem;
-  border-radius: 16px;
-  background: #ffffff;
-}
-.materials-section {
-  grid-column: 1 / -1;
-  padding: 1rem;
-  border: 1px solid #e8edf5;
-  border-radius: 20px;
-  background: #f8fafc;
-}
-
-.materials-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.materials-header h3 {
-  margin: 0;
-  color: #0f172a;
-}
-
-.materials-header p {
-  margin: .25rem 0 0;
-  color: #64748b;
-}
-
-.materials-header strong {
-  color: #0b1680;
-  font-size: 1.2rem;
-}
-
-.inventory-options {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: .75rem;
-}
-
-.inventory-option {
-  display: flex;
-  gap: .75rem;
-  align-items: center;
-  padding: .75rem;
-  border: 1px solid #dbe3ef;
-  border-radius: 16px;
-  background: #ffffff;
-  cursor: pointer;
-  text-align: left;
-}
-
-.inventory-option:hover {
-  border-color: #0b1680;
-}
-
-.inventory-option img {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  object-fit: cover;
-}
-
-.inventory-option strong,
-.inventory-option span,
-.inventory-option small {
-  display: block;
-}
-
-.inventory-option span,
-.inventory-option small {
-  color: #64748b;
-}
-
-.selected-materials {
-  display: grid;
-  gap: .75rem;
-  margin-top: 1rem;
-}
-
-.selected-material {
-  display: grid;
-  grid-template-columns: 1fr 120px 100px auto;
-  gap: .75rem;
-  align-items: center;
-  padding: .75rem;
-  border-radius: 16px;
-  background: #ffffff;
-}
-
-.selected-material span {
-  display: block;
-  color: #64748b;
-}
-
-.quantity-input {
-  width: 100%;
-}
-
-@media (max-width: 720px) {
-  .inventory-options {
-    grid-template-columns: 1fr;
-  }
-
-  .selected-material {
-    grid-template-columns: 1fr;
-  }
-}
-@media (max-width: 1200px) {
-  .mechanic-header,
-  .workspace-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-panel {
-    position: static;
-  }
-}
-
-@media (max-width: 900px) {
-  .summary-grid,
-  .task-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .mini-task-card {
-    grid-template-columns: 44px 1fr;
-  }
-
-  .mini-task-card .p-button {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 640px) {
-  .mechanic-page {
-    padding: 1rem;
-  }
-
-  .summary-grid,
-  .task-list {
-    grid-template-columns: 1fr;
-  }
-
-  .panel-header {
-    flex-direction: column;
-  }
-
-  .status-filter {
-    width: 100%;
-  }
-
-  .logout-button {
-    position: static;
-    width: 100%;
-    margin-top: 1rem;
-  }
+.progress-label{
+  font-size:.85rem;
+  color:#64748b;
+  margin-bottom:.5rem;
 }
 </style>

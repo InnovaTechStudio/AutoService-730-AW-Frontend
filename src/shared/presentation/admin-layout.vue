@@ -1,65 +1,144 @@
+<script setup>
+/**
+ * Main admin layout.
+ * Contains sidebar navigation, topbar and routed content.
+ */
+
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+
+import Button from 'primevue/button';
+
+import { useAuthStore } from '../../domains/auth/application/auth.store';
+
+import LanguageSwitcher from './language-switcher.vue';
+
+const { t } = useI18n();
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+/**
+ * Logs out current user and redirects to login page.
+ */
+const handleLogout = () => {
+  authStore.logout();
+
+  window.location.href = '/login';
+};
+</script>
+
 <template>
   <div class="admin-layout">
 
     <!-- SIDEBAR -->
     <aside class="sidebar">
+
       <div class="logo-area">
-        <h2>AutoService</h2>
-        <span class="subtitle">{{ t('nav.controlPanel') }}</span>
+        <h2>{{ t('layout.brand') }}</h2>
+
+        <span class="subtitle">
+          {{ t('nav.controlPanel') }}
+        </span>
       </div>
 
       <nav class="menu">
-        <router-link to="/" class="menu-item">
+
+        <router-link
+            to="/"
+            class="menu-item"
+        >
           <i class="pi pi-home"></i>
+
           <span>{{ t('nav.dashboard') }}</span>
         </router-link>
 
-        <router-link to="/customers" class="menu-item">
+        <router-link
+            to="/customers"
+            class="menu-item"
+        >
           <i class="pi pi-users"></i>
+
           <span>{{ t('nav.customers') }}</span>
         </router-link>
 
-        <router-link to="/vehicles" class="menu-item">
+        <router-link
+            to="/vehicles"
+            class="menu-item"
+        >
           <i class="pi pi-car"></i>
+
           <span>{{ t('nav.vehicles') }}</span>
         </router-link>
 
-        <router-link to="/work-orders" class="menu-item">
+        <router-link
+            to="/work-orders"
+            class="menu-item"
+        >
           <i class="pi pi-address-book"></i>
+
           <span>{{ t('nav.workOrders') }}</span>
         </router-link>
 
-        <router-link to="/tasks" class="menu-item">
+        <router-link
+            to="/tasks"
+            class="menu-item"
+        >
           <i class="pi pi-check-square"></i>
+
           <span>{{ t('nav.tasks') }}</span>
         </router-link>
 
-        <router-link to="/mechanics" class="menu-item">
+        <router-link
+            to="/mechanics"
+            class="menu-item"
+        >
           <i class="pi pi-users"></i>
+
           <span>{{ t('nav.mechanics') }}</span>
         </router-link>
+
+        <router-link
+            to="/inventory"
+            class="menu-item"
+        >
+          <i class="pi pi-box"></i>
+
+          <span>{{ t('nav.inventory') }}</span>
+        </router-link>
+
       </nav>
+
     </aside>
 
     <!-- MAIN -->
     <main class="main-content">
 
-      <!-- TOOLBAR -->
+      <!-- TOPBAR -->
       <header class="topbar">
 
         <div class="topbar-left">
           <span class="welcome-text">
             {{ t('topbar.welcome') }}
-            <strong>{{ authStore.user?.name || t('topbar.admin') }}</strong>
+
+            <strong>
+              {{ authStore.user?.name || t('topbar.admin') }}
+            </strong>
           </span>
         </div>
 
         <div class="topbar-right">
+
           <LanguageSwitcher />
 
           <div class="user-info">
+
             <i class="pi pi-user user-icon"></i>
-            <span>{{ authStore.user?.name || t('topbar.admin') }}</span>
+
+            <span>
+              {{ authStore.user?.name || t('topbar.admin') }}
+            </span>
+
           </div>
 
           <Button
@@ -70,7 +149,9 @@
               outlined
               @click="handleLogout"
           />
+
         </div>
+
       </header>
 
       <!-- CONTENT -->
@@ -79,42 +160,25 @@
       </section>
 
     </main>
+
   </div>
 </template>
 
-<script setup>
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../../domains/auth/application/auth.store';
-import Button from 'primevue/button';
-import LanguageSwitcher from './language-switcher.vue';
-
-const { t } = useI18n();
-const router = useRouter();
-const authStore = useAuthStore();
-
-const handleLogout = () => {
-  authStore.logout();
-  router.push('/login');
-};
-</script>
-
 <style scoped>
-
-/* LAYOUT */
+/* Layout */
 .admin-layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
 }
 
-/* SIDEBAR */
+/* Sidebar */
 .sidebar {
-  width: 260px;
-  background: #0f172a;
-  color: white;
   display: flex;
   flex-direction: column;
+  width: 260px;
+  color: #ffffff;
+  background: #0f172a;
 }
 
 .logo-area {
@@ -129,60 +193,55 @@ const handleLogout = () => {
 }
 
 .subtitle {
-  font-size: 0.9rem;
   color: #94a3b8;
+  font-size: 0.9rem;
 }
 
-/* MENU */
+/* Menu */
 .menu {
-  padding: 1rem 0;
   flex: 1;
+  padding: 1rem 0;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
   gap: 12px;
-
   padding: 0.9rem 1.5rem;
   color: #cbd5e1;
   text-decoration: none;
-
   transition: all 0.2s ease;
 }
 
 .menu-item:hover {
+  color: #ffffff;
   background: #1e293b;
-  color: white;
 }
 
 .router-link-exact-active {
+  color: #ffffff;
   background: #1e293b;
-  color: white;
   border-left: 4px solid #14b8a6;
 }
 
-/* MAIN */
+/* Main */
 .main-content {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   background: #f1f5f9;
 }
 
-/* TOPBAR */
+/* Topbar */
 .topbar {
-  height: 70px;
-  background: white;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
-
+  height: 70px;
   padding: 0 2rem;
-
+  background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .topbar-left {
@@ -190,15 +249,9 @@ const handleLogout = () => {
   flex-direction: column;
 }
 
-.topbar-left h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  color: #0f172a;
-}
-
 .welcome-text {
-  font-size: 0.9rem;
   color: #64748b;
+  font-size: 0.9rem;
 }
 
 .topbar-right {
@@ -207,36 +260,31 @@ const handleLogout = () => {
   gap: 1rem;
 }
 
-/* USER INFO */
+/* User info */
 .user-info {
   display: flex;
   align-items: center;
   gap: 10px;
-
   padding: 0.5rem 1rem;
   background: #f8fafc;
   border-radius: 12px;
 }
 
 .user-icon {
-  background: #14b8a6;
-  color: white;
-
-  width: 35px;
-  height: 35px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
+  width: 35px;
+  height: 35px;
+  color: #ffffff;
+  background: #14b8a6;
   border-radius: 50%;
 }
 
-/* CONTENT */
+/* Content */
 .content {
   flex: 1;
   overflow-y: auto;
   padding: 2rem;
 }
-
 </style>

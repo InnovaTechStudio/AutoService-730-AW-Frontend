@@ -1,26 +1,45 @@
+/**
+ * @file task.entity.js
+ * @description Factory for task domain entity.
+ */
+
+/**
+ * Creates a normalized task entity.
+ *
+ * @param {Object} [data={}] - Raw task data.
+ * @returns {Object} Normalized task entity.
+ */
 export const createTask = (data = {}) => ({
-    id: data.id || null,
-    workshopId: data.workshopId || null,
-    workOrderId: data.workOrderId || null,
-    description: data.description || '',
-    status: data.status || 'Pendiente',
+    id: data.id,
+
+    workOrderId: data.workOrderId,
+
     mechanicId: data.mechanicId || null,
-    priority: data.priority || 'Media',
-    estimatedTime: data.estimatedTime || 'No definido',
-    price: Number(data.price || 0),
-    photo: data.photo || '',
 
-    technicalDiagnosis: data.technicalDiagnosis || '',
-    customerExplanation: data.customerExplanation || '',
-    internalObservation: data.internalObservation || '',
-    evidenceRegistered: data.evidenceRegistered || '',
+    description: data.description || '',
 
-    requiredMaterials: data.requiredMaterials || [],
-    usedMaterials: data.usedMaterials || [],
-    materialsTotal: Number(data.materialsTotal || 0),
-    materialRequestStatus: data.materialRequestStatus || 'Sin materiales',
+    status: data.status || 'PENDING',
 
-    adminReviewStatus: data.adminReviewStatus || 'Sin enviar',
-    customerReportStatus: data.customerReportStatus || 'No visible',
-    completedAt: data.completedAt || null
+    priority: data.priority || 'MEDIUM',
+
+    estimatedTime: data.estimatedTime || 0,
+
+    laborPrice: data.laborPrice || 0.0,
+
+    technicalDiagnosis:
+        data.technicalDiagnosis || '',
+
+    customerExplanation:
+        data.customerExplanation || '',
+
+    internalObservation:
+        data.internalObservation || '',
+
+    evidenceRegistered:
+        data.evidenceRegistered || '',
+
+    adminReviewStatus:
+        data.adminReviewStatus || '',
+
+    parts: data.parts || []
 });

@@ -1,191 +1,191 @@
-/**
-* @file MechanicsView.vue
-* @description
-* Main view for mechanic management.
-* Displays mechanic workload metrics, filtering tools,
-* registration dialog, and mechanic performance information.
-*/
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+/**
+ * @file MechanicsPage.vue
+ * @description Mechanics management page.
+ */
+
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMechanicStore } from '../application/mechanic.store';
-import { useTaskStore } from '../../workshop-operations/application/task.store';
 
 import Button from 'primevue/button';
-import MechanicFilters from './components/MechanicFilters.vue';
+import Dialog from 'primevue/dialog';
+import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
+import Message from 'primevue/message';
+import Select from 'primevue/select';
+
+import { useAuthStore } from '../../auth/application/auth.store';
+import { useMechanicStore } from '../application/mechanic.store';
+
 import MechanicCard from './components/MechanicCard.vue';
-import MechanicDialog from './components/MechanicDialog.vue';
+import MechanicFilters from './components/MechanicFilters.vue';
 
 const { t } = useI18n();
-/**
- * Mechanics store instance.
- * Handles mechanic CRUD operations and state management.
- */
-const mechanicStore = useMechanicStore();
-const taskStore = useTaskStore();
 
-const displayDialog = ref(false);
-const mechanicForm = ref({});
+const mechanicStore = useMechanicStore();
+const authStore = useAuthStore();
+
+const mechanicDialog = ref(false);
+const mechanic = ref({});
 const search = ref('');
 const selectedSpecialty = ref(null);
+const errorMessage = ref('');
 
+/**
+ * Mechanic specialties options.
+ */
 const specialtyOptions = computed(() => [
   t('mechanics.specialties.general'),
   t('mechanics.specialties.electrical'),
-  t('mechanics.specialties.bodywork'),
-  t('mechanics.specialties.electronics'),
   t('mechanics.specialties.brakes'),
-  t('mechanics.specialties.engine')
+  t('mechanics.specialties.tires')
 ]);
 
-onMounted(async () => {
-  await Promise.all([mechanicStore.fetchMechanics(), taskStore.fetchAllTasks()]);
+/**
+ * Computes admin email domain for mechanic accounts.
+ */
+const adminDomain = computed(() => {
+  if (!authStore.user?.email) {
+    return '@taller.com';
+  }
+
+  return `@${authStore.user.email.split('@')[1]}`;
 });
 
-const getActiveTasksCount = (mechanicId) =>
-    taskStore.tasks.filter((task) => String(task.mechanicId) === String(mechanicId) && task.status !== 'Completada').length;
-
 /**
- * Calculates the workload percentage for a mechanic.
- *
- * @param {string|number} mechanicId Mechanic identifier.
- * @param {number} maxCapacity Maximum task capacity.
- * @returns {number} Workload percentage.
+ * Filters mechanics by search and specialty.
  */
-const calculateLoadPercentage = (mechanicId, maxCapacity) => {
-  const max = Number(maxCapacity) || 1;
-  const count = getActiveTasksCount(mechanicId);
-  return Math.min(Math.round((count / max) * 100), 100);
-};
-
-const getWorkloadStatus = (mechanicId, maxCapacity) => {
-  const percentage = calculateLoadPercentage(mechanicId, maxCapacity);
-  if (percentage >= 100) return t('mechanics.workloadStatus.atMax');
-  if (percentage >= 70) return t('mechanics.workloadStatus.highLoad');
-  return t('mechanics.workloadStatus.available');
-};
-
-const getSeverity = (mechanicId, maxCapacity) => {
-  const percentage = calculateLoadPercentage(mechanicId, maxCapacity);
-  if (percentage >= 100) return 'danger';
-  if (percentage >= 70) return 'warning';
-  return 'success';
-};
-
-/**
- * Returns the CSS class associated with workload level.
- *
- * @param {string|number} mechanicId Mechanic identifier.
- * @param {number} maxCapacity Maximum mechanic capacity.
- * @returns {string} CSS class name.
- */
-const getLoadClass = (mechanicId, maxCapacity) => {
-  const percentage = calculateLoadPercentage(mechanicId, maxCapacity);
-  if (percentage >= 100) return 'load-high';
-  if (percentage >= 70) return 'load-medium';
-  return 'load-low';
-};
-
-const calculateEffectiveness = (mechanicId) => {
-  const mechanicTasks = taskStore.tasks.filter((task) => String(task.mechanicId) === String(mechanicId));
-  if (!mechanicTasks.length) return 0;
-  const completed = mechanicTasks.filter((task) => ['Completada', 'Finalizada', 'Listo'].includes(task.status)).length;
-  return Math.round((completed / mechanicTasks.length) * 100);
-};
-
-const mechanicsView = computed(() =>
-    mechanicStore.mechanics.map((mechanic) => ({
-      id: mechanic.id,
-      raw: mechanic,
-      fullName: mechanic.fullName,
-      specialty: mechanic.specialty || t('mechanics.specialties.general'),
-      maxCapacity: mechanic.maxCapacity || 5,
-      activeTasks: getActiveTasksCount(mechanic.id),
-      loadPercentage: calculateLoadPercentage(mechanic.id, mechanic.maxCapacity),
-      workloadStatus: getWorkloadStatus(mechanic.id, mechanic.maxCapacity),
-      severity: getSeverity(mechanic.id, mechanic.maxCapacity),
-      loadClass: getLoadClass(mechanic.id, mechanic.maxCapacity),
-      effectiveness: calculateEffectiveness(mechanic.id)
-    }))
-);
-
 const filteredMechanics = computed(() => {
   const term = search.value.toLowerCase().trim();
-  return mechanicsView.value.filter((mechanic) => {
-    const matchesSearch = !term || mechanic.fullName.toLowerCase().includes(term) || mechanic.specialty.toLowerCase().includes(term);
-    const matchesSpecialty = !selectedSpecialty.value || mechanic.specialty === selectedSpecialty.value;
+
+  return mechanicStore.mechanics.filter((currentMechanic) => {
+    const matchesSearch =
+        !term ||
+        currentMechanic.fullName?.toLowerCase().includes(term) ||
+        currentMechanic.email?.toLowerCase().includes(term);
+
+    const matchesSpecialty =
+        !selectedSpecialty.value ||
+        currentMechanic.specialty === selectedSpecialty.value;
+
     return matchesSearch && matchesSpecialty;
   });
 });
 
-const availableMechanics = computed(() => mechanicsView.value.filter((m) => m.loadPercentage < 70).length);
-const highLoadMechanics = computed(() => mechanicsView.value.filter((m) => m.loadPercentage >= 70).length);
+onMounted(async () => {
+  await mechanicStore.fetchMechanics();
+});
 
-const openDialog = () => {
-  mechanicForm.value = { fullName: '', specialty: t('mechanics.specialties.general'), maxCapacity: 5 };
-  displayDialog.value = true;
+const openNew = () => {
+  mechanic.value = {
+    fullName: '',
+    specialty: '',
+    maxCapacity: 3,
+    username: '',
+    password: ''
+  };
+
+  errorMessage.value = '';
+  mechanicDialog.value = true;
 };
 
-const editMechanic = (mechanic) => { mechanicForm.value = { ...mechanic }; displayDialog.value = true; };
-const hideDialog = () => { displayDialog.value = false; mechanicForm.value = {}; };
+const openEdit = (mech) => {
+  mechanic.value = { ...mech };
+  errorMessage.value = '';
+  mechanicDialog.value = true;
+};
+
+const hideDialog = () => {
+  mechanicDialog.value = false;
+  errorMessage.value = '';
+};
+
+const confirmDelete = async (mech) => {
+  const confirmed = confirm(
+      t('mechanics.confirm.delete', { name: mech.fullName })
+  );
+
+  if (!confirmed) return;
+
+  await mechanicStore.deleteMechanic(mech.id);
+};
 
 const saveMechanic = async () => {
-  if (!mechanicForm.value.fullName) return;
-  if (mechanicForm.value.id) {
-    await mechanicStore.updateMechanic(mechanicForm.value.id, mechanicForm.value);
-  } else {
-    await mechanicStore.addMechanic(mechanicForm.value);
-  }
-  hideDialog();
-};
+  errorMessage.value = '';
 
-const deleteMechanic = async (mechanic) => {
-  const confirmed = window.confirm(t('mechanics.card.confirmDelete', { name: mechanic.fullName }));
-  if (!confirmed) return;
-  await mechanicStore.deleteMechanic(mechanic.id);
+  try {
+    if (mechanic.value.id) {
+      await mechanicStore.updateMechanic(
+          mechanic.value.id,
+          mechanic.value
+      );
+
+      hideDialog();
+      return;
+    }
+
+    const hasRequiredFields =
+        mechanic.value.fullName &&
+        mechanic.value.username &&
+        mechanic.value.password;
+
+    if (!hasRequiredFields) return;
+
+    const fullEmail =
+        `${mechanic.value.username.trim()}${adminDomain.value}`;
+
+    const payload = {
+      fullName: mechanic.value.fullName,
+      specialty: mechanic.value.specialty,
+      maxCapacity: mechanic.value.maxCapacity,
+      email: fullEmail,
+      password: mechanic.value.password
+    };
+
+    await mechanicStore.addMechanic(payload);
+
+    hideDialog();
+  } catch (error) {
+    if (error.response?.status === 400) {
+      errorMessage.value = t('mechanics.errors.invalidData');
+      return;
+    }
+
+    errorMessage.value = t('mechanics.errors.server');
+  }
 };
 </script>
 
 <template>
-  <section class="mechanics-page">
-    <div class="mechanics-header">
-      <div>
-        <span class="eyebrow">{{ t('mechanics.eyebrow') }}</span>
-        <h1>{{ t('mechanics.title') }}</h1>
-        <p>{{ t('mechanics.description') }}</p>
-      </div>
-      <Button :label="t('mechanics.registerButton')" icon="pi pi-user-plus" class="add-button" @click="openDialog" />
+  <div class="mechanics-page">
+    <div class="header-section">
+      <h1>{{ t('mechanics.title') }}</h1>
+
+      <Button
+          :label="t('mechanics.actions.new')"
+          icon="pi pi-plus"
+          @click="openNew"
+      />
     </div>
 
-    <div class="summary-row">
-      <div class="summary-card">
-        <span>{{ t('mechanics.summary.total') }}</span>
-        <strong>{{ mechanicStore.mechanics.length }}</strong>
-      </div>
-      <div class="summary-card">
-        <span>{{ t('mechanics.summary.available') }}</span>
-        <strong>{{ availableMechanics }}</strong>
-      </div>
-      <div class="summary-card warning">
-        <span>{{ t('mechanics.summary.highLoad') }}</span>
-        <strong>{{ highLoadMechanics }}</strong>
-      </div>
-    </div>
-
-    <MechanicFilters v-model:search="search" v-model:specialty="selectedSpecialty" :specialty-options="specialtyOptions" />
+    <MechanicFilters
+        v-model:search="search"
+        v-model:specialty="selectedSpecialty"
+        :specialty-options="specialtyOptions"
+    />
 
     <div v-if="mechanicStore.loading" class="empty-state">
       <i class="pi pi-spin pi-spinner"></i>
       <p>{{ t('mechanics.loading') }}</p>
     </div>
 
-    <div v-else-if="filteredMechanics.length" class="mechanics-grid">
+    <div v-else-if="filteredMechanics.length > 0" class="mechanics-grid">
       <MechanicCard
-          v-for="mechanic in filteredMechanics"
-          :key="mechanic.id"
-          :mechanic="mechanic"
-          @edit="editMechanic"
-          @delete="deleteMechanic"
+          v-for="mech in filteredMechanics"
+          :key="mech.id"
+          :mechanic="mech"
+          @edit="openEdit"
+          @delete="confirmDelete"
       />
     </div>
 
@@ -195,32 +195,200 @@ const deleteMechanic = async (mechanic) => {
       <p>{{ t('mechanics.empty.description') }}</p>
     </div>
 
-    <MechanicDialog
-        v-model:visible="displayDialog"
-        :mechanic="mechanicForm"
-        :specialty-options="specialtyOptions"
-        @save="saveMechanic"
-        @cancel="hideDialog"
-    />
-  </section>
+    <!-- DIALOG -->
+    <Dialog
+        v-model:visible="mechanicDialog"
+        :header="
+        mechanic.id
+          ? t('mechanics.dialog.editTitle')
+          : t('mechanics.dialog.registerTitle')
+      "
+        modal
+        class="p-fluid mechanic-dialog"
+    >
+      <Message
+          v-if="errorMessage"
+          severity="error"
+          :closable="false"
+          class="form-field"
+      >
+        {{ errorMessage }}
+      </Message>
+
+      <div class="field form-field">
+        <label for="fullName">
+          {{ t('mechanics.dialog.fullName') }}
+        </label>
+        <InputText
+            id="fullName"
+            v-model.trim="mechanic.fullName"
+            required
+            autofocus
+        />
+      </div>
+
+      <div class="field form-field">
+        <label for="specialty">
+          {{ t('mechanics.dialog.specialty') }}
+        </label>
+        <Select
+            id="specialty"
+            v-model="mechanic.specialty"
+            :options="specialtyOptions"
+            :placeholder="t('mechanics.dialog.selectSpecialty')"
+        />
+      </div>
+
+      <div class="field form-field">
+        <label for="maxCapacity">
+          {{ t('mechanics.dialog.maxCapacity') }}
+        </label>
+        <InputNumber
+            id="maxCapacity"
+            v-model="mechanic.maxCapacity"
+            showButtons
+            :min="1"
+            :max="10"
+        />
+      </div>
+
+      <div v-if="!mechanic.id" class="field form-field">
+        <label for="username">
+          {{ t('mechanics.dialog.username') }}
+        </label>
+
+        <div class="p-inputgroup flex-1">
+          <InputText
+              id="username"
+              v-model.trim="mechanic.username"
+              :placeholder="t('mechanics.dialog.usernamePlaceholder')"
+          />
+
+          <span class="p-inputgroup-addon">
+            {{ adminDomain }}
+          </span>
+        </div>
+
+        <small class="text-color-secondary">
+          {{ t('mechanics.dialog.usernameHelp') }}
+        </small>
+      </div>
+
+      <div v-if="!mechanic.id" class="field form-field">
+        <label for="password">
+          {{ t('mechanics.dialog.password') }}
+        </label>
+
+        <InputText
+            id="password"
+            v-model.trim="mechanic.password"
+            type="password"
+            required
+        />
+      </div>
+
+      <template #footer>
+        <Button
+            :label="t('actions.cancel')"
+            icon="pi pi-times"
+            text
+            @click="hideDialog"
+        />
+
+        <Button
+            :label="
+            mechanic.id
+              ? t('mechanics.actions.saveChanges')
+              : t('mechanics.actions.create')
+          "
+            icon="pi pi-check"
+            @click="saveMechanic"
+        />
+      </template>
+    </Dialog>
+  </div>
 </template>
 
 <style scoped>
-.mechanics-page { min-height: 100%; }
-.mechanics-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; }
-.eyebrow { display: inline-flex; margin-bottom: 0.5rem; color: #0b1680; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
-.mechanics-header h1 { margin: 0; color: #0f172a; font-size: clamp(2rem,4vw,2.7rem); line-height: 1.05; letter-spacing: -0.04em; }
-.mechanics-header p { max-width: 680px; margin: 0.75rem 0 0; color: #64748b; }
-.add-button { background: #0b1680; border-color: #0b1680; border-radius: 14px; }
-.summary-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; margin-bottom: 1.25rem; }
-.summary-card { padding: 1rem 1.2rem; border: 1px solid #e8edf5; border-radius: 20px; background: #ffffff; box-shadow: 0 10px 24px rgba(15,23,42,0.05); }
-.summary-card span { display: block; color: #64748b; font-weight: 700; }
-.summary-card strong { display: block; margin-top: 0.25rem; color: #0b1680; font-size: 1.8rem; }
-.summary-card.warning strong { color: #c2410c; }
-.mechanics-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; }
-.empty-state { display: grid; place-items: center; min-height: 260px; text-align: center; color: #64748b; border: 1px dashed #cbd5e1; border-radius: 24px; background: #ffffff; }
-.empty-state i { color: #0b1680; font-size: 2rem; margin-bottom: 0.75rem; }
-.empty-state h3 { margin: 0; color: #0f172a; }
-@media (max-width: 1200px) { .mechanics-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-@media (max-width: 768px) { .mechanics-header { flex-direction: column; } .add-button { width: 100%; } .summary-row, .mechanics-grid { grid-template-columns: 1fr; } }
+.mechanics-page {
+  min-height: 100%;
+}
+
+.header-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.mechanics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  padding: 1rem;
+  text-align: center;
+  color: #64748b;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 24px;
+}
+
+.empty-state i {
+  margin-bottom: 0.75rem;
+  font-size: 2.5rem;
+  color: #0b1680;
+}
+
+/* STANDARD FORM SPACING */
+.form-field {
+  margin-bottom: 1rem;
+}
+
+/* DIALOG IMPROVEMENTS */
+.mechanic-dialog {
+  width: 450px;
+  max-width: 95vw;
+}
+
+.mechanic-dialog :deep(.p-dialog-content) {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+}
+
+.mechanic-dialog :deep(.p-dialog-header) {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.mechanic-dialog :deep(.p-dialog-footer) {
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+}
+
+.field input,
+.field .p-inputtext,
+.field .p-select,
+.field .p-inputnumber {
+  width: 100%;
+}
 </style>

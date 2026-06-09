@@ -2,15 +2,15 @@
  * @file vehicle.service.js
  * @description **Vehicle Service (Infrastructure Layer)**
  *
- * This service acts as the data access layer (Repository pattern) for vehicles.
- * It encapsulates all HTTP communication with the backend related to vehicles,
- * abstracting the API calls from the rest of the application.
+ * Acts as the data access layer (Repository pattern) for vehicles.
+ * Encapsulates all HTTP communication with the backend related to vehicles,
+ * abstracting API calls from the rest of the application.
  *
  * Part of the **Fleet Management** domain - Infrastructure Layer.
- *
- * This follows Domain-Driven Design principles by isolating external concerns
+ * Follows Domain-Driven Design principles by isolating external concerns
  * (HTTP requests, API endpoints) from the Application and Domain layers.
  */
+
 import http from '../../../shared/infrastructure/http-common';
 
 /**
@@ -28,6 +28,7 @@ export const VehicleService = {
     getAll() {
         return http.get('/vehicles');
     },
+
     /**
      * Retrieves a single vehicle by its ID.
      *
@@ -37,6 +38,7 @@ export const VehicleService = {
     getById(id) {
         return http.get(`/vehicles/${id}`);
     },
+
     /**
      * Creates a new vehicle in the backend.
      *
@@ -46,6 +48,7 @@ export const VehicleService = {
     create(vehicleData) {
         return http.post('/vehicles', vehicleData);
     },
+
     /**
      * Updates an existing vehicle's information.
      *

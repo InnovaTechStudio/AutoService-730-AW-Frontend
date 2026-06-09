@@ -2,25 +2,22 @@
  * @file vehicle.store.js
  * @description **Vehicle Store (Pinia)**
  *
- * This store manages all vehicle-related state and business operations in the AutoService application.
- * It belongs to the **Fleet Management** domain and follows the Domain-Driven Design (DDD) architecture:
- * - Application Layer: Coordinates use cases and interacts with the Infrastructure layer (services).
- *
+ * This store manages all vehicle-related state and operations in the AutoService application.
  * Responsibilities:
  * - Fetching vehicles from the backend
- * - Adding new vehicles
- * - Updating existing vehicles
- * - Maintaining a reactive list of vehicles for the UI
+ * - Creating and updating vehicles
+ * - Maintaining the list of vehicles in a reactive state
  */
+
 import { defineStore } from 'pinia';
 import { VehicleService } from '../infrastructure/vehicle.service';
 import { createVehicle } from '../domain/vehicle.entity';
 
 /**
- * Vehicle Store definition using Pinia.
+ * Vehicle Management Store using Pinia.
  *
  * @typedef {Object} VehicleStoreState
- * @property {Array<Object>} vehicles - List of all vehicles in the workshop
+ * @property {Array<Object>} vehicles - List of all vehicles
  * @property {boolean} loading - Loading state for async operations
  */
 export const useVehicleStore = defineStore('vehicle', {
@@ -28,12 +25,13 @@ export const useVehicleStore = defineStore('vehicle', {
         vehicles: [],
         loading: false
     }),
+
     actions: {
         /**
          * Fetches all vehicles from the backend and updates the store.
          *
-         * Each raw vehicle from the API is transformed using the `createVehicle`
-         * factory function to ensure data consistency and apply domain rules.
+         * Each vehicle is transformed using the Vehicle entity to ensure
+         * data consistency and business rules are applied.
          *
          * @returns {Promise<void>}
          */
@@ -43,17 +41,18 @@ export const useVehicleStore = defineStore('vehicle', {
                 const response = await VehicleService.getAll();
                 this.vehicles = response.data.map(v => createVehicle(v));
             } catch (error) {
-                console.error("Error al cargar vehículos:", error);
+                console.error('vehicles.errors.load', error);
+                throw error;
             } finally {
                 this.loading = false;
             }
         },
 
         /**
-         * Creates a new vehicle and adds it to the local state.
+         * Creates a new vehicle and adds it to the store.
          *
-         * @param {Object} vehicleData - Raw vehicle data (from form)
-         * @returns {Promise<Object>} The created vehicle returned from the API
+         * @param {Object} vehicleData - Raw vehicle data from the form
+         * @returns {Promise<Object>} The newly created vehicle (as entity)
          */
         async addVehicle(vehicleData) {
             try {
@@ -62,7 +61,7 @@ export const useVehicleStore = defineStore('vehicle', {
                 this.vehicles.push(response.data);
                 return response.data;
             } catch (error) {
-                console.error("Error al crear vehículo:", error);
+                console.error('vehicles.errors.create', error);
                 throw error;
             }
         },
@@ -82,7 +81,8 @@ export const useVehicleStore = defineStore('vehicle', {
                     this.vehicles.splice(index, 1, response.data);
                 }
             } catch (error) {
-                console.error("Error al actualizar vehículo:", error);
+                console.error('vehicles.errors.update', error);
+                throw error;
             }
         }
     }

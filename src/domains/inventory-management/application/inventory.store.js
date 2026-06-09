@@ -5,82 +5,65 @@ import { createInventoryItem } from '../domain/inventory-item.entity';
 export const useInventoryStore = defineStore('inventory', {
     state: () => ({
         items: [],
-        loading: false,
-        error: null
+        loading: false
     }),
 
-    getters: {
-        lowStockItems: (state) =>
-            state.items.filter(item => Number(item.stock) <= Number(item.minStock)),
-
-        availableItems: (state) =>
-            state.items.filter(item => item.status === 'Disponible' && Number(item.stock) > 0)
-    },
-
     actions: {
-        async fetchInventory(workshopId = null) {
+        /**
+         * Fetch all inventory items
+         */
+        async fetchItems() {
             this.loading = true;
-            this.error = null;
 
             try {
-                const response = workshopId
-                    ? await InventoryService.getByWorkshop(workshopId)
-                    : await InventoryService.getAll();
-
+                const response = await InventoryService.getAll();
                 this.items = response.data.map(item => createInventoryItem(item));
             } catch (error) {
-                this.error = 'No se pudo cargar el inventario';
-                console.error(error);
+                console.error('Error cargando inventario:', error);
             } finally {
                 this.loading = false;
             }
         },
 
+        /**
+         * Add new inventory item
+         * @param {Object} itemData
+         */
         async addItem(itemData) {
-            const newItem = createInventoryItem({
-                ...itemData,
-                lastUpdated: new Date().toISOString()
-            });
-
+            const newItem = createInventoryItem(itemData);
             const response = await InventoryService.create(newItem);
+
             this.items.push(createInventoryItem(response.data));
-            return response.data;
         },
 
+        /**
+         * Update inventory item
+         * @param {string|number} id
+         * @param {Object} itemData
+         */
         async updateItem(id, itemData) {
-            const response = await InventoryService.update(id, {
-                ...itemData,
-                lastUpdated: new Date().toISOString()
-            });
+            const response = await InventoryService.update(
+                id,
+                createInventoryItem(itemData)
+            );
 
-            const index = this.items.findIndex(item => String(item.id) === String(id));
+            const index = this.items.findIndex(i => String(i.id) === String(id));
 
             if (index !== -1) {
                 this.items.splice(index, 1, createInventoryItem(response.data));
             }
-
-            return response.data;
         },
 
-        async discountStock(id, quantity) {
-            const item = this.items.find(item => String(item.id) === String(id));
+        /**
+         * Delete inventory item
+         * @param {string|number} id
+         */
+        async deleteItem(id) {
+            await InventoryService.delete(id);
 
-            if (!item) return null;
-
-            const newStock = Math.max(Number(item.stock) - Number(quantity), 0);
-
-            const response = await InventoryService.patch(id, {
-                stock: newStock,
-                lastUpdated: new Date().toISOString()
-            });
-
-            const index = this.items.findIndex(item => String(item.id) === String(id));
-
-            if (index !== -1) {
-                this.items.splice(index, 1, createInventoryItem(response.data));
-            }
-
-            return response.data;
+            this.items = this.items.filter(
+                i => String(i.id) !== String(id)
+            );
         }
     }
 });

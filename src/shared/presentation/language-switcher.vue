@@ -1,34 +1,68 @@
 <script setup>
+/**
+ * Language switcher component.
+ * Handles locale selection and persistence.
+ */
+
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ref, computed } from 'vue';
 
-const { locale, t } = useI18n();
+const { locale } = useI18n();
 
+// ── Language options ──────────────────────────────────────
 const options = [
-  { label: 'ES', value: 'es', flag: '🇵🇪' },
-  { label: 'EN', value: 'en', flag: '🇺🇸' }
+  {
+    label: 'ES',
+    value: 'es',
+    flag: '🇪🇸'
+  },
+  {
+    label: 'EN',
+    value: 'en',
+    flag: '🇺🇸'
+  }
 ];
 
-const currentOption = computed(() => options.find(o => o.value === locale.value) || options[0]);
+// ── Computed ──────────────────────────────────────────────
+const currentOption = computed(() =>
+    options.find(option => option.value === locale.value) || options[0]
+);
 
-function switchLocale(val) {
-  locale.value = val;
-  localStorage.setItem('autoservice-locale', val);
-}
+// ── Actions ───────────────────────────────────────────────
+
+/**
+ * Updates application locale and persists it.
+ * @param {string} value
+ */
+const switchLocale = (value) => {
+  locale.value = value;
+
+  localStorage.setItem('autoservice-locale', value);
+};
 </script>
 
 <template>
   <div class="lang-switcher">
+
     <button
-        v-for="opt in options"
-        :key="opt.value"
-        :class="['lang-btn', { active: locale === opt.value }]"
-        @click="switchLocale(opt.value)"
-        :title="opt.label"
+        v-for="option in options"
+        :key="option.value"
+        :title="option.label"
+        :class="[
+          'lang-btn',
+          { active: locale === option.value }
+        ]"
+        @click="switchLocale(option.value)"
     >
-      <span class="flag">{{ opt.flag }}</span>
-      <span class="label">{{ opt.label }}</span>
+      <span class="flag">
+        {{ option.flag }}
+      </span>
+
+      <span class="label">
+        {{ option.label }}
+      </span>
     </button>
+
   </div>
 </template>
 
@@ -37,9 +71,9 @@ function switchLocale(val) {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  padding: 3px;
   background: #f1f5f9;
   border-radius: 10px;
-  padding: 3px;
 }
 
 .lang-btn {
@@ -47,25 +81,25 @@ function switchLocale(val) {
   align-items: center;
   gap: 0.3rem;
   padding: 0.3rem 0.65rem;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
+  color: #64748b;
   font-size: 0.78rem;
   font-weight: 700;
-  color: #64748b;
-  transition: all 0.18s ease;
   letter-spacing: 0.5px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
 }
 
 .lang-btn:hover {
-  background: #e2e8f0;
   color: #0f172a;
+  background: #e2e8f0;
 }
 
 .lang-btn.active {
-  background: #ffffff;
   color: #0b1680;
+  background: #ffffff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
