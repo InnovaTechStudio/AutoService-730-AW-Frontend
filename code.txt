@@ -1217,6 +1217,7 @@ import Dialog from 'primevue/dialog';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
+import InventoryCard from './components/InventoryCard.vue';
 
 // ── CONSTANTS FOR DOMAIN LOGIC ───────────────────────────
 /** Standardized system inventory categories */
@@ -1287,9 +1288,21 @@ const openNew = () => {
     brand: '',
     unitPrice: 0,
     stock: 10,
-    minStock: 3
+    minStock: 3,
+    image: ''
   };
   displayDialog.value = true;
+};
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    itemForm.value.image = e.target.result;
+  };
+  reader.readAsDataURL(file);
 };
 
 const editItem = (item) => {
@@ -1299,6 +1312,11 @@ const editItem = (item) => {
 
 const saveItem = async () => {
   if (!itemForm.value.name) return;
+
+  const payload = {
+    ...itemForm.value,
+    Image: itemForm.value.Image || ''
+  };
 
   if (itemForm.value.id) {
     await inventoryStore.updateItem(itemForm.value.id, itemForm.value);
@@ -1344,54 +1362,18 @@ const deleteItem = async (item) => {
     </div>
 
     <div class="table-card">
-      <DataTable
-          :value="filteredItems"
-          responsiveLayout="scroll"
-          :loading="inventoryStore.loading"
-          class="custom-table"
-      >
-        <Column field="sku" :header="t('inventory.table.sku')" style="font-weight: 700; color: #0b1680;" />
+      <div v-if="filteredItems.length > 0" class="inventory-grid">
+        <InventoryCard
+            v-for="item in filteredItems"
+            :key="item.id"
+            :item="item"
+            @edit="editItem"
+        />
+      </div>
 
-        <Column :header="t('inventory.table.item')">
-          <template #body="{ data }">
-            <div class="item-name">
-              <strong>{{ data.name }}</strong>
-              <span>{{ data.brand }}</span>
-            </div>
-          </template>
-        </Column>
-
-        <Column :header="t('inventory.table.category')">
-          <template #body="{ data }">
-            <Tag :value="getCategoryLabel(data.category)" severity="secondary" rounded />
-          </template>
-        </Column>
-
-        <Column :header="t('inventory.table.stock')">
-          <template #body="{ data }">
-            <Tag
-                :value="`${data.stock} ${t('inventory.units')}`"
-                :severity="getStockSeverity(data)"
-                rounded
-            />
-          </template>
-        </Column>
-
-        <Column :header="t('inventory.table.price')">
-          <template #body="{ data }">
-            <strong>S/. {{ data.unitPrice.toFixed(2) }}</strong>
-          </template>
-        </Column>
-
-        <Column :header="t('inventory.table.actions')" alignFrozen="right">
-          <template #body="{ data }">
-            <div class="actions">
-              <Button icon="pi pi-pencil" text rounded severity="info" @click="editItem(data)" />
-              <Button icon="pi pi-trash" text rounded severity="danger" @click="deleteItem(data)" />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <div v-else class="empty-state">
+        <p>No se encontraron materiales en el inventario.</p>
+      </div>
     </div>
 
     <Dialog
@@ -1437,18 +1419,37 @@ const deleteItem = async (item) => {
         <div class="row-grid">
           <div class="field">
             <label>{{ t('inventory.form.stock') }}</label>
-            <InputNumber v-model="itemForm.stock" :min="0" showButtons />
+            <InputNumber v-model="itemForm.stock" :min="0" showButtons class="w-full" />
           </div>
 
           <div class="field">
             <label>{{ t('inventory.form.minStock') }}</label>
-            <InputNumber v-model="itemForm.minStock" :min="0" showButtons />
+            <InputNumber v-model="itemForm.minStock" :min="0" showButtons class="w-full" />
           </div>
         </div>
 
         <div class="field">
           <label>{{ t('inventory.form.unitPrice') }}</label>
           <InputNumber v-model="itemForm.unitPrice" mode="currency" currency="PEN" />
+        </div>
+
+        <div class="field">
+          <label>Imagen del Material</label>
+          <div class="file-upload-container">
+            <label for="inventory-image-upload" class="file-upload-btn">
+              <i class="pi pi-upload"></i> Seleccionar Imagen
+            </label>
+            <input
+                id="inventory-image-upload"
+                type="file"
+                accept="image/*"
+                @change="handleImageUpload"
+                class="hidden-input"
+            />
+            <div v-if="itemForm.image" class="preview-box">
+              <img :src="itemForm.image" alt="preview" />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1535,6 +1536,67 @@ const deleteItem = async (item) => {
 
 :deep(.p-inputtext),
 :deep(.p-inputnumber) { border-radius: 10px; }
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
+  background: white;
+  border-radius: 20px;
+  border: 1px dashed #cbd5e1;
+}
+
+.file-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 1.5rem;
+  align-items: center;
+}
+.hidden-input { display: none; }
+.file-upload-btn {
+  background: #eef2ff;
+  color: #0b1680;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.file-upload-btn:hover { background: #e0e7ff; }
+.preview-box {
+  width: 100%;
+  max-height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  background: white;
+}
+.preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+:deep(.p-inputnumber.w-full) {
+  width: 100%;
+}
+:deep(.p-inputnumber.w-full .p-inputtext) {
+  width: 100%;
+}
 </style>
 
 ===== src/domains/inventory-management/presentation/components/InventoryFormDialog.vue =====
@@ -2935,9 +2997,6 @@ const getOrderProgress = (orderId) => {
   );
 };
 
-/**
- * Vista resumida de vehículos activos.
- */
 const activeVehiclePreview = computed(() => {
   const activeOrders = workOrderStore.workOrders.filter((order) =>
       isStatusActive(order.status)
@@ -2955,6 +3014,9 @@ const activeVehiclePreview = computed(() => {
 
         return {
           id: vehicle.id || order.id,
+          // CAMBIO: Ahora enviamos el código de la orden y la placa
+          orderCode: order.trackingCode || `WO-${order.id}`,
+          plate: vehicle.plate || t('dashboard.defaults.plate'),
           name: `${vehicle.brand || t('dashboard.defaults.vehicle')} ${vehicle.model || ''}`,
           status:
               progress === 100
@@ -5341,15 +5403,19 @@ defineEmits(['view-vehicles']);
           <div class="vehicle-info">
             <div class="vehicle-top">
               <div>
-                <h3>
-                  {{ vehicle.name }}
+                <span class="order-code">{{ vehicle.orderCode }}</span>
+                <h3 class="plate-text">
+                  {{ vehicle.plate }}
                 </h3>
+                <small class="model-text">{{ vehicle.name }}</small>
 
-                <Tag
-                    :value="vehicle.status"
-                    :severity="vehicle.severity"
-                    rounded
-                />
+                <div class="mt-1">
+                  <Tag
+                      :value="vehicle.status"
+                      :severity="vehicle.severity"
+                      rounded
+                  />
+                </div>
               </div>
 
               <strong>
@@ -5444,6 +5510,28 @@ defineEmits(['view-vehicles']);
   height: 8px;
   margin-top: 0.75rem;
 }
+.order-code {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  display: block;
+}
+
+.plate-text {
+  margin: 0 !important;
+  font-size: 1.1rem !important;
+  color: #0f172a;
+}
+
+.model-text {
+  display: block;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.mt-1 { margin-top: 0.25rem; }
 </style>
 
 ===== src/domains/workshop-operations/presentation/components/dashboard/DashboardHeader.vue =====
@@ -8080,84 +8168,38 @@ const goToOrder = (orderId) => router.push(`/work-orders/${orderId}`);
 /**
  * @file tracking.service.js
  * @description **Tracking Service (Infrastructure Layer)**
- *
- * This service handles API requests related to tracking work orders,
- * vehicles, tasks, and payments.
- *
- * Responsibilities:
- * - Fetch work orders by tracking code
- * - Retrieve vehicle details and history
- * - Fetch tasks linked to a work order
- * - Process payments for completed work orders
- *
- * Layer Role:
- * - Part of the **Infrastructure Layer** in DDD
- * - Provides clean methods for the Presentation/Application layers
- * - Uses shared http-common to inject Auth Tokens and prevent 401 Unauthorized errors.
  */
 
-import http from '../../../shared/infrastructure/http-common.js';
+import axios from 'axios';
+
+const publicHttp = axios.create({
+    baseURL: 'http://localhost:5024/api/v1/tracking',
+    headers: { 'Content-type': 'application/json' }
+});
 
 export const TrackingService = {
-    /**
-     * Retrieves a work order by its tracking code.
-     *
-     * @param {string} trackingCode - Unique tracking code provided to the customer
-     * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to API response
-     */
     getOrderByCode(trackingCode) {
-        return http.get(`/workorders?trackingCode=${trackingCode}`);
+        return publicHttp.get(`/workorders?trackingCode=${trackingCode}`);
     },
 
-    /**
-     * Retrieves vehicle details by ID.
-     *
-     * @param {string|number} vehicleId - Unique identifier of the vehicle
-     * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to API response
-     */
     getVehicle(vehicleId) {
-        return http.get(`/vehicles/${vehicleId}`);
+        return publicHttp.get(`/vehicles/${vehicleId}`);
     },
 
-    /**
-     * Retrieves tasks associated with a work order.
-     *
-     * @param {string|number} workOrderId - ID of the work order
-     * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to API response
-     */
     getTasksByOrder(workOrderId) {
-        return http.get(`/tasks?workOrderId=${workOrderId}`);
+        return publicHttp.get(`/tasks?workOrderId=${workOrderId}`);
     },
 
-    /**
-     * Retrieves customer details by ID.
-     *
-     * @param {string|number} customerId - Unique identifier of the customer
-     * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to API response
-     */
     getCustomer(customerId) {
-        return http.get(`/customers/${customerId}`);
+        return publicHttp.get(`/customers/${customerId}`);
     },
 
-    /**
-     * Retrieves vehicle history by plate number.
-     *
-     * @param {string} plate - Vehicle plate number
-     * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to API response
-     */
-    getVehicleHistory(plate) {
-        return http.get(`/vehicle-history?plate=${plate}`);
+    getWorkshop(workshopId) {
+        return publicHttp.get(`/workshops/${workshopId}`);
     },
 
-    /**
-     * Processes payment for a work order.
-     * Updates the work order status to "DELIVERED".
-     *
-     * @param {string|number} workOrderId - ID of the work order
-     * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to API response
-     */
     processPayment(workOrderId) {
-        return http.patch(`/workorders/${workOrderId}`, {
+        return publicHttp.patch(`/workorders/${workOrderId}`, {
             status: 'DELIVERED'
         });
     }
@@ -8307,14 +8349,15 @@ const trackingCode = ref('');
 const order = ref(null);
 const vehicle = ref(null);
 const customer = ref(null);
+const workshop = ref(null); // Nuevo estado para guardar el taller
 const tasks = ref([]);
 const loading = ref(false);
 const errorMsg = ref('');
 
-// Nombre estático del taller (Se puede parametrizar a futuro desde un config o store)
-const workshopName = ref('AutoService Surco');
+// Nombres y correos dinámicos computados
+const dynamicWorkshopName = computed(() => workshop.value?.name || workshop.value?.workshopName || 'Auto-Taller');
+const dynamicWorkshopEmail = computed(() => workshop.value?.email || 'contacto@taller.com');
 
-// State para el Modal de Pago simulado
 const paymentDialogVisible = ref(false);
 const paymentMethod = ref('card');
 const cardNumber = ref('');
@@ -8340,15 +8383,18 @@ const searchOrder = async () => {
 
     order.value = orders[0];
 
-    const [vehicleRes, tasksRes, customerRes] = await Promise.all([
+    // Traemos de forma paralela Vehículo, Tareas, Cliente y el TALLER
+    const [vehicleRes, tasksRes, customerRes, workshopRes] = await Promise.all([
       TrackingService.getVehicle(order.value.vehicleId),
       TrackingService.getTasksByOrder(order.value.id),
-      TrackingService.getCustomer(order.value.customerId).catch(() => ({ data: { fullName: 'Cliente' } }))
+      TrackingService.getCustomer(order.value.customerId).catch(() => ({ data: { fullName: 'Cliente' } })),
+      TrackingService.getWorkshop(order.value.workshopId).catch(() => ({ data: null }))
     ]);
 
     vehicle.value = vehicleRes.data;
     tasks.value = tasksRes.data;
     customer.value = customerRes.data;
+    workshop.value = workshopRes.data;
 
   } catch (err) {
     console.error(err);
@@ -8363,6 +8409,7 @@ const resetSearch = () => {
   trackingCode.value = '';
   vehicle.value = null;
   customer.value = null;
+  workshop.value = null;
   tasks.value = [];
   paymentSuccess.value = false;
 };
@@ -8382,7 +8429,6 @@ const executeSimulatedPayment = async () => {
   }
 };
 
-// Disparador nativo de impresión estilo Ctrl + P
 const printReceipt = () => {
   window.print();
 };
@@ -8390,12 +8436,11 @@ const printReceipt = () => {
 const getStatusMessage = computed(() => {
   if (!order.value) return '';
   const status = order.value.status;
-  // Pasamos el workshopName como variable al i18n
-  if (status === 'PENDING') return t('tracking.statusMessages.pending', { workshop: workshopName.value });
-  if (status === 'IN_PROGRESS') return t('tracking.statusMessages.in_progress', { workshop: workshopName.value });
-  if (status === 'FINISHED') return t('tracking.statusMessages.finished', { workshop: workshopName.value });
-  if (status === 'DELIVERED') return t('tracking.statusMessages.delivered', { workshop: workshopName.value });
-  if (status === 'CANCELLED') return t('tracking.statusMessages.cancelled', { workshop: workshopName.value });
+  if (status === 'PENDING') return t('tracking.statusMessages.pending', { workshop: dynamicWorkshopName.value });
+  if (status === 'IN_PROGRESS') return t('tracking.statusMessages.in_progress', { workshop: dynamicWorkshopName.value });
+  if (status === 'FINISHED') return t('tracking.statusMessages.finished', { workshop: dynamicWorkshopName.value });
+  if (status === 'DELIVERED') return t('tracking.statusMessages.delivered', { workshop: dynamicWorkshopName.value });
+  if (status === 'CANCELLED') return t('tracking.statusMessages.cancelled', { workshop: dynamicWorkshopName.value });
   return '';
 });
 
@@ -8415,7 +8460,7 @@ const getProgressValue = computed(() => {
 
       <div v-if="!order" class="tracking-header">
         <i class="pi pi-wrench text-6xl mb-3" style="color: #0b1680;"></i>
-        <h1>{{ workshopName }}</h1>
+        <h1>Portal de Seguimiento</h1>
         <p>{{ t('tracking.welcomeSubtitle') }}</p>
       </div>
 
@@ -8599,9 +8644,8 @@ const getProgressValue = computed(() => {
   <div v-if="order" class="print-receipt-sheet only-print">
     <div class="receipt-header">
       <div>
-        <h1>{{ workshopName }}</h1>
-        <p>Santiago de Surco, Lima, Perú</p>
-        <p>Contacto: soporte@autoservice.pe</p>
+        <h1>{{ dynamicWorkshopName }}</h1>
+        <p>Contacto: {{ dynamicWorkshopEmail }}</p>
       </div>
       <div class="receipt-meta">
         <h2>COMPROBANTE</h2>
@@ -8669,7 +8713,7 @@ const getProgressValue = computed(() => {
     </div>
 
     <div class="receipt-footer">
-      <p>Gracias por confiar en {{ workshopName }}.</p>
+      <p>Gracias por confiar en {{ dynamicWorkshopName }}.</p>
       <p>Este documento es un comprobante digital de seguimiento de servicios automotrices.</p>
     </div>
   </div>
@@ -8758,71 +8802,40 @@ const getProgressValue = computed(() => {
 .block { display: block; }
 .fade-in { animation: fadeIn 0.3s ease-in; }
 
+/* Ocultar la estructura del PDF por defecto en pantalla */
 .only-print { display: none; }
 
+/* REGLAS CSS MÁGICAS PARA LA IMPRESIÓN (WINDOW.PRINT) */
 @media print {
-  .no-print, .p-dialog-mask, .p-component-overlay {
-    display: none !important;
-  }
-
-  .only-print {
-    display: block !important;
-  }
-
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
-    font-size: 12pt;
-    margin: 0;
-    padding: 0;
-  }
-
-  .print-receipt-sheet {
-    max-width: 100%;
-    padding: 20mm 15mm;
-    box-sizing: border-box;
-  }
-
-  .receipt-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 15px;
-  }
-
-  .receipt-header h1 { margin: 0; font-size: 24pt; color: #0b1680; font-weight: bold; }
+  .no-print, .p-dialog-mask, .p-component-overlay { display: none !important; }
+  .only-print { display: block !important; }
+  body { background: #ffffff !important; color: #000000 !important; font-size: 12pt; margin: 0; padding: 0; }
+  .print-receipt-sheet { max-width: 100%; padding: 20mm 15mm; box-sizing: border-box; }
+  .receipt-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+  .receipt-header h1 { margin: 0; font-size: 24pt; color: #0b1680; font-weight: bold; text-transform: uppercase;}
   .receipt-header p { margin: 2px 0; font-size: 10pt; color: #475569; }
   .receipt-meta { text-align: right; }
   .receipt-meta h2 { margin: 0 0 5px 0; font-size: 16pt; color: #0f172a; letter-spacing: 1px; }
   .receipt-meta p { margin: 2px 0; font-size: 10pt; }
-
   .receipt-divider { border: none; border-top: 2px solid #0b1680; margin: 15px 0; }
-
   .receipt-section h3 { font-size: 12pt; margin: 0 0 8px 0; text-transform: uppercase; color: #1e3a8a; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }
-
   .receipt-table-info { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 10.5pt; }
   .receipt-table-info td { padding: 4px 8px; vertical-align: top; }
-
   .receipt-main-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
   .receipt-main-table th { background: #f1f5f9; text-align: left; padding: 8px 12px; font-size: 11pt; border-bottom: 2px solid #cbd5e1; }
   .receipt-main-table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 10.5pt; }
-
   .task-row { page-break-inside: avoid; }
   .print-parts-detail { margin-top: 4px; background: #f8fafc; padding: 6px; border-radius: 4px; }
   .print-parts-detail ul { list-style: none; padding: 0; margin: 0; font-size: 9.5pt; color: #334155; }
-
   .text-right { text-align: right !important; }
   .font-mono { font-family: monospace; }
-
   .receipt-summary { display: flex; justify-content: flex-end; margin-top: 20px; }
   .summary-box { width: 280px; border-top: 2px solid #0b1680; padding-top: 8px; }
   .summary-line { display: flex; justify-content: space-between; font-size: 12pt; }
   .summary-line strong { font-size: 14pt; color: #0b1680; }
-
   .receipt-footer { margin-top: 40px; text-align: center; font-size: 9pt; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 15px; }
   .receipt-footer p { margin: 2px 0; }
 }
-
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 

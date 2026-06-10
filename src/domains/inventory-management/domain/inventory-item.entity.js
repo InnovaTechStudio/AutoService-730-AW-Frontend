@@ -11,5 +11,6 @@ export const createInventoryItem = (data = {}) => ({
     brand: data.brand || 'GENERIC',
     unitPrice: parseFloat(data.unitPrice) || 0.00,
     stock: parseInt(data.stock) || 0,
-    minStock: parseInt(data.minStock) || 5
+    minStock: parseInt(data.minStock) || 5,
+    image: data.image || ''
 });

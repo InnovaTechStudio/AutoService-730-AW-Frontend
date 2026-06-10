@@ -18,6 +18,7 @@ import Dialog from 'primevue/dialog';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
+import InventoryCard from './components/InventoryCard.vue';
 
 // ── CONSTANTS FOR DOMAIN LOGIC ───────────────────────────
 /** Standardized system inventory categories */
@@ -88,9 +89,21 @@ const openNew = () => {
     brand: '',
     unitPrice: 0,
     stock: 10,
-    minStock: 3
+    minStock: 3,
+    image: ''
   };
   displayDialog.value = true;
+};
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    itemForm.value.image = e.target.result;
+  };
+  reader.readAsDataURL(file);
 };
 
 const editItem = (item) => {
@@ -101,10 +114,15 @@ const editItem = (item) => {
 const saveItem = async () => {
   if (!itemForm.value.name) return;
 
+  const payload = {
+    ...itemForm.value,
+    image: itemForm.value.image || ''
+  };
+
   if (itemForm.value.id) {
-    await inventoryStore.updateItem(itemForm.value.id, itemForm.value);
+    await inventoryStore.updateItem(itemForm.value.id, payload);
   } else {
-    await inventoryStore.addItem(itemForm.value);
+    await inventoryStore.addItem(payload);
   }
 
   displayDialog.value = false;
@@ -145,54 +163,18 @@ const deleteItem = async (item) => {
     </div>
 
     <div class="table-card">
-      <DataTable
-          :value="filteredItems"
-          responsiveLayout="scroll"
-          :loading="inventoryStore.loading"
-          class="custom-table"
-      >
-        <Column field="sku" :header="t('inventory.table.sku')" style="font-weight: 700; color: #0b1680;" />
+      <div v-if="filteredItems.length > 0" class="inventory-grid">
+        <InventoryCard
+            v-for="item in filteredItems"
+            :key="item.id"
+            :item="item"
+            @edit="editItem"
+        />
+      </div>
 
-        <Column :header="t('inventory.table.item')">
-          <template #body="{ data }">
-            <div class="item-name">
-              <strong>{{ data.name }}</strong>
-              <span>{{ data.brand }}</span>
-            </div>
-          </template>
-        </Column>
-
-        <Column :header="t('inventory.table.category')">
-          <template #body="{ data }">
-            <Tag :value="getCategoryLabel(data.category)" severity="secondary" rounded />
-          </template>
-        </Column>
-
-        <Column :header="t('inventory.table.stock')">
-          <template #body="{ data }">
-            <Tag
-                :value="`${data.stock} ${t('inventory.units')}`"
-                :severity="getStockSeverity(data)"
-                rounded
-            />
-          </template>
-        </Column>
-
-        <Column :header="t('inventory.table.price')">
-          <template #body="{ data }">
-            <strong>S/. {{ data.unitPrice.toFixed(2) }}</strong>
-          </template>
-        </Column>
-
-        <Column :header="t('inventory.table.actions')" alignFrozen="right">
-          <template #body="{ data }">
-            <div class="actions">
-              <Button icon="pi pi-pencil" text rounded severity="info" @click="editItem(data)" />
-              <Button icon="pi pi-trash" text rounded severity="danger" @click="deleteItem(data)" />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <div v-else class="empty-state">
+        <p>No se encontraron materiales en el inventario.</p>
+      </div>
     </div>
 
     <Dialog
@@ -238,18 +220,37 @@ const deleteItem = async (item) => {
         <div class="row-grid">
           <div class="field">
             <label>{{ t('inventory.form.stock') }}</label>
-            <InputNumber v-model="itemForm.stock" :min="0" showButtons />
+            <InputNumber v-model="itemForm.stock" :min="0" showButtons class="w-full" />
           </div>
 
           <div class="field">
             <label>{{ t('inventory.form.minStock') }}</label>
-            <InputNumber v-model="itemForm.minStock" :min="0" showButtons />
+            <InputNumber v-model="itemForm.minStock" :min="0" showButtons class="w-full" />
           </div>
         </div>
 
         <div class="field">
           <label>{{ t('inventory.form.unitPrice') }}</label>
           <InputNumber v-model="itemForm.unitPrice" mode="currency" currency="PEN" />
+        </div>
+
+        <div class="field">
+          <label>Imagen del Material</label>
+          <div class="file-upload-container">
+            <label for="inventory-image-upload" class="file-upload-btn">
+              <i class="pi pi-upload"></i> Seleccionar Imagen
+            </label>
+            <input
+                id="inventory-image-upload"
+                type="file"
+                accept="image/*"
+                @change="handleImageUpload"
+                class="hidden-input"
+            />
+            <div v-if="itemForm.image" class="preview-box">
+              <img :src="itemForm.image" alt="preview" />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -336,4 +337,65 @@ const deleteItem = async (item) => {
 
 :deep(.p-inputtext),
 :deep(.p-inputnumber) { border-radius: 10px; }
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
+  background: white;
+  border-radius: 20px;
+  border: 1px dashed #cbd5e1;
+}
+
+.file-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 1.5rem;
+  align-items: center;
+}
+.hidden-input { display: none; }
+.file-upload-btn {
+  background: #eef2ff;
+  color: #0b1680;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.file-upload-btn:hover { background: #e0e7ff; }
+.preview-box {
+  width: 100%;
+  max-height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  background: white;
+}
+.preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+:deep(.p-inputnumber.w-full) {
+  width: 100%;
+}
+:deep(.p-inputnumber.w-full .p-inputtext) {
+  width: 100%;
+}
 </style>

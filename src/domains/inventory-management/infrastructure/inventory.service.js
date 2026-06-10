@@ -27,7 +27,10 @@ export const InventoryService = {
      * @returns {Promise}
      */
     create(data) {
-        return http.post('/inventoryitems', data);
+        return http.post('/inventoryitems', {
+            ...data,
+            Image: data.image || ''
+        });
     },
 
     /**
@@ -37,7 +40,10 @@ export const InventoryService = {
      * @returns {Promise}
      */
     update(id, data) {
-        return http.put(`/inventoryitems/${id}`, data);
+        return http.put(`/inventoryitems/${id}`, {
+            ...data,
+            Image: data.image || ''
+        });
     },
 
     /**
