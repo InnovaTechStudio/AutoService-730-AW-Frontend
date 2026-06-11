@@ -430,7 +430,8 @@ const deleteItem = async (item) => {
 }
 :deep(.p-inputnumber.w-full .p-inputtext) {
   width: 100%;
-//rodrigo
+}
+/*rodrigo*/
 .inventory-kpis {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -468,5 +469,5 @@ const deleteItem = async (item) => {
   .inventory-kpis {
     grid-template-columns: 1fr;
   }
-}}
+}
 </style>
