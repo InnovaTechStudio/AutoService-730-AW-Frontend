@@ -26,13 +26,50 @@ const handleLogout = () => {
 
   window.location.href = '/login';
 };
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+
+const sidebarOpen = ref(false);
+const isMobile = ref(false);
+
+const checkScreen = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+onMounted(() => {
+  checkScreen();
+  window.addEventListener('resize', checkScreen);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkScreen);
+});
+
+const toggleSidebar = () => {
+  sidebarOpen.value = !sidebarOpen.value;
+};
+
+const closeSidebar = () => {
+  if (isMobile.value) {
+    sidebarOpen.value = false;
+  }
+};
 </script>
 
 <template>
   <div class="admin-layout">
-
+    <div
+        v-if="isMobile && sidebarOpen"
+        class="sidebar-overlay"
+        @click="closeSidebar"
+    />
     <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <aside
+        class="sidebar"
+        :class="{
+    'sidebar-mobile': isMobile,
+    'sidebar-open': sidebarOpen
+  }"
+    >
 
       <div class="logo-area">
         <h2>{{ t('layout.brand') }}</h2>
@@ -47,6 +84,7 @@ const handleLogout = () => {
         <router-link
             to="/"
             class="menu-item"
+            @click="closeSidebar"
         >
           <i class="pi pi-home"></i>
 
@@ -56,6 +94,7 @@ const handleLogout = () => {
         <router-link
             to="/customers"
             class="menu-item"
+            @click="closeSidebar"
         >
           <i class="pi pi-users"></i>
 
@@ -65,6 +104,7 @@ const handleLogout = () => {
         <router-link
             to="/vehicles"
             class="menu-item"
+            @click="closeSidebar"
         >
           <i class="pi pi-car"></i>
 
@@ -74,6 +114,7 @@ const handleLogout = () => {
         <router-link
             to="/work-orders"
             class="menu-item"
+            @click="closeSidebar"
         >
           <i class="pi pi-address-book"></i>
 
@@ -83,6 +124,7 @@ const handleLogout = () => {
         <router-link
             to="/tasks"
             class="menu-item"
+            @click="closeSidebar"
         >
           <i class="pi pi-check-square"></i>
 
@@ -92,6 +134,7 @@ const handleLogout = () => {
         <router-link
             to="/mechanics"
             class="menu-item"
+            @click="closeSidebar"
         >
           <i class="pi pi-users"></i>
 
@@ -101,6 +144,7 @@ const handleLogout = () => {
         <router-link
             to="/inventory"
             class="menu-item"
+            @click="closeSidebar"
         >
           <i class="pi pi-box"></i>
 
@@ -118,6 +162,13 @@ const handleLogout = () => {
       <header class="topbar">
 
         <div class="topbar-left">
+          <Button
+              v-if="isMobile"
+              icon="pi pi-bars"
+              text
+              rounded
+              @click="toggleSidebar"
+          />
           <span class="welcome-text">
             {{ t('topbar.welcome') }}
 
@@ -129,8 +180,12 @@ const handleLogout = () => {
 
         <div class="topbar-right">
 
-          <LanguageSwitcher />
 
+          <LanguageSwitcher />
+          <div
+              class="user-info"
+              v-if="!isMobile"
+          >
           <div class="user-info">
 
             <i class="pi pi-user user-icon"></i>
@@ -139,6 +194,7 @@ const handleLogout = () => {
               {{ authStore.user?.name || t('topbar.admin') }}
             </span>
 
+          </div>
           </div>
 
           <Button
@@ -286,5 +342,85 @@ const handleLogout = () => {
   flex: 1;
   overflow-y: auto;
   padding: 2rem;
+}
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(2px);
+}
+@media (max-width: 768px) {
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+
+    z-index: 999;
+
+    width: 260px;
+    height: 100vh;
+
+    transition: left .3s ease;
+  }
+
+  .sidebar-open {
+    left: 0;
+  }
+
+  .main-content {
+    width: 100%;
+  }
+
+  .topbar {
+    padding: 0 1rem;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+  }
+  .menu-toggle {
+    flex-shrink: 0;
+  }
+
+  .welcome-text {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #64748b;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .topbar-right {
+    gap: .5rem;
+  }
+
+  .user-info span {
+    display: none;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+  @media (max-width: 768px) {
+
+    .welcome-text {
+      font-size: 0.8rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+  }
+  @media (max-width: 576px) {
+
+    .welcome-text {
+      display: none;
+    }
+
+  }
 }
 </style>

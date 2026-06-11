@@ -46,7 +46,22 @@ const categories = computed(() => [
   { value: INVENTORY_CATEGORIES.SUPPLY, label: t('inventory.categories.supply') },
   { value: INVENTORY_CATEGORIES.TOOL, label: t('inventory.categories.tool') }
 ]);
+const categoryImages = {
+  BRAKES:
+      'https://images.unsplash.com/photo-1613214149922-f1809c99b414',
 
+  OIL:
+      'https://images.unsplash.com/photo-1632823471565-1ecdf7d8c1b8',
+
+  BATTERY:
+      'https://images.unsplash.com/photo-1607861716497-e65ab29fc7ac',
+
+  TIRES:
+      'https://images.unsplash.com/photo-1558981806-ec527fa84c39',
+
+  ENGINE:
+      'https://images.unsplash.com/photo-1487754180451-c456f719a1fc'
+};
 onMounted(() => {
   inventoryStore.fetchItems();
 });
@@ -62,7 +77,16 @@ const filteredItems = computed(() => {
       item.sku.toLowerCase().includes(term)
   );
 });
-
+const inventoryValue = computed(() =>
+    inventoryStore.items.reduce(
+        (sum, item) =>
+            sum + (Number(item.stock || 0) * Number(item.unitPrice || 0)),
+        0
+    )
+);
+const totalItems = computed(() =>
+    inventoryStore.items.length
+);
 /**
  * Returns severity color based on stock level.
  */
@@ -151,6 +175,16 @@ const deleteItem = async (item) => {
           @click="openNew"
       />
     </div>
+    <div class="inventory-kpis">
+      <div class="kpi-card">
+        <span>Total Productos</span>
+        <h2>{{ totalItems }}</h2>
+      </div>
+      <div class="kpi-card">
+        <span>Valor Inventario</span>
+        <h2>S/. {{ inventoryValue.toFixed(2) }}</h2>
+      </div>
+    </div>
 
     <div class="toolbar">
       <div class="search-box">
@@ -160,6 +194,7 @@ const deleteItem = async (item) => {
             :placeholder="t('inventory.searchPlaceholder')"
         />
       </div>
+
     </div>
 
     <div class="table-card">
@@ -337,13 +372,13 @@ const deleteItem = async (item) => {
 
 :deep(.p-inputtext),
 :deep(.p-inputnumber) { border-radius: 10px; }
+
 .inventory-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
   margin-top: 1rem;
 }
-
 .empty-state {
   text-align: center;
   padding: 3rem;
@@ -352,7 +387,6 @@ const deleteItem = async (item) => {
   border-radius: 20px;
   border: 1px dashed #cbd5e1;
 }
-
 .file-upload-container {
   display: flex;
   flex-direction: column;
@@ -391,11 +425,48 @@ const deleteItem = async (item) => {
   height: 100%;
   object-fit: contain;
 }
-
 :deep(.p-inputnumber.w-full) {
   width: 100%;
 }
 :deep(.p-inputnumber.w-full .p-inputtext) {
   width: 100%;
+//rodrigo
+.inventory-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
+
+.kpi-card {
+  background: white;
+  border: 1px solid #e8edf5;
+  border-radius: 18px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.kpi-card span {
+  display: block;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.kpi-card h2 {
+  margin: 0.5rem 0 0;
+  color: #0b1680;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+@media (max-width: 992px) {
+  .inventory-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .inventory-kpis {
+    grid-template-columns: 1fr;
+  }
+}}
 </style>

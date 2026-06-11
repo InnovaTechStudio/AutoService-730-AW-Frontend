@@ -106,21 +106,44 @@ const isRiskOrder = (order) => {
 
 // ── Computed ──────────────────────────────────────────────
 const ordersView = computed(() =>
-    workOrderStore.workOrders.map(order => ({
-      id: order.id,
-      raw: order,
-      trackingCode: order.trackingCode || `WO-${order.id}`,
-      vehiclePlate: getVehicleName(order.vehicleId),
-      plateOnly: getVehiclePlate(order.vehicleId),
-      customerName: getCustomerName(order.customerId),
-      progress: calculateProgress(order.id),
-      startDate: order.startDate,
-      estimatedDate: order.estimatedDate,
-      status: order.status || ORDER_STATUS.PENDING,
-      severity: getSeverity(order.status),
-      price: order.price || 0,
-      isRisk: isRiskOrder(order)
-    }))
+    workOrderStore.workOrders.map(order => {
+
+      const tasks = taskStore.tasks.filter(
+          task => task.workOrderId === order.id
+      );
+
+      const calculatedTotal = tasks.reduce(
+          (sum, task) =>
+              sum +
+              Number(task.laborPrice || 0) +
+              Number(task.materialsCost || 0),
+          0
+      );
+
+      return {
+        id: order.id,
+        raw: order,
+
+        trackingCode: order.trackingCode || `WO-${order.id}`,
+
+        vehiclePlate: getVehicleName(order.vehicleId),
+        plateOnly: getVehiclePlate(order.vehicleId),
+
+        customerName: getCustomerName(order.customerId),
+
+        progress: calculateProgress(order.id),
+
+        startDate: order.startDate,
+        estimatedDate: order.estimatedDate,
+
+        status: order.status || ORDER_STATUS.PENDING,
+        severity: getSeverity(order.status),
+
+        calculatedTotal,
+
+        isRisk: isRiskOrder(order)
+      };
+    })
 );
 
 const filteredOrders = computed(() => {
@@ -160,6 +183,27 @@ watch(viewMode, (newMode) => {
     selectedStatus.value = null;
   }
 });
+const ordersWithTotal = computed(() =>
+    workOrderStore.workOrders.map(order => {
+
+      const tasks = taskStore.tasks.filter(
+          task => task.workOrderId === order.id
+      );
+
+      const total = tasks.reduce(
+          (sum, task) =>
+              sum +
+              Number(task.laborPrice || 0) +
+              Number(task.materialsCost || 0),
+          0
+      );
+
+      return {
+        ...order,
+        calculatedTotal: total
+      };
+    })
+);
 </script>
 
 <template>
@@ -218,8 +262,12 @@ watch(viewMode, (newMode) => {
     <template v-else-if="filteredOrders.length">
 
       <div v-if="viewMode === 'list'" class="orders-grid">
-        <WorkOrderCard v-for="order in filteredOrders" :key="order.id" :order="order" @view-detail="viewDetail" />
+        <WorkOrderCard v-for="order in filteredOrders"
+                       :key="order.id"
+                       :order="order"
+                       @view-detail="viewDetail" />
       </div>
+
 
       <div v-else class="kanban-board">
         <div v-for="column in kanbanColumns" :key="column.id" class="kanban-column">

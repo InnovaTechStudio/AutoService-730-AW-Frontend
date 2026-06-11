@@ -6,7 +6,8 @@
   },
   "auth": {
     "loginError": "Invalid credentials or connection error",
-    "registerError": "Error registering the workshop"
+    "registerError": "Error registering the workshop",
+    "question": "Are you a customer of the workshop?"
   },
   "common": {
     "action": "Action",
@@ -22,7 +23,9 @@
     "unassigned": "Unassigned",
     "undefined": "Undefined",
     "currencyPrefix": "$",
-    "vehicle": "Vehicle"
+    "vehicle": "Vehicle",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "customer": {
     "dni": "ID / Document",

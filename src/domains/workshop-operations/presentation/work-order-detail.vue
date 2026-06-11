@@ -38,15 +38,28 @@ const orderTasks = computed(() =>
     taskStore.tasks.filter(task => String(task.workOrderId) === String(orderId))
 );
 
-const calculatedTotal = computed(() => {
+/*const calculatedTotal = computed(() => {
   let total = 0;
   orderTasks.value.forEach(task => {
     const labor = parseFloat(task.laborPrice || 0);
     const partsTotal = (task.parts || []).reduce((sum, p) => sum + (parseFloat(p.unitPrice || 0) * parseInt(p.quantity || 1)), 0);
     total += labor + partsTotal;
   });
+  console.log(orderTasks.value);
+  return total.toFixed(2);
+});*/
+const calculatedTotal = computed(() => {
+  let total = 0;
+
+  orderTasks.value.forEach(task => {
+    total +=
+        Number(task.laborPrice || 0) +
+        Number(task.materialsCost || 0);
+  });
+
   return total.toFixed(2);
 });
+
 
 const loadData = async () => {
   await Promise.all([
@@ -141,7 +154,13 @@ const goBack = () => {
                   <span class="font-bold">S/. {{ slotProps.data.laborPrice }}</span>
                 </template>
               </Column>
-
+              <Column
+                  field="materialsCost"
+                  header="Materiales">
+                <template #body="slotProps">
+                  <span class="font-bold">S/. {{ Number(slotProps.data.materialsCost || 0).toFixed(2) }}</span>
+                </template>
+              </Column>
             </DataTable>
           </template>
         </Card>
@@ -152,7 +171,7 @@ const goBack = () => {
           <template #title>{{ t('workOrderDetail.quote.title') }}</template>
           <template #content>
             <div class="total-display">
-              <span>S/. {{ currentOrder.price || calculatedTotal }}</span>
+              <span>S/. {{ calculatedTotal }}</span>
             </div>
 
             <div v-if="!isMechanic && currentOrder.status === 'FINISHED'" class="admin-validation mt-4">

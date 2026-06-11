@@ -92,12 +92,16 @@ const handleSubmit = async () => {
 
           <Button type="submit" :label="isRegister ? t('login.registerButton') : t('login.submit')" :loading="authStore.loading" class="p-button-primary w-full mt-3" />
 
-          <div class="text-center mt-4">
+          <div class="auth-links">
             <span class="text-color-secondary">{{ isRegister ? t('login.hasAccount') : t('login.noWorkshop') }}</span><br>
             <a href="#" @click.prevent="isRegister = !isRegister" class="font-bold text-primary">
               {{ isRegister ? t('login.loginHere') : t('login.registerHere') }}
             </a>
+            <hr>
+            <router-link to="/tracking"
+                         class="tracking">{{ isRegister ? t('auth.question') : t('auth.question') }}</router-link>
           </div>
+
         </form>
       </div>
     </div>
@@ -107,7 +111,6 @@ const handleSubmit = async () => {
 <style scoped>
 .login-layout { display: flex; min-height: 100vh; width: 100%; overflow: hidden; font-family: Inter, system-ui, sans-serif; background: #1f1f23; }
 .hero-section { flex: 1; position: relative; background-image: linear-gradient( rgba(255,255,255,0.15), rgba(255,255,255,0.15) ), url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1600&auto=format&fit=crop'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; padding: 4rem; }
-.hero-section::after { content: ''; position: absolute; top: -10%; right: -70px; width: 140px; height: 120%; background: rgba(255,255,255,0.75); transform: rotate(18deg); backdrop-filter: blur(2px); }
 .hero-content { position: relative; z-index: 1; max-width: 480px; color: white; }
 .hero-content h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -1px; }
 .hero-content p { font-size: 1rem; line-height: 1.8; color: rgba(255,255,255,0.9); }
@@ -128,4 +131,20 @@ const handleSubmit = async () => {
 :deep(.p-button:hover) { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(37,99,235,0.3); }
 .error-message { display: flex; align-items: center; gap: 0.5rem; padding: 0.9rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 0.9rem; }
 @media (max-width: 900px) { .login-layout { flex-direction: column; } .hero-section { display: flex; min-height: 240px; width: 100%; } .hero-section::after { display: none; } .hero-content { text-align: center; } .hero-content h1 { font-size: 2.4rem; } .hero-content p { font-size: 0.95rem; } .form-section { width: 100%; padding: 1.5rem; } .login-box { max-width: 100%; padding: 2rem; margin-top: -40px; position: relative; z-index: 2; } }
+.auth-links {display: flex;flex-direction: column;align-items: center;justify-content: center;text-align: center;margin-top: 1.5rem;}
+
+.auth-links hr {
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.tracking {
+  font-weight: 600;
+  color: #0b1680;
+  text-decoration: none;
+}
+
+.tracking:hover {
+  text-decoration: underline;
+}
 </style>

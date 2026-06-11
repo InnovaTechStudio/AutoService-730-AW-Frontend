@@ -6,7 +6,8 @@
   },
   "auth": {
     "loginError": "Credenciales inválidas o error de conexión",
-    "registerError": "Error al registrar el taller"
+    "registerError": "Error al registrar el taller",
+    "question": "Es cliente del taller?"
   },
   "common": {
     "action": "Acción",
@@ -22,7 +23,9 @@
     "unassigned": "No asignado",
     "undefined": "Indefinido",
     "currencyPrefix": "S/.",
-    "vehicle": "Vehículo"
+    "vehicle": "Vehículo",
+    "save": "Guardar",
+    "cancel": "Cancelar"
   },
   "customer": {
     "dni": "DNI / Documento",

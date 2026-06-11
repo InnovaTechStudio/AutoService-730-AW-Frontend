@@ -93,6 +93,27 @@ const hasMaterials = (task) => {
           </div>
         </div>
       </div>
+      <div class="cost-summary">
+        <div>
+          Mano de obra:
+          <strong>S/. {{ task.raw.laborPrice }}</strong>
+        </div>
+
+        <div>
+          Materiales:
+          <strong>S/. {{ task.raw.materialsCost }}</strong>
+        </div>
+
+        <div class="total">
+          Total:
+          <strong>
+            S/. {{
+              Number(task.raw.laborPrice) +
+              Number(task.raw.materialsCost)
+            }}
+          </strong>
+        </div>
+      </div>
 
       <div class="task-actions">
         <Button

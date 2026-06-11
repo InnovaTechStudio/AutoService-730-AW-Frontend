@@ -36,6 +36,7 @@ const getStatusSeverity = (status) => {
   if (s.includes('cancel')) return 'danger';
   return 'secondary';
 };
+
 </script>
 
 <template>
@@ -73,7 +74,7 @@ const getStatusSeverity = (status) => {
       </div>
       <div>
         <span>{{ t('workOrders.card.total') }}</span>
-        <strong>S/. {{ order.price }}</strong>
+        <strong> S/. {{ Number(order.calculatedTotal || 0).toFixed(2) }}</strong>
       </div>
     </div>
 

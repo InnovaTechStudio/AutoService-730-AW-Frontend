@@ -243,9 +243,23 @@ const calculatedTotal = computed(() => {
               @change="
               onPartSelected($event.value, index)
             "
-              class="part-select"
-          />
+              class="part-select">
+            <template #option="slotProps">
+              <div class="inventory-option">
+                <div>
+                  <strong>{{ slotProps.option.name }}</strong>
+                </div>
 
+                <small>
+                  Stock: {{ slotProps.option.stock }}
+                </small>
+
+                <small>
+                  S/. {{ slotProps.option.unitPrice }}
+                </small>
+              </div>
+            </template>
+          </Select>
           <InputNumber
               v-model="part.quantity"
               :min="1"

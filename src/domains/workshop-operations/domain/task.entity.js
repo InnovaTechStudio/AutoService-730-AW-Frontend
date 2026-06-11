@@ -25,6 +25,7 @@ export const createTask = (data = {}) => ({
     estimatedTime: data.estimatedTime || 0,
 
     laborPrice: data.laborPrice || 0.0,
+    materialsCost: data.materialsCost || 0,
 
     technicalDiagnosis:
         data.technicalDiagnosis || '',

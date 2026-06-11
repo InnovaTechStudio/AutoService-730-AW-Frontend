@@ -104,7 +104,7 @@ const getOrderSeverity = (status) => {
             :header="t('dashboard.panels.recentOrders.amount')"
         >
           <template #body="slotProps">
-            S/. {{ slotProps.data.price || 0 }}
+            S/. {{ Number(slotProps.data.calculatedTotal || 0).toFixed(2) }}
           </template>
         </Column>
       </DataTable>

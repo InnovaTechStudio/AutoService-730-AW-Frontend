@@ -120,14 +120,41 @@ const completedOrdersCount = computed(() =>
  * Ingreso proyectado total.
  * Excluye los estados anulados/cancelados del sistema.
  */
-const projectedIncome = computed(() =>
-    workOrderStore.workOrders
-        .filter((order) => order.status !== ORDER_STATUS.CANCELLED)
-        .reduce(
-            (accumulator, order) =>
-                accumulator + (parseFloat(order.price) || 0),
-            0
-        )
+const projectedIncome = computed(() => {
+  const validOrderIds = workOrderStore.workOrders
+      .filter(order => order.status !== ORDER_STATUS.CANCELLED)
+      .map(order => order.id);
+
+  return taskStore.tasks
+      .filter(task => validOrderIds.includes(task.workOrderId))
+      .reduce(
+          (sum, task) =>
+              sum +
+              Number(task.laborPrice || 0) +
+              Number(task.materialsCost || 0),
+          0
+      );
+});
+
+const ordersWithTotal = computed(() =>
+    workOrderStore.workOrders.map(order => {
+      const tasks = taskStore.tasks.filter(
+          task => String(task.workOrderId) === String(order.id)
+      );
+
+      const calculatedTotal = tasks.reduce(
+          (sum, task) =>
+              sum +
+              Number(task.laborPrice || 0) +
+              Number(task.materialsCost || 0),
+          0
+      );
+
+      return {
+        ...order,
+        calculatedTotal
+      };
+    })
 );
 
 /**
@@ -209,7 +236,9 @@ const frequentServices = computed(() => {
     }
 
     taskMap[serviceName].count += 1;
-    taskMap[serviceName].amount += task.laborPrice || 0;
+    taskMap[serviceName].amount +=
+        Number(task.laborPrice || 0) +
+        Number(task.materialsCost || 0);
   });
 
   const sortedServices = Object.values(taskMap)
@@ -257,11 +286,14 @@ const weeklyIncomeData = computed(() => {
     const dateString =
         currentDate.toISOString().split('T')[0];
 
-    const dayTotal = workOrderStore.workOrders
-        .filter((order) => order.startDate === dateString)
+    const dayTotal = ordersWithTotal.value
+        .filter(
+            order =>
+                order.startDate === dateString &&
+                order.status !== ORDER_STATUS.CANCELLED
+        )
         .reduce(
-            (sum, order) =>
-                sum + (parseFloat(order.price) || 0),
+            (sum, order) => sum + order.calculatedTotal,
             0
         );
 
@@ -336,7 +368,7 @@ const barChartOptions = ref({
  * Últimas órdenes registradas.
  */
 const recentOrders = computed(() =>
-    [...workOrderStore.workOrders]
+    [...ordersWithTotal.value]
         .reverse()
         .slice(0, 5)
 );
@@ -376,7 +408,7 @@ const recentOrders = computed(() =>
 
       <DashboardMetricCard
           :title="t('dashboard.metrics.projectedRevenue')"
-          :value="`${t('common.currencyPrefix')} ${projectedIncome}`"
+          :value="`${t('common.currencyPrefix')} ${projectedIncome.toFixed(2)}`"
           :subtitle="t('dashboard.metrics.projectedRevenueSub')"
           icon="pi pi-wallet"
           color="violet"
