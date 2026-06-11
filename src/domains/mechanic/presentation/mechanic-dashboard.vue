@@ -84,8 +84,7 @@ const getTaskCount = orderId => {
       task => String(task.workOrderId) === String(orderId)
   ).length;
 };
-
-/*const getOrderTotal = orderId => {
+const getOrderTotal = orderId => {
   const tasks = taskStore.tasks.filter(
       task => String(task.workOrderId) === String(orderId)
   )
@@ -97,7 +96,7 @@ const getTaskCount = orderId => {
           Number(task.materialsCost || 0),
       0
   );
-};*/
+};
 
 /**
  * Maps system standard status codes to PrimeVue severity contexts
@@ -140,12 +139,25 @@ const getCompletedTasks = orderId => {
   ).length;
 };
 
-/*const getTotalTasks = orderId => {
+const getTotalTasks = orderId => {
   return taskStore.tasks.filter(
       t => String(t.workOrderId) === String(orderId)
   ).length;
+};
+/*const getTotalTasks = (task) => {
+  const labor = Number(task.laborPrice || 0);
+
+  const partsCost = (task.parts || []).reduce(
+      (sum, part) =>
+          sum +
+          Number(part.unitPrice || 0) *
+          Number(part.quantity || 1),
+      0
+  );
+
+  return labor + partsCost;
 };*/
-const getTotalTasks = (task) => {
+const getTaskTotalCost = (task) => {
   const labor = Number(task.laborPrice || 0);
 
   const partsCost = (task.parts || []).reduce(
@@ -158,7 +170,6 @@ const getTotalTasks = (task) => {
 
   return labor + partsCost;
 };
-
 const getProgress = orderId => {
   const total = getTotalTasks(orderId);
   if (!total) return 0;
@@ -166,25 +177,6 @@ const getProgress = orderId => {
   return Math.round(
       (getCompletedTasks(orderId) / total) * 100
   );
-};
-const getOrderTotal = (orderId) => {
-  const tasks = taskStore.tasks.filter(
-      task => String(task.workOrderId) === String(orderId)
-  );
-
-  return tasks.reduce((total, task) => {
-    const labor = Number(task.laborPrice || 0);
-
-    const partsCost = (task.parts || []).reduce(
-        (sum, part) =>
-            sum +
-            Number(part.unitPrice || 0) *
-            Number(part.quantity || 1),
-        0
-    );
-
-    return total + labor + partsCost;
-  }, 0);
 };
 </script>
 
@@ -327,7 +319,7 @@ const getOrderTotal = (orderId) => {
 
               <div>
                 <small>{{ t('mechanicDashboard.labor') }}</small>
-                <strong>S/ {{ getOrderTotal(order.id) }}</strong>
+                <strong>S/ {{ getOrderTotal(order.id).toFixed(2) }}</strong>
               </div>
 
             </div>

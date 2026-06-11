@@ -145,6 +145,32 @@ const getPriorityLabel = (priorityValue) => {
   const found = priorities.find(p => p.value === priorityValue);
   return found ? found.label : priorityValue;
 };
+const getTaskTotalCost = (task) => {
+  const labor = Number(task.laborPrice || 0);
+
+  const partsCost = (task.parts || []).reduce(
+      (sum, part) =>
+          sum +
+          Number(part.unitPrice || 0) *
+          Number(part.quantity || 1),
+      0
+  );
+
+  return labor + partsCost;
+};
+const getOrderTotal = orderId => {
+  const tasks = taskStore.tasks.filter(
+      task => String(task.workOrderId) === String(orderId)
+  )
+
+  return tasks.reduce(
+      (sum, task) =>
+          sum +
+          Number(task.laborPrice || 0) +
+          Number(task.materialsCost || 0),
+      0
+  );
+};
 </script>
 
 <template>
@@ -191,7 +217,10 @@ const getPriorityLabel = (priorityValue) => {
                 <Tag :value="task.status === TASK_STATUS.COMPLETED ? ($t('tasks.summary.completed') || 'Completado') : task.status" :severity="task.status === TASK_STATUS.COMPLETED ? 'success' : 'warning'" />
                 <Tag :value="getPriorityLabel(task.priority)" severity="info" />
                 <span><i class="pi pi-clock"></i> {{ task.estimatedTime }}h</span>
-                <strong>S/ {{ task.laborPrice }}</strong>
+                <strong> S/. {{
+                    Number(task.laborPrice) +
+                    Number(task.materialsCost)
+                  }}</strong>
               </div>
               <div v-if="task.parts && task.parts.length > 0" class="task-parts">
                 <small class="parts-title"><i class="pi pi-box"></i> Materiales:</small>
@@ -211,11 +240,11 @@ const getPriorityLabel = (priorityValue) => {
       <template #content>
         <div class="summary-row">
           <span>{{ $t('mechanicOrder.totalLabor') }}</span>
-          <strong>S/ {{ totalLabor.toFixed(2) }}</strong>
+          <strong>S/ {{ getOrderTotal(order.id).toFixed(2) }}</strong>
         </div>
         <div class="summary-row highlight-total">
           <span>Costo Total (Inc. Materiales)</span>
-          <strong>S/ {{ totalOrderCost.toFixed(2) }}</strong>
+          <strong>S/ {{ getOrderTotal(order.id).toFixed(2) }}</strong>
         </div>
         <div class="summary-row">
           <span>{{ $t('mechanicOrder.tasksLabel') }}</span>
