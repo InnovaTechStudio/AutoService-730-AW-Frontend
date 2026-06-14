@@ -6,7 +6,7 @@
 import axios from 'axios';
 
 const publicHttp = axios.create({
-    baseURL: 'http://localhost:5024/api/v1/tracking',
+    baseURL: 'https://autoservice-aw-backend.onrender.com/api/v1',
     headers: { 'Content-type': 'application/json' }
 });
 
