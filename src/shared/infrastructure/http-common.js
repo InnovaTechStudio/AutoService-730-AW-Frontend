@@ -6,7 +6,7 @@
 import axios from 'axios';
 
 const http = axios.create({
-    baseURL: 'http://localhost:5024/api/v1',
+    baseURL: 'https://autoservice-aw-backend.onrender.com/api/v1',
     headers: {
         'Content-Type': 'application/json'
     }
