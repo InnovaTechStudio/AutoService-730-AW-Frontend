@@ -42,8 +42,6 @@ defineEmits(['edit', 'view-detail']);
 
       <div class="vehicle-meta">
         <span><i class="pi pi-id-card"></i>{{ vehicle.plate }}</span>
-        <span><i class="pi pi-calendar"></i>{{ vehicle.year }}</span>
-        <span><i class="pi pi-palette"></i>{{ vehicle.color }}</span>
       </div>
 
       <div class="vehicle-progress-container">

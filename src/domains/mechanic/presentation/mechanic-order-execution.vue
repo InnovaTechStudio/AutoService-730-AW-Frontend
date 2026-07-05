@@ -259,7 +259,7 @@ const readyForAdministrativeReview = computed(() =>
 const inventoryOptions = computed(() =>
     inventoryStore.items.map(item => ({
       ...item,
-      disabled: toInteger(item.stock) <= 0
+      disabled: false
     }))
 );
 
@@ -811,7 +811,7 @@ const getTaskSeverity = (task) => {
           </div>
 
           <Tag
-              value="Información técnica"
+              value="{{ $t('tasks.dialogExt.financialInfo') }}"
               severity="info"
           />
         </div>
@@ -1082,13 +1082,11 @@ const getTaskSeverity = (task) => {
 
           <div>
             <strong>
-              Propuesta para cotización
+              {{ $t('tasks.dialogExt.proposalNoticeTitle') }}
             </strong>
 
             <span>
-              Define el trabajo, tiempo y materiales.
-              El administrador establecerá la mano de
-              obra, los costos y la cotización final.
+              {{ $t('tasks.dialogExt.proposalNoticeDesc') }}
             </span>
           </div>
         </div>
@@ -1179,7 +1177,6 @@ const getTaskSeverity = (task) => {
                 :options="inventoryOptions"
                 optionLabel="name"
                 optionValue="id"
-                optionDisabled="disabled"
                 filter
                 showClear
                 placeholder="Buscar repuesto..."

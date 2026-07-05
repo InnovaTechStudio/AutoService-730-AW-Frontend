@@ -59,7 +59,7 @@ export const useAuthStore = defineStore('auth', {
 
                 return true;
             } catch (err) {
-                this.error = err.response?.data?.message || this.$t('auth.loginError');
+                this.error = err.response?.data?.message || 'Error al iniciar sesión';
                 return false;
             } finally {
                 this.loading = false;
@@ -84,7 +84,7 @@ export const useAuthStore = defineStore('auth', {
                 });
                 return true;
             } catch (error) {
-                this.error = error.response?.data?.message || this.$t('auth.registerError');
+                this.error = error.response?.data?.message || 'Error al registrar el taller';
                 return false;
             } finally {
                 this.loading = false;

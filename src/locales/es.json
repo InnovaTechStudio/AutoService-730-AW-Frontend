@@ -2,12 +2,26 @@
   "actions": {
     "deleteMechanic": "Desactivar",
     "editProfile": "Editar Perfil",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "add": "Añadir",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "appointments": {
+    "title": "Agendar cita",
+    "serviceType": "Tipo de servicio",
+    "serviceTypePlaceholder": "Ej: Cambio de aceite",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Describe el problema",
+    "date": "Fecha",
+    "time": "Hora",
+    "submit": "Agendar cita",
+    "successMessage": "Cita registrada correctamente"
   },
   "auth": {
     "loginError": "Credenciales inválidas o error de conexión",
     "registerError": "Error al registrar el taller",
-    "question": "Es cliente del taller?"
+    "question": "¿Es cliente del taller?"
   },
   "common": {
     "action": "Acción",
@@ -64,7 +78,7 @@
       "phone": "Teléfono",
       "fullName": "Nombre Completo",
       "email": "Correo",
-      "emailPlaceholder": "cliente{'@'}correo.com",
+      "emailPlaceholder": "cliente@correo.com",
       "fullNamePlaceholder": "ej. Juan Pérez",
       "phonePlaceholder": "+51 999 999 999",
       "save": "Guardar",
@@ -76,6 +90,52 @@
     "totalRegistered": "Total registrados"
   },
   "dashboard": {
+    "financial": {
+      "eyebrow": "Rendimiento financiero",
+      "title": "Ganancias, costos y pérdidas",
+      "description": "Resumen calculado según las órdenes, tareas, mano de obra y materiales registrados.",
+      "refresh": "Actualizar",
+      "fetchError": "No se pudo cargar el resumen financiero.",
+      "projectedRevenue": "Ingresos proyectados",
+      "projectedRevenueDesc": "Total estimado según órdenes registradas",
+      "realizedRevenue": "Ingresos realizados",
+      "realizedRevenueDesc": "Ingresos de servicios finalizados",
+      "pendingRevenue": "Ingresos pendientes",
+      "pendingRevenueDesc": "Importe aún pendiente de realización",
+      "operatingCost": "Costos operativos",
+      "operatingCostDesc": "Mano de obra y materiales utilizados",
+      "grossProfit": "Ganancia bruta",
+      "grossLoss": "Pérdida bruta",
+      "margin": "Margen:",
+      "averageTicket": "Ticket promedio",
+      "ticketStats": "{profitable} rentables · {loss} con pérdida",
+      "chart": {
+        "income": "Ingresos",
+        "costs": "Costos",
+        "profit": "Ganancia"
+      }
+    },
+    "profitability": {
+      "eyebrow": "Rentabilidad por orden",
+      "title": "Resultados de servicios realizados",
+      "description": "Comparación entre ingresos, costos y utilidad obtenida por cada orden de trabajo.",
+      "columns": {
+        "order": "Orden",
+        "income": "Ingresos",
+        "costs": "Costos",
+        "result": "Resultado",
+        "margin": "Margen",
+        "status": "Estado"
+      },
+      "status": {
+        "profitable": "Rentable",
+        "loss": "Con pérdida"
+      },
+      "empty": {
+        "title": "Aún no existen resultados financieros",
+        "description": "La rentabilidad por orden aparecerá cuando se registren órdenes con tareas, costos y precios."
+      }
+    },
     "defaults": {
       "vehicle": "Vehículo"
     },
@@ -143,7 +203,7 @@
     "dniPlaceholder": "12345678",
     "editTitle": "Editar Cliente",
     "email": "CORREO ELECTRÓNICO",
-    "emailPlaceholder": "cliente{'@'}correo.com",
+    "emailPlaceholder": "cliente@correo.com",
     "fullName": "NOMBRE COMPLETO",
     "fullNamePlaceholder": "ej. Juan Pérez",
     "newRecord": "NUEVO REGISTRO",
@@ -188,12 +248,74 @@
       "stock": "Stock / Mín"
     },
     "title": "Gestión de Inventario",
-    "units": "und."
+    "units": "und.",
+    "kpis": {
+      "totalProducts": "Total de productos",
+      "totalProductsDesc": "Productos diferentes registrados",
+      "inventoryCost": "Costo del inventario",
+      "inventoryCostDesc": "Valor según precios de compra",
+      "potentialValue": "Valor potencial de venta",
+      "potentialValueDesc": "Valor según precios de venta",
+      "potentialProfit": "Utilidad potencial",
+      "lowStockCount": "producto(s) con stock bajo"
+    },
+    "filters": {
+      "allBrands": "Todas las marcas",
+      "allTiers": "Todas las gamas",
+      "clear": "Limpiar filtros"
+    },
+    "labels": {
+      "qualityTier": "Gama o nivel de calidad",
+      "presentation": "Presentación",
+      "unitMeasure": "Unidad de medida",
+      "technicalSpec": "Especificación técnica",
+      "financialInfo": "Información financiera",
+      "financialInfoDesc": "Define el costo interno y el precio cobrado al cliente.",
+      "purchasePrice": "Precio de compra",
+      "unitProfit": "Utilidad por unidad",
+      "estimatedMargin": "Margen estimado",
+      "currentStock": "Stock actual",
+      "stockWarningEdit": "Se actualiza únicamente mediante recepciones de proveedor y consumo de tareas aprobadas.",
+      "stockWarningNew": "El artículo se registrará con stock 0. El ingreso se realizará mediante una recepción de proveedor.",
+      "itemImage": "Imagen del material",
+      "selectImage": "Seleccionar imagen",
+      "defaultImageWarning": "Se utilizará una imagen predeterminada según la categoría.",
+      "delete": "Eliminar",
+      "registerReceipt": "Registrar recepción",
+      "noImage": "Sin imagen",
+      "defaultDesc": "Material disponible para los servicios del taller.",
+      "brand": "Marca",
+      "stockMinRecommended": "Stock mínimo recomendado:",
+      "compatibleWith": "Compatible con:",
+      "updateStock": "Actualizar stock",
+      "editProduct": "Editar producto",
+      "salePrice": "Precio de venta",
+      "sale": "Venta",
+      "cost": "Costo:",
+      "partsTypes": "Tipos de materiales",
+      "requestedUnits": "Unidades solicitadas",
+      "initialStatus": "Estado inicial",
+      "pendingApproval": "Pendiente de aprobación",
+      "sendProposal": "Enviar propuesta"
+    },
+    "receipt": {
+      "title": "Registrar recepción de proveedor",
+      "receivedQuantity": "Cantidad recibida",
+      "provider": "Proveedor",
+      "providerPlaceholder": "Ej. Distribuidora Mobil Perú",
+      "documentNumber": "Número de documento",
+      "documentPlaceholder": "Ej. FAC-001-4587",
+      "notes": "Observaciones",
+      "notesPlaceholder": "Estado de la entrega u observaciones adicionales",
+      "stockAfter": "Stock después de la recepción",
+      "close": "Cerrar",
+      "submit": "Registrar ingreso"
+    }
   },
   "login": {
     "description": "Ingrese sus credenciales para continuar",
     "email": "Correo electrónico",
-    "emailPlaceholder": "taller{'@'}correo.com",
+    "emailPlaceholder": "taller@correo.com",
     "hasAccount": "¿Ya tiene una cuenta?",
     "loginHere": "Inicie sesión aquí",
     "noWorkshop": "¿Aún no tiene un taller?",
@@ -384,6 +506,19 @@
       "emptyParts": "No hay repuestos asignados a esta tarea.",
       "totalCost": "Costo Total Calculado de la Tarea:"
     },
+    "dialogExt": {
+      "proposalNoticeTitle": "Propuesta para cotización",
+      "proposalNoticeDesc": "Define el trabajo, tiempo y materiales. El administrador establecerá la mano de obra, los costos y la cotización final.",
+      "financialInfo": "Información financiera",
+      "financialInfoDesc": "Diferencia entre el precio cobrado y el costo asumido por el taller.",
+      "laborPriceHelp": "Importe cobrado al cliente.",
+      "internalLaborCostHelp": "Costo interno asumido por el taller.",
+      "materialsTitle": "Materiales o repuestos",
+      "materialsDesc": "La selección crea una solicitud. Todavía no modifica el stock.",
+      "searchSpare": "Buscar repuesto...",
+      "availableStock": "Stock disponible:",
+      "emptyPartsWarning": "No hay materiales solicitados. La tarea puede enviarse sin repuestos."
+    },
     "empty": {
       "description": "Intente cambiar los filtros o registre una nueva tarea.",
       "title": "No se encontraron tareas"
@@ -425,6 +560,8 @@
     "subtitle": "Ingresa el código de tu orden de trabajo para ver el estado de la reparación en tiempo real.",
     "notFound": "No se encontró ninguna orden con este código. Verifica que esté bien escrito.",
     "errorConnection": "Hubo un error de conexión al buscar la orden. Inténtalo más tarde.",
+    "validationError": "Por favor ingresa un código de seguimiento",
+    "invalidId": "La orden no tiene un ID válido",
     "backButton": "Buscar otra orden",
     "yourVehicle": "Tu vehículo",
     "progress": "Progreso de la reparación",
@@ -444,6 +581,22 @@
     "inputPlaceholder": "Ingresa el código de tu orden aquí",
     "searchButton": "Buscar Mi Orden",
     "greeting": "¡Hola, {name}!",
+    "receipt": {
+      "title": "COMPROBANTE",
+      "contact": "Contacto:",
+      "issueDate": "Fecha Emisión:",
+      "customerVehicleData": "Datos del Cliente & Vehículo",
+      "customer": "Cliente:",
+      "vehicle": "Vehículo:",
+      "orderStatus": "Estado Orden:",
+      "plate": "Placa:",
+      "serviceDetail": "Detalle del Servicio",
+      "taskMaterialsDesc": "Descripción de la Tarea / Materiales",
+      "labor": "Mano de Obra",
+      "complementaryTotal": "TOTAL COMPLEMENTARIO:",
+      "thankYou": "Gracias por confiar en",
+      "footerDisclaimer": "Este documento es un comprobante digital de seguimiento de servicios automotrices."
+    },
     "payment": {
       "payButton": "Proceder al Pago en Línea",
       "downloadReceipt": "Descargar Comprobante",
@@ -640,9 +793,6 @@
       "delivered": "Entregado"
     },
     "title": "Órdenes de trabajo"
-  },
-  "layout": {
-    "brand": "AutoService"
   },
   "workOrderDetail": {
     "actions": {

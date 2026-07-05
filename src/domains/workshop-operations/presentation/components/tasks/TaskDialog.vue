@@ -44,7 +44,7 @@ const props = defineProps({
   }
 });
 
-defineEmits([
+const emit = defineEmits([
   'update:visible',
   'save',
   'cancel'
@@ -182,7 +182,7 @@ watch(
 const inventoryOptions = computed(() =>
     inventoryStore.items.map(item => ({
       ...item,
-      disabled: toInteger(item.stock) <= 0
+      disabled: false
     }))
 );
 
@@ -435,6 +435,26 @@ watch(
       immediate: true
     }
 );
+const handleSave = () => {
+  if (!props.task.status || props.task.status === 'PENDING') {
+    props.task.adminReviewStatus = 'APPROVED';
+    props.task.customerReportStatus = 'VISIBLE';
+  }
+  emit('save');
+};
+
+watch(
+    () => props.task.estimatedTime,
+    (newTime) => {
+      if (!props.task.id && newTime > 0) {
+        const costPerMinute = 0.50;
+
+        props.task.laborCost = roundToTwoDecimals(newTime * costPerMinute);
+
+        props.task.laborPrice = roundToTwoDecimals(props.task.laborCost * 2);
+      }
+    }
+);
 </script>
 
 <template>
@@ -648,7 +668,6 @@ watch(
               :options="inventoryOptions"
               optionLabel="name"
               optionValue="id"
-              optionDisabled="disabled"
               filter
               showClear
               :placeholder="
@@ -891,14 +910,12 @@ watch(
       <Button
           :label="
             task?.id
-              ? t(
-                  'tasks.actions.saveChanges'
-                )
+              ? t('tasks.actions.saveChanges')
               : t('tasks.actions.create')
           "
           icon="pi pi-check"
           class="save-btn"
-          @click="$emit('save')"
+          @click="handleSave"
       />
     </template>
   </Dialog>

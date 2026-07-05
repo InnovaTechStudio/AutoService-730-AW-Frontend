@@ -4,6 +4,9 @@ import {useAppointmentStore} from "../application/appointment.store.js";
 import {useVehicleStore} from "../../../fleet-management/application/vehicle.store.js";
 const vehicleStore = useVehicleStore();
 const appointmentStore = useAppointmentStore();
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const form = ref({
   customerId: '',
@@ -26,7 +29,7 @@ const saveAppointment = async () => {
 
   await appointmentStore.createAppointment(form.value);
 
-  alert('Cita registrada correctamente');
+  alert(t('appointments.successMessage'));
 };
 
 </script>
@@ -37,30 +40,30 @@ const saveAppointment = async () => {
 
     <div class="appointment-card">
 
-      <h1>Agendar cita</h1>
+      <h1>{{ $t('appointments.title') }}</h1>
 
       <div class="form-group">
-        <label>Tipo de servicio</label>
+        <label>{{ $t('appointments.serviceType') }}</label>
 
         <input
             v-model="form.serviceType"
-            placeholder="Ej: Cambio de aceite"
+            :placeholder="$t('appointments.serviceTypePlaceholder')"
         >
       </div>
 
       <div class="form-group">
-        <label>Descripción</label>
+        <label>{{ $t('appointments.description') }}</label>
 
         <textarea
             v-model="form.description"
-            placeholder="Describe el problema">
+            :placeholder="$t('appointments.descriptionPlaceholder')">
       </textarea>
       </div>
 
       <div class="form-row">
 
         <div class="form-group">
-          <label>Fecha</label>
+          <label>{{ $t('appointments.date') }}</label>
 
           <input
               type="date"
@@ -68,7 +71,7 @@ const saveAppointment = async () => {
         </div>
 
         <div class="form-group">
-          <label>Hora</label>
+          <label>{{ $t('appointments.time') }}</label>
 
           <input
               type="time"
@@ -81,7 +84,7 @@ const saveAppointment = async () => {
           class="save-btn"
           @click="saveAppointment">
 
-        Agendar cita
+        {{ $t('appointments.submit') }}
 
       </button>
 

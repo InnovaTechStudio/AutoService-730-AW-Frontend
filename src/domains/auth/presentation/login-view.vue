@@ -9,7 +9,7 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Message from 'primevue/message';
 import LanguageSwitcher from '../../../shared/presentation/language-switcher.vue';
-
+import { API_BASE_URL } from '../../../shared/infrastructure/http-common';
 /**
  * Login/Register component.
  * Handles authentication flow for workshop registration and login.
@@ -32,13 +32,11 @@ const form = ref({
   password: ''
 });
 const loginWithGoogle = () => {
-  // Redirige al backend para iniciar el flujo OAuth2 con Google
-  window.location.href = 'https://autoservice-aw-backend.onrender.com/api/v1/auth/google';
+  window.location.href = `${API_BASE_URL}/auth/google`;
 };
 
 const loginWithMicrosoft = () => {
-  // Redirige al backend para iniciar el flujo OAuth2 con Microsoft
-  window.location.href = 'https://autoservice-aw-backend.onrender.com/api/v1/auth/microsoft';
+  window.location.href = `${API_BASE_URL}/auth/microsoft`;
 };
 
 /**

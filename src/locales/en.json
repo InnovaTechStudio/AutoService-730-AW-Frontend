@@ -2,7 +2,21 @@
   "actions": {
     "deleteMechanic": "Deactivate",
     "editProfile": "Edit Profile",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "appointments": {
+    "title": "Schedule appointment",
+    "serviceType": "Service type",
+    "serviceTypePlaceholder": "e.g., Oil change",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the issue",
+    "date": "Date",
+    "time": "Time",
+    "submit": "Schedule appointment",
+    "successMessage": "Appointment registered successfully"
   },
   "auth": {
     "loginError": "Invalid credentials or connection error",
@@ -64,7 +78,7 @@
       "phone": "Phone",
       "fullName": "Full Name",
       "email": "Email",
-      "emailPlaceholder": "customer{'@'}email.com",
+      "emailPlaceholder": "customer@email.com",
       "fullNamePlaceholder": "e.g., John Doe",
       "phonePlaceholder": "+1 555 555 5555",
       "save": "Save",
@@ -76,6 +90,52 @@
     "totalRegistered": "Total registered"
   },
   "dashboard": {
+    "financial": {
+      "eyebrow": "Financial Performance",
+      "title": "Profits, Costs, and Losses",
+      "description": "Summary calculated based on registered orders, tasks, labor, and materials.",
+      "refresh": "Refresh",
+      "fetchError": "Could not load the financial summary.",
+      "projectedRevenue": "Projected Revenue",
+      "projectedRevenueDesc": "Estimated total based on registered orders",
+      "realizedRevenue": "Realized Revenue",
+      "realizedRevenueDesc": "Revenue from completed services",
+      "pendingRevenue": "Pending Revenue",
+      "pendingRevenueDesc": "Amount still pending realization",
+      "operatingCost": "Operating Costs",
+      "operatingCostDesc": "Labor and materials used",
+      "grossProfit": "Gross Profit",
+      "grossLoss": "Gross Loss",
+      "margin": "Margin:",
+      "averageTicket": "Average Ticket",
+      "ticketStats": "{profitable} profitable · {loss} loss",
+      "chart": {
+        "income": "Income",
+        "costs": "Costs",
+        "profit": "Profit"
+      }
+    },
+    "profitability": {
+      "eyebrow": "Profitability per Order",
+      "title": "Results of Completed Services",
+      "description": "Comparison between income, costs, and profit obtained for each work order.",
+      "columns": {
+        "order": "Order",
+        "income": "Income",
+        "costs": "Costs",
+        "result": "Result",
+        "margin": "Margin",
+        "status": "Status"
+      },
+      "status": {
+        "profitable": "Profitable",
+        "loss": "Loss"
+      },
+      "empty": {
+        "title": "No financial results yet",
+        "description": "Order profitability will appear when orders with tasks, costs, and prices are registered."
+      }
+    },
     "defaults": {
       "vehicle": "Vehicle"
     },
@@ -143,7 +203,7 @@
     "dniPlaceholder": "12345678",
     "editTitle": "Edit Customer",
     "email": "EMAIL ADDRESS",
-    "emailPlaceholder": "customer{'@'}email.com",
+    "emailPlaceholder": "customer@email.com",
     "fullName": "FULL NAME",
     "fullNamePlaceholder": "e.g., John Doe",
     "newRecord": "NEW RECORD",
@@ -188,12 +248,74 @@
       "stock": "Stock / Min"
     },
     "title": "Inventory Management",
-    "units": "pcs."
+    "units": "pcs.",
+    "kpis": {
+      "totalProducts": "Total products",
+      "totalProductsDesc": "Different registered products",
+      "inventoryCost": "Inventory cost",
+      "inventoryCostDesc": "Value based on purchase prices",
+      "potentialValue": "Potential sales value",
+      "potentialValueDesc": "Value based on retail prices",
+      "potentialProfit": "Potential profit",
+      "lowStockCount": "product(s) with low stock"
+    },
+    "filters": {
+      "allBrands": "All brands",
+      "allTiers": "All quality tiers",
+      "clear": "Clear filters"
+    },
+    "labels": {
+      "qualityTier": "Quality tier",
+      "presentation": "Presentation",
+      "unitMeasure": "Unit of measure",
+      "technicalSpec": "Technical specification",
+      "financialInfo": "Financial information",
+      "financialInfoDesc": "Define the internal cost and the price charged to the customer.",
+      "purchasePrice": "Purchase price",
+      "unitProfit": "Unit profit",
+      "estimatedMargin": "Estimated margin",
+      "currentStock": "Current stock",
+      "stockWarningEdit": "It is updated only through supplier receipts and consumption of approved tasks.",
+      "stockWarningNew": "The item will be registered with 0 stock. Entry will be made via supplier receipt.",
+      "itemImage": "Item image",
+      "selectImage": "Select image",
+      "defaultImageWarning": "A default image based on the category will be used.",
+      "delete": "Delete",
+      "registerReceipt": "Register receipt",
+      "noImage": "No image",
+      "defaultDesc": "Material available for workshop services.",
+      "brand": "Brand",
+      "stockMinRecommended": "Minimum recommended stock:",
+      "compatibleWith": "Compatible with:",
+      "updateStock": "Update stock",
+      "editProduct": "Edit product",
+      "salePrice": "Sale price",
+      "sale": "Sale",
+      "cost": "Cost:",
+      "partsTypes": "Material types",
+      "requestedUnits": "Requested units",
+      "initialStatus": "Initial status",
+      "pendingApproval": "Pending approval",
+      "sendProposal": "Send proposal"
+    },
+    "receipt": {
+      "title": "Register supplier receipt",
+      "receivedQuantity": "Received quantity",
+      "provider": "Supplier",
+      "providerPlaceholder": "e.g., Mobil Distributors",
+      "documentNumber": "Document number",
+      "documentPlaceholder": "e.g., INV-001-4587",
+      "notes": "Notes",
+      "notesPlaceholder": "Delivery status or additional observations",
+      "stockAfter": "Stock after receipt",
+      "close": "Close",
+      "submit": "Register entry"
+    }
   },
   "login": {
     "description": "Enter your credentials to continue",
     "email": "Email address",
-    "emailPlaceholder": "workshop{'@'}email.com",
+    "emailPlaceholder": "workshop@email.com",
     "hasAccount": "Already have an account?",
     "loginHere": "Log in here",
     "noWorkshop": "Don't have a workshop yet?",
@@ -212,8 +334,8 @@
     "workshopName": "Workshop Name",
     "workshopPlaceholder": "e.g., Juarez MotorSport",
     "forgotPassword": "Forgot Password?",
-    "forgotPasswordTitle": "Recuperar Contraseña",
-    "forgotPasswordDescription": "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña."
+    "forgotPasswordTitle": "Recover Password",
+    "forgotPasswordDescription": "Enter your email address and we will send you a link to reset your password."
   },
   "mechanic": {
     "capacity": {
@@ -384,6 +506,19 @@
       "emptyParts": "No spare parts assigned to this task.",
       "totalCost": "Total Calculated Task Cost:"
     },
+    "dialogExt": {
+      "proposalNoticeTitle": "Proposal for quote",
+      "proposalNoticeDesc": "Define the work, time, and materials. The administrator will set the labor, costs, and final quote.",
+      "financialInfo": "Financial information",
+      "financialInfoDesc": "Difference between the price charged and the cost assumed by the workshop.",
+      "laborPriceHelp": "Amount charged to the customer.",
+      "internalLaborCostHelp": "Internal cost assumed by the workshop.",
+      "materialsTitle": "Materials or spare parts",
+      "materialsDesc": "The selection creates a request. It does not modify stock yet.",
+      "searchSpare": "Search spare part...",
+      "availableStock": "Available stock:",
+      "emptyPartsWarning": "No materials requested. The task can be submitted without spare parts."
+    },
     "empty": {
       "description": "Try changing the filters or register a new task.",
       "title": "No tasks found"
@@ -425,6 +560,8 @@
     "subtitle": "Enter your work order code to view the repair status in real time.",
     "notFound": "No order was found with this code. Please check that it is correct.",
     "errorConnection": "There was a connection error while searching for the order. Please try again later.",
+    "validationError": "Please enter a tracking code",
+    "invalidId": "The order does not have a valid ID",
     "backButton": "Search another order",
     "yourVehicle": "Your vehicle",
     "progress": "Repair Progress",
@@ -444,6 +581,22 @@
     "inputPlaceholder": "Enter your order code here",
     "searchButton": "Search My Order",
     "greeting": "Hello, {name}!",
+    "receipt": {
+      "title": "RECEIPT",
+      "contact": "Contact:",
+      "issueDate": "Issue Date:",
+      "customerVehicleData": "Customer & Vehicle Data",
+      "customer": "Customer:",
+      "vehicle": "Vehicle:",
+      "orderStatus": "Order Status:",
+      "plate": "License Plate:",
+      "serviceDetail": "Service Details",
+      "taskMaterialsDesc": "Task Description / Materials",
+      "labor": "Labor",
+      "complementaryTotal": "COMPLEMENTARY TOTAL:",
+      "thankYou": "Thank you for trusting",
+      "footerDisclaimer": "This document is a digital receipt for automotive tracking services."
+    },
     "payment": {
       "payButton": "Proceed to Online Payment",
       "downloadReceipt": "Download Invoice PDF",
@@ -457,7 +610,7 @@
       "cvv": "CVV Code",
       "cancel": "Cancel",
       "confirmAction": "Confirm Selection",
-      "payAction": "Pay S/. {total}",
+      "payAction": "Pay {currencyPrefix} {total}",
       "qrInstructions": "Scan this QR code using your preferred banking mobile app to complete the simulation transfer.",
       "cashMessage": "Upon confirmation, the workshop system will be notified that you intend to settle the payment in cash on-site when collecting your vehicle.",
       "successTitle": "Simulated Transaction Successful!",
@@ -641,9 +794,6 @@
     },
     "title": "Work Orders"
   },
-  "layout": {
-    "brand": "AutoService"
-  },
   "workOrderDetail": {
     "actions": {
       "back": "Back",
@@ -658,6 +808,7 @@
       "columns": {
         "task": "Task",
         "status": "Status",
+        "labor": "Cost",
         "materials": "Materials"
       },
       "noMaterials": "None"

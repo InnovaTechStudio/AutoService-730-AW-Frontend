@@ -1,20 +1,12 @@
-import axios from 'axios';
-
-const API_URL = 'https://autoservice-aw-backend.onrender.com/api/v1/appointments';
+import http from '../../../../shared/infrastructure/http-common';
 
 export default {
-
     async getAll() {
-
-        const response = await axios.get(API_URL);
-
+        const response = await http.get('/appointments');
         return response.data;
     },
-
     async create(data) {
-
-        const response = await axios.post(API_URL, data);
-
+        const response = await http.post('/appointments', data);
         return response.data;
     }
 }

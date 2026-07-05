@@ -660,9 +660,9 @@ const deleteItem = async (item) => {
         </div>
 
         <div>
-          <span>Total de productos</span>
+          <span>{{ $t('inventory.kpis.totalProducts') }}</span>
           <h2>{{ totalItems }}</h2>
-          <small>Productos diferentes registrados</small>
+          <small>{{ $t('inventory.kpis.totalProductsDesc') }}</small>
         </div>
       </div>
 
@@ -672,9 +672,9 @@ const deleteItem = async (item) => {
         </div>
 
         <div>
-          <span>Costo del inventario</span>
+          <span>{{ $t('inventory.kpis.inventoryCost') }}</span>
           <h2>{{ formatCurrency(inventoryPurchaseValue) }}</h2>
-          <small>Valor según precios de compra</small>
+          <small>{{ $t('inventory.kpis.inventoryCostDesc') }}</small>
         </div>
       </div>
 
@@ -684,9 +684,9 @@ const deleteItem = async (item) => {
         </div>
 
         <div>
-          <span>Valor potencial de venta</span>
+          <span>{{ $t('inventory.kpis.potentialValue') }}</span>
           <h2>{{ formatCurrency(inventorySaleValue) }}</h2>
-          <small>Valor según precios de venta</small>
+          <small>{{ $t('inventory.kpis.potentialValueDesc') }}</small>
         </div>
       </div>
 
@@ -702,15 +702,13 @@ const deleteItem = async (item) => {
         </div>
 
         <div>
-          <span>Utilidad potencial</span>
+          <span>{{ $t('inventory.kpis.potentialProfit') }}</span>
           <h2>
             {{ formatCurrency(potentialInventoryProfit) }}
           </h2>
 
           <small>
-            {{ lowStockItems }}
-            producto{{ lowStockItems === 1 ? '' : 's' }}
-            con stock bajo
+            {{ lowStockItems }} {{ $t('inventory.kpis.lowStockCount') }}
           </small>
         </div>
       </div>
@@ -731,7 +729,7 @@ const deleteItem = async (item) => {
           :options="brandOptions"
           optionLabel="label"
           optionValue="value"
-          placeholder="Todas las marcas"
+          placeholder="{{ $t('inventory.filters.allTiers') }}"
           showClear
           class="filter-select"
       />
@@ -741,13 +739,13 @@ const deleteItem = async (item) => {
           :options="qualityTiers"
           optionLabel="label"
           optionValue="value"
-          placeholder="Todas las gamas"
+          placeholder="{{ $t('inventory.filters.allTiers') }}"
           showClear
           class="filter-select"
       />
 
       <Button
-          label="Limpiar filtros"
+          label="{{ $t('inventory.filters.clear') }}"
           icon="pi pi-filter-slash"
           severity="secondary"
           outlined
@@ -855,7 +853,7 @@ const deleteItem = async (item) => {
 
         <div class="row-grid">
           <div class="field">
-            <label>Gama o nivel de calidad</label>
+            <label>{{ $t('inventory.labels.qualityTier') }}</label>
 
             <Select
                 v-model="itemForm.qualityTier"
@@ -866,7 +864,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="field">
-            <label>Presentación</label>
+            <label>{{ $t('inventory.labels.presentation') }}</label>
 
             <InputText
                 v-model.trim="itemForm.presentation"
@@ -877,7 +875,7 @@ const deleteItem = async (item) => {
 
         <div class="row-grid">
           <div class="field">
-            <label>Unidad de medida</label>
+            <label>{{ $t('inventory.labels.unitMeasure') }}</label>
 
             <Select
                 v-model="itemForm.unitMeasure"
@@ -888,7 +886,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="field">
-            <label>Especificación técnica</label>
+            <label>{{ $t('inventory.labels.technicalSpec') }}</label>
 
             <InputText
                 v-model.trim="itemForm.specification"
@@ -900,17 +898,16 @@ const deleteItem = async (item) => {
         <div class="financial-form-section">
           <div class="section-header">
             <div>
-              <span>Información financiera</span>
+              <span>{{ $t('inventory.labels.financialInfo') }}</span>
               <small>
-                Define el costo interno y el precio cobrado
-                al cliente.
+                {{ $t('inventory.labels.financialInfoDesc') }}
               </small>
             </div>
           </div>
 
           <div class="row-grid">
             <div class="field">
-              <label>Precio de compra</label>
+              <label>{{ $t('inventory.labels.purchasePrice') }}</label>
 
               <InputNumber
                   v-model="itemForm.purchasePrice"
@@ -942,7 +939,7 @@ const deleteItem = async (item) => {
 
           <div class="profit-preview">
             <div>
-              <span>Utilidad por unidad</span>
+              <span>{{ $t('inventory.labels.unitProfit') }}</span>
 
               <strong
                   :class="{
@@ -955,7 +952,7 @@ const deleteItem = async (item) => {
             </div>
 
             <div>
-              <span>Margen estimado</span>
+              <span>{{ $t('inventory.labels.estimatedMargin') }}</span>
 
               <strong
                   :class="{
@@ -971,7 +968,7 @@ const deleteItem = async (item) => {
 
         <div class="row-grid">
           <div class="field">
-            <label>Stock actual</label>
+            <label>{{ $t('inventory.labels.currentStock') }}</label>
 
             <div class="stock-readonly-panel">
               <div class="stock-readonly-value">
@@ -1007,7 +1004,7 @@ const deleteItem = async (item) => {
         </div>
 
         <div class="field">
-          <label>Imagen del material</label>
+          <label>{{ $t('inventory.labels.itemImage') }}</label>
 
           <div class="file-upload-container">
             <label
@@ -1015,7 +1012,7 @@ const deleteItem = async (item) => {
                 class="file-upload-btn"
             >
               <i class="pi pi-upload"></i>
-              Seleccionar imagen
+              {{ $t('inventory.labels.selectImage') }}
             </label>
 
             <input
@@ -1037,8 +1034,7 @@ const deleteItem = async (item) => {
             </div>
 
             <small v-else>
-              Se utilizará una imagen predeterminada
-              según la categoría.
+              {{ $t('inventory.labels.defaultImageWarning') }}
             </small>
           </div>
         </div>
@@ -1051,7 +1047,7 @@ const deleteItem = async (item) => {
               class="dialog-footer-left"
           >
             <Button
-                label="Eliminar"
+                label="{{ $t('inventory.labels.delete') }}"
                 icon="pi pi-trash"
                 severity="danger"
                 text
@@ -1060,7 +1056,7 @@ const deleteItem = async (item) => {
             />
 
             <Button
-                label="Registrar recepción"
+                label="{{ $t('inventory.labels.registerReceipt') }}"
                 icon="pi pi-truck"
                 severity="success"
                 outlined
@@ -1092,7 +1088,7 @@ const deleteItem = async (item) => {
 
     <Dialog
         v-model:visible="displayReceiptDialog"
-        header="Registrar recepción de proveedor"
+        header="{{ $t('inventory.receipt.title') }}"
         :modal="true"
         :closable="!receivingStock"
         :style="{
@@ -1147,7 +1143,7 @@ const deleteItem = async (item) => {
           <div class="row-grid">
             <div class="field">
               <label>
-                Cantidad recibida
+                {{ $t('inventory.receipt.receivedQuantity') }}
                 <span class="required">*</span>
               </label>
 
@@ -1161,7 +1157,7 @@ const deleteItem = async (item) => {
 
             <div class="field">
               <label>
-                Proveedor
+                {{ $t('inventory.receipt.provider') }}
                 <span class="required">*</span>
               </label>
 
@@ -1174,7 +1170,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="field">
-            <label>Número de documento</label>
+            <label>{{ $t('inventory.receipt.documentNumber') }}</label>
 
             <InputText
                 v-model.trim="receiptForm.documentNumber"
@@ -1184,7 +1180,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="field">
-            <label>Observaciones</label>
+            <label>{{ $t('inventory.receipt.notes') }}</label>
 
             <Textarea
                 v-model.trim="receiptForm.notes"
@@ -1196,7 +1192,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="receipt-stock-preview">
-            <span>Stock después de la recepción</span>
+            <span>{{ $t('inventory.receipt.stockAfter') }}</span>
             <strong>
               {{
                 toInteger(receiptItem.stock, 0) +
@@ -1210,7 +1206,7 @@ const deleteItem = async (item) => {
       <template #footer>
         <div class="dialog-footer-actions receipt-footer">
           <Button
-              label="Cerrar"
+              label="{{ $t('inventory.receipt.close') }}"
               text
               severity="secondary"
               :disabled="receivingStock"
@@ -1218,7 +1214,7 @@ const deleteItem = async (item) => {
           />
 
           <Button
-              label="Registrar ingreso"
+              label="{{ $t('inventory.receipt.submit') }}"
               icon="pi pi-check"
               severity="success"
               :loading="receivingStock"

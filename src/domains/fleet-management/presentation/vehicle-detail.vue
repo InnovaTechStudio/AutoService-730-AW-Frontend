@@ -150,7 +150,7 @@ const progress = computed(() => {
  */
 const getProgressByStatus = (status) => {
   if ([VEHICLE_STATUS.READY, VEHICLE_STATUS.DELIVERED, ORDER_STATUS.FINISHED, ORDER_STATUS.DELIVERED].includes(status)) return 100;
-  if ([VEHICLE_STATUS.IN_WORKSHOP, ORDER_STATUS.IN_PROGRESS].includes(status)) return 65;
+  if (status === ORDER_STATUS.IN_PROGRESS) return 65;
   if (status === ORDER_STATUS.PENDING) return 15;
   return 0;
 };
@@ -228,7 +228,6 @@ const goToOrder = (orderId) => router.push(`/work-orders/${orderId}`);
             <div>
               <span class="plate-badge">{{ vehicle.plate }}</span>
               <h2>{{ vehicle.brand }} {{ vehicle.model }}</h2>
-              <p>{{ vehicle.year }} · {{ vehicle.color }}</p>
             </div>
 
             <div class="progress-block">

@@ -100,7 +100,7 @@ const getProfitLabel = (unitProfit) => {
 
         <div v-else class="image-placeholder">
           <i class="pi pi-box"></i>
-          <span>Sin imagen</span>
+          <span>{{ $t('inventory.labels.noImage') }}</span>
         </div>
 
         <div class="header-tags">
@@ -145,17 +145,17 @@ const getProfitLabel = (unitProfit) => {
 
       <div class="product-details">
         <div>
-          <span>Marca</span>
+          <span>{{ $t('inventory.labels.brand') }}</span>
           <strong>{{ item.brand || 'Genérica' }}</strong>
         </div>
 
         <div>
-          <span>Presentación</span>
+          <span>{{ $t('inventory.labels.presentation') }}</span>
           <strong>{{ item.presentation || 'Unidad' }}</strong>
         </div>
 
         <div>
-          <span>Unidad de medida</span>
+          <span>{{ $t('inventory.labels.unitMeasure') }}</span>
           <strong>{{ item.unitMeasure || 'UNIT' }}</strong>
         </div>
       </div>
@@ -163,8 +163,8 @@ const getProfitLabel = (unitProfit) => {
       <div class="financial-section">
         <div class="financial-header">
           <div>
-            <span>Información financiera</span>
-            <small>Rentabilidad por unidad</small>
+            <span>{{ $t('inventory.labels.financialInfo') }}</span>
+            <small>{{ $t('inventory.labels.unitProfit') }}</small>
           </div>
 
           <Tag
@@ -176,17 +176,17 @@ const getProfitLabel = (unitProfit) => {
 
         <div class="financial-grid">
           <div>
-            <span>Precio de compra</span>
+            <span>{{ $t('inventory.labels.purchasePrice') }}</span>
             <strong>{{ formatCurrency(item.purchasePrice) }}</strong>
           </div>
 
           <div>
-            <span>Precio de venta</span>
+            <span>{{ $t('inventory.labels.salePrice') }}</span>
             <strong>{{ formatCurrency(item.unitPrice) }}</strong>
           </div>
 
           <div class="profit-box">
-            <span>Utilidad unitaria</span>
+            <span>{ $t('inventory.labels.unitProfit') }}</span>
             <strong
                 :class="{
                   'positive-profit': toNumber(item.unitProfit) > 0,
@@ -202,7 +202,7 @@ const getProfitLabel = (unitProfit) => {
       <div class="stock-section">
         <div class="stock-summary">
           <div>
-            <span>Stock actual</span>
+            <span>{{ $t('inventory.labels.currentStock') }}</span>
             <strong>
               {{ item.stock }}
               {{ item.unitMeasure || 'UNIT' }}
@@ -232,7 +232,7 @@ const getProfitLabel = (unitProfit) => {
         </div>
 
         <small>
-          Stock mínimo recomendado: {{ item.minStock }}
+          {{ $t('inventory.labels.stockMinRecommended') }} {{ item.minStock }}
         </small>
       </div>
 
@@ -240,7 +240,7 @@ const getProfitLabel = (unitProfit) => {
           v-if="item.compatibleVehicleBrands?.length"
           class="compatibility"
       >
-        <span>Compatible con:</span>
+        <span>{{ $t('inventory.labels.compatibleWith') }}</span>
 
         <div class="brand-tags">
           <Tag
@@ -255,7 +255,7 @@ const getProfitLabel = (unitProfit) => {
 
       <div class="card-actions">
         <Button
-            label="Actualizar stock"
+            label="{{ $t('inventory.labels.updateStock') }}"
             icon="pi pi-refresh"
             outlined
             class="stock-button"

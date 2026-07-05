@@ -12,7 +12,6 @@ import Dialog from 'primevue/dialog';
 import RadioButton from 'primevue/radiobutton';
 
 import { TrackingService } from '../infrastructure/tracking.service';
-
 const { t } = useI18n();
 
 const trackingCode = ref('');
@@ -38,7 +37,7 @@ const paymentSuccess = ref(false);
 const searchOrder = async () => {
   const code = trackingCode.value.trim();
   if (!code) {
-    errorMsg.value = 'Por favor ingresa un código de seguimiento';
+    errorMsg.value = t('tracking.validationError');
     return;
   }
 
@@ -74,7 +73,7 @@ const searchOrder = async () => {
 
     // Verificar que el orden tenga los datos necesarios
     if (!orderData || !orderData.id) {
-      errorMsg.value = 'La orden no tiene un ID válido';
+      errorMsg.value = t('tracking.invalidId');
       loading.value = false;
       return;
     }
@@ -425,31 +424,31 @@ const getProgressValue = computed(() => {
     <div class="receipt-header">
       <div>
         <h1>{{ dynamicWorkshopName }}</h1>
-        <p>Contacto: {{ dynamicWorkshopEmail }}</p>
+        <p>{{ $t('tracking.receipt.contact') }} {{ dynamicWorkshopEmail }}</p>
       </div>
       <div class="receipt-meta">
-        <h2>COMPROBANTE</h2>
+        <h2>{{ $t('tracking.receipt.title') }}</h2>
         <p><strong>Código:</strong> {{ order.trackingCode || order.code || '---' }}</p>
-        <p><strong>Fecha Emisión:</strong> {{ new Date().toLocaleDateString() }}</p>
+        <p><strong>{{ $t('tracking.receipt.issueDate') }}</strong> {{ new Date().toLocaleDateString() }}</p>
       </div>
     </div>
 
     <hr class="receipt-divider" />
 
     <div class="receipt-section">
-      <h3>Datos del Cliente & Vehículo</h3>
+      <h3>{{ $t('tracking.receipt.customerVehicleData') }}</h3>
       <table class="receipt-table-info">
         <tbody> <!-- Envolver las filas en tbody -->
         <tr>
-          <td><strong>Cliente:</strong></td>
+          <td><strong>{{ $t('tracking.receipt.customer') }}</strong></td>
           <td>{{ customer?.fullName || '---' }}</td>
-          <td><strong>Vehículo:</strong></td>
+          <td><strong>{{ $t('tracking.receipt.vehicle') }}</strong></td>
           <td>{{ vehicle ? `${vehicle.brand} ${vehicle.model}` : '---' }}</td>
         </tr>
         <tr>
-          <td><strong>Estado Orden:</strong></td>
+          <td><strong>{{ $t('tracking.receipt.orderStatus') }}</strong></td>
           <td>{{ order.status }}</td>
-          <td><strong>Placa:</strong></td>
+          <td><strong>{{ $t('tracking.receipt.plate') }}</strong></td>
           <td>{{ vehicle?.plate || '---' }}</td>
         </tr>
         </tbody>
@@ -457,12 +456,12 @@ const getProgressValue = computed(() => {
     </div>
 
     <div class="receipt-section mt-4">
-      <h3>Detalle del Servicio</h3>
+      <h3>{{ $t('tracking.receipt.serviceDetail') }}</h3>
       <table class="receipt-main-table">
         <thead>
         <tr>
-          <th>Descripción de la Tarea / Materiales</th>
-          <th class="text-right">Mano de Obra</th>
+          <th>{{ $t('tracking.receipt.taskMaterialsDesc') }}</th>
+          <th class="text-right">{{ $t('tracking.receipt.labor') }}</th>
         </tr>
         </thead>
         <tbody>
@@ -488,15 +487,15 @@ const getProgressValue = computed(() => {
     <div class="receipt-summary">
       <div class="summary-box">
         <div class="summary-line">
-          <span>TOTAL COMPLEMENTARIO:</span>
+          <span>$t('tracking.receipt.complementaryTotal') }}</span>
           <strong>S/. {{ parseFloat(order.price).toFixed(2) }}</strong>
         </div>
       </div>
     </div>
 
     <div class="receipt-footer">
-      <p>Gracias por confiar en {{ dynamicWorkshopName }}.</p>
-      <p>Este documento es un comprobante digital de seguimiento de servicios automotrices.</p>
+      <p>{{ $t('tracking.receipt.thankYou') }} {{ dynamicWorkshopName }}.</p>
+      <p>{{ $t('tracking.receipt.footerDisclaimer') }}</p>
     </div>
   </div>
 </template>

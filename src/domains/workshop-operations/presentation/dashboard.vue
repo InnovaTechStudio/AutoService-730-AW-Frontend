@@ -138,7 +138,7 @@ const fetchFinancialSummary = async () => {
     financialError.value =
         error?.response?.data?.message ||
         error?.message ||
-        'No se pudo cargar el resumen financiero.';
+        t('dashboard.financial.fetchError');
 
     console.error(
         'Error cargando el resumen financiero:',
@@ -443,19 +443,19 @@ const weeklyIncomeData = computed(() => {
         labels,
         datasets: [
           {
-            label: 'Ingresos',
+            label: t('dashboard.financial.chart.income'),
             data: revenues,
             backgroundColor: '#0b1680',
             borderRadius: 10
           },
           {
-            label: 'Costos',
+            label: t('dashboard.financial.chart.costs'),
             data: costs,
             backgroundColor: '#f59e0b',
             borderRadius: 10
           },
           {
-            label: 'Ganancia',
+            label: t('dashboard.financial.chart.profit'),
             data: profits,
             backgroundColor: '#16a34a',
             borderRadius: 10
@@ -657,8 +657,8 @@ const orderProfitability = computed(() =>
 
 const financialResultLabel = computed(() =>
     financialSummary.value.grossProfit >= 0
-        ? 'Ganancia bruta'
-        : 'Pérdida bruta'
+        ? t('dashboard.financial.grossProfit')
+        : t('dashboard.financial.grossLoss')
 );
 </script>
 
@@ -707,14 +707,13 @@ const financialResultLabel = computed(() =>
       <div class="section-heading">
         <div>
           <span class="section-eyebrow">
-            Rendimiento financiero
+            {{ $t('dashboard.financial.eyebrow') }}
           </span>
 
-          <h2>Ganancias, costos y pérdidas</h2>
+          <h2>{{ $t('dashboard.financial.title') }}</h2>
 
           <p>
-            Resumen calculado según las órdenes,
-            tareas, mano de obra y materiales registrados.
+            {{ $t('dashboard.financial.description') }}
           </p>
         </div>
 
@@ -733,7 +732,7 @@ const financialResultLabel = computed(() =>
               "
           ></i>
 
-          Actualizar
+          {{ $t('dashboard.financial.refresh') }}
         </button>
       </div>
 
@@ -752,7 +751,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Ingresos proyectados</span>
+            <span>{{ $t('dashboard.financial.projectedRevenue') }}</span>
             <strong>
               {{
                 formatCurrency(
@@ -762,7 +761,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Total estimado según órdenes registradas
+              {{ $t('dashboard.financial.projectedRevenueDesc') }}
             </small>
           </div>
         </article>
@@ -773,7 +772,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Ingresos realizados</span>
+            <span>{{ $t('dashboard.financial.realizedRevenue') }}</span>
             <strong>
               {{
                 formatCurrency(
@@ -783,7 +782,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Ingresos de servicios finalizados
+              {{ $t('dashboard.financial.realizedRevenueDesc') }}
             </small>
           </div>
         </article>
@@ -794,7 +793,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Ingresos pendientes</span>
+            <span>{{ $t('dashboard.financial.pendingRevenue') }}</span>
             <strong>
               {{
                 formatCurrency(
@@ -804,7 +803,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Importe aún pendiente de realización
+              {{ $t('dashboard.financial.pendingRevenueDesc') }}
             </small>
           </div>
         </article>
@@ -815,7 +814,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Costos operativos</span>
+            <span>{{ $t('dashboard.financial.operatingCost') }}</span>
             <strong>
               {{
                 formatCurrency(
@@ -825,7 +824,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Mano de obra y materiales utilizados
+              {{ $t('dashboard.financial.operatingCostDesc') }}
             </small>
           </div>
         </article>
@@ -869,7 +868,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Margen:
+              {{ $t('dashboard.financial.margin') }}
               {{
                 formatPercentage(
                     financialSummary.marginPercentage
@@ -885,7 +884,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Ticket promedio</span>
+            <span>{{ $t('dashboard.financial.averageTicket') }}</span>
 
             <strong>
               {{
@@ -896,14 +895,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              {{
-                financialSummary.profitableOrders
-              }}
-              rentables ·
-              {{
-                financialSummary.lossOrders
-              }}
-              con pérdida
+              {{ $t('dashboard.financial.ticketStats', { profitable: financialSummary.profitableOrders, loss: financialSummary.lossOrders }) }}
             </small>
           </div>
         </article>
@@ -936,14 +928,13 @@ const financialResultLabel = computed(() =>
       <div class="section-heading">
         <div>
           <span class="section-eyebrow">
-            Rentabilidad por orden
+            {{ $t('dashboard.profitability.eyebrow') }}
           </span>
 
-          <h2>Resultados de servicios realizados</h2>
+          <h2>{{ $t('dashboard.profitability.title') }}</h2>
 
           <p>
-            Comparación entre ingresos, costos y utilidad
-            obtenida por cada orden de trabajo.
+            {{ $t('dashboard.profitability.description') }}
           </p>
         </div>
       </div>
@@ -955,12 +946,12 @@ const financialResultLabel = computed(() =>
         <table class="profitability-table">
           <thead>
           <tr>
-            <th>Orden</th>
-            <th>Ingresos</th>
-            <th>Costos</th>
-            <th>Resultado</th>
-            <th>Margen</th>
-            <th>Estado</th>
+            <th>{{ $t('dashboard.profitability.columns.order') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.income') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.costs') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.result') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.margin') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.status') }}</th>
           </tr>
           </thead>
 
@@ -1014,8 +1005,8 @@ const financialResultLabel = computed(() =>
                 >
                   {{
                     order.profit >= 0
-                        ? 'Rentable'
-                        : 'Con pérdida'
+                        ? $t('dashboard.profitability.status.profitable')
+                        : $t('dashboard.profitability.status.loss')
                   }}
                 </span>
             </td>
@@ -1030,11 +1021,10 @@ const financialResultLabel = computed(() =>
       >
         <i class="pi pi-chart-bar"></i>
 
-        <h3>Aún no existen resultados financieros</h3>
+        <h3>{{ $t('dashboard.profitability.empty.title') }}</h3>
 
         <p>
-          La rentabilidad por orden aparecerá cuando se
-          registren órdenes con tareas, costos y precios.
+          {{ $t('dashboard.profitability.empty.description') }}
         </p>
       </div>
     </section>
