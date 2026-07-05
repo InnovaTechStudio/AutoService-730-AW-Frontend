@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.DEV
-    ? 'http://localhost:5024/api/v1'
-    : 'https://autoservice-aw-backend.onrender.com/api/v1';
+const baseURL = import.meta.env.VITE_API_URL || 'https://autoservice-aw-backend.onrender.com/api/v1';
+
+export const API_BASE_URL = baseURL;
 
 const http = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json'
     }
