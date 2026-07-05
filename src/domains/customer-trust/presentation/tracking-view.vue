@@ -19,12 +19,11 @@ const trackingCode = ref('');
 const order = ref(null);
 const vehicle = ref(null);
 const customer = ref(null);
-const workshop = ref(null); // Nuevo estado para guardar el taller
+const workshop = ref(null);
 const tasks = ref([]);
 const loading = ref(false);
 const errorMsg = ref('');
 
-// Nombres y correos dinámicos computados
 const dynamicWorkshopName = computed(() => workshop.value?.name || workshop.value?.workshopName || 'Auto-Taller');
 const dynamicWorkshopEmail = computed(() => workshop.value?.email || 'contacto@taller.com');
 
@@ -37,43 +36,154 @@ const paymentLoading = ref(false);
 const paymentSuccess = ref(false);
 
 const searchOrder = async () => {
-  if (!trackingCode.value.trim()) return;
+  const code = trackingCode.value.trim();
+  if (!code) {
+    errorMsg.value = 'Por favor ingresa un código de seguimiento';
+    return;
+  }
 
   loading.value = true;
   errorMsg.value = '';
 
   try {
-    const { data: orders } = await TrackingService.getOrderByCode(trackingCode.value.trim());
+    console.log('Buscando orden con código:', code);
 
-    if (!orders || orders.length === 0) {
+    // Llamada única al servicio
+    const response = await TrackingService.getOrderByCode(code);
+    console.log('Respuesta completa:', response);
+
+    // Verificar si la respuesta tiene datos
+    if (!response || !response.data) {
       errorMsg.value = t('tracking.notFound');
       loading.value = false;
       return;
     }
 
-    order.value = orders[0];
+    // Si la respuesta es un array (como parece ser)
+    let orderData;
+    if (Array.isArray(response.data)) {
+      if (response.data.length === 0) {
+        errorMsg.value = t('tracking.notFound');
+        loading.value = false;
+        return;
+      }
+      orderData = response.data[0]; // Tomamos el primer elemento
+    } else {
+      orderData = response.data;
+    }
 
-    // Traemos de forma paralela Vehículo, Tareas, Cliente y el TALLER
-    const [vehicleRes, tasksRes, customerRes, workshopRes] = await Promise.all([
-      TrackingService.getVehicle(order.value.vehicleId),
-      TrackingService.getTasksByOrder(order.value.id),
-      TrackingService.getCustomer(order.value.customerId).catch(() => ({ data: { fullName: 'Cliente' } })),
-      TrackingService.getWorkshop(order.value.workshopId).catch(() => ({ data: null }))
-    ]);
+    // Verificar que el orden tenga los datos necesarios
+    if (!orderData || !orderData.id) {
+      errorMsg.value = 'La orden no tiene un ID válido';
+      loading.value = false;
+      return;
+    }
 
-    vehicle.value = vehicleRes.data;
-    tasks.value = tasksRes.data;
-    customer.value = customerRes.data;
-    workshop.value = workshopRes.data;
+    order.value = orderData;
+    console.log('Orden encontrada:', orderData);
+
+    // Verificar que tenga los IDs necesarios
+    if (!orderData.vehicleId) {
+      console.warn('La orden no tiene vehicleId');
+    }
+    if (!orderData.customerId) {
+      console.warn('La orden no tiene customerId');
+    }
+    if (!orderData.workshopId) {
+      console.warn('La orden no tiene workshopId');
+    }
+
+    // Traer datos relacionados con manejo de errores individual
+    const fetchPromises = [];
+
+    // Vehículo
+    if (orderData.vehicleId) {
+      fetchPromises.push(
+          TrackingService.getVehicle(orderData.vehicleId)
+              .then(res => ({ type: 'vehicle', data: res.data }))
+              .catch(err => {
+                console.error('Error al obtener vehículo:', err);
+                return { type: 'vehicle', data: null };
+              })
+      );
+    } else {
+      fetchPromises.push(Promise.resolve({ type: 'vehicle', data: null }));
+    }
+
+    // Tareas
+    if (orderData.id) {
+      fetchPromises.push(
+          TrackingService.getTasksByOrder(orderData.id)
+              .then(res => ({ type: 'tasks', data: res.data }))
+              .catch(err => {
+                console.error('Error al obtener tareas:', err);
+                return { type: 'tasks', data: [] };
+              })
+      );
+    } else {
+      fetchPromises.push(Promise.resolve({ type: 'tasks', data: [] }));
+    }
+
+    // Cliente
+    if (orderData.customerId) {
+      fetchPromises.push(
+          TrackingService.getCustomer(orderData.customerId)
+              .then(res => ({ type: 'customer', data: res.data }))
+              .catch(err => {
+                console.error('Error al obtener cliente:', err);
+                return { type: 'customer', data: { fullName: 'Cliente' } };
+              })
+      );
+    } else {
+      fetchPromises.push(Promise.resolve({ type: 'customer', data: { fullName: 'Cliente' } }));
+    }
+
+    // Taller
+    if (orderData.workshopId) {
+      fetchPromises.push(
+          TrackingService.getWorkshop(orderData.workshopId)
+              .then(res => ({ type: 'workshop', data: res.data }))
+              .catch(err => {
+                console.error('Error al obtener taller:', err);
+                return { type: 'workshop', data: null };
+              })
+      );
+    } else {
+      fetchPromises.push(Promise.resolve({ type: 'workshop', data: null }));
+    }
+
+    // Esperar todas las promesas
+    const results = await Promise.all(fetchPromises);
+
+    // Asignar resultados
+    results.forEach(result => {
+      switch(result.type) {
+        case 'vehicle':
+          vehicle.value = result.data;
+          break;
+        case 'tasks':
+          tasks.value = Array.isArray(result.data) ? result.data : [];
+          break;
+        case 'customer':
+          customer.value = result.data;
+          break;
+        case 'workshop':
+          workshop.value = result.data;
+          break;
+      }
+    });
+
+    console.log('Datos cargados:', { vehicle: vehicle.value, tasks: tasks.value, customer: customer.value, workshop: workshop.value });
 
   } catch (err) {
-    console.error(err);
-    errorMsg.value = t('tracking.errorConnection');
+    console.error('Error en searchOrder:', err);
+    errorMsg.value = err.response?.data?.message || t('tracking.errorConnection');
   } finally {
     loading.value = false;
   }
 };
 
+// Resto de métodos sin cambios...
 const resetSearch = () => {
   order.value = null;
   trackingCode.value = '';
@@ -319,7 +429,7 @@ const getProgressValue = computed(() => {
       </div>
       <div class="receipt-meta">
         <h2>COMPROBANTE</h2>
-        <p><strong>Código:</strong> {{ order.trackingCode }}</p>
+        <p><strong>Código:</strong> {{ order.trackingCode || order.code || '---' }}</p>
         <p><strong>Fecha Emisión:</strong> {{ new Date().toLocaleDateString() }}</p>
       </div>
     </div>
@@ -329,6 +439,7 @@ const getProgressValue = computed(() => {
     <div class="receipt-section">
       <h3>Datos del Cliente & Vehículo</h3>
       <table class="receipt-table-info">
+        <tbody> <!-- Envolver las filas en tbody -->
         <tr>
           <td><strong>Cliente:</strong></td>
           <td>{{ customer?.fullName || '---' }}</td>
@@ -341,6 +452,7 @@ const getProgressValue = computed(() => {
           <td><strong>Placa:</strong></td>
           <td>{{ vehicle?.plate || '---' }}</td>
         </tr>
+        </tbody>
       </table>
     </div>
 

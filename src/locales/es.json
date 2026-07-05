@@ -25,7 +25,8 @@
     "currencyPrefix": "S/.",
     "vehicle": "Vehículo",
     "save": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "email": "Email"
   },
   "customer": {
     "dni": "DNI / Documento",
@@ -34,6 +35,12 @@
     "phone": "Teléfono"
   },
   "customers": {
+    "delete": {
+      "title": "Eliminar Cliente",
+      "description": "¿Está seguro de que desea eliminar este cliente?",
+      "delete": "Eliminar",
+      "cancel": "Cancelar"
+    },
     "columns": {
       "actions": "ACCIONES",
       "dni": "ID / DNI",
@@ -49,6 +56,8 @@
     },
     "eyebrow": "Gestión de Clientes",
     "form": {
+      "update": "Actualizar",
+      "editTitle": "Editar Cliente",
       "registerTitle": "Registrar nuevo Cliente",
       "dniPlaceholder": "12345678",
       "dni": "DNI",
@@ -233,7 +242,8 @@
     "actions": {
       "new": "Agregar mecánico",
       "cancel": "Cancelar",
-      "create": "Crear"
+      "create": "Crear",
+      "saveChanges": "Guardar cambios"
     },
     "card": {
       "activeTasks": "Tareas activas",
@@ -255,7 +265,8 @@
       "usernamePlaceholder": "nombre",
       "username": "Cuenta de Mecánico",
       "usernameHelp": "Se recomienda nombre+apellido",
-      "password": "Contraseña"
+      "password": "Contraseña",
+      "editTitle": "Editar mecánico"
     },
     "empty": {
       "description": "Intente cambiar el filtro o registre a un nuevo miembro.",

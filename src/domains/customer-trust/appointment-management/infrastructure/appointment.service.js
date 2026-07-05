@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/appointments';
+const API_URL = 'https://autoservice-aw-backend.onrender.com/api/v1/appointments';
 
 export default {
 
