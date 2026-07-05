@@ -4,20 +4,86 @@ import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
 defineProps({
-  item: Object
+  item: {
+    type: Object,
+    required: true
+  }
 });
 
 defineEmits(['edit']);
 
+const toNumber = (value) => {
+  const parsedValue = Number(value);
+  return Number.isFinite(parsedValue) ? parsedValue : 0;
+};
+
+const formatCurrency = (value) =>
+    toNumber(value).toLocaleString('es-PE', {
+      style: 'currency',
+      currency: 'PEN',
+      minimumFractionDigits: 2
+    });
+
+const formatPercentage = (value) =>
+    `${toNumber(value).toFixed(2)}%`;
+
 const getStockSeverity = (item) => {
-  if (item.stock <= item.minStock) return 'danger';
-  if (item.stock <= item.minStock + 2) return 'warning';
+  const stock = toNumber(item.stock);
+  const minStock = toNumber(item.minStock);
+
+  if (stock <= minStock) return 'danger';
+  if (stock <= minStock + 2) return 'warning';
+
   return 'success';
 };
 
 const getStockLabel = (item) => {
-  if (item.stock <= item.minStock) return 'Stock bajo';
+  const stock = toNumber(item.stock);
+  const minStock = toNumber(item.minStock);
+
+  if (stock <= 0) return 'Sin stock';
+  if (stock <= minStock) return 'Stock bajo';
+  if (stock <= minStock + 2) return 'Stock limitado';
+
   return 'Disponible';
+};
+
+const getQualityTierLabel = (qualityTier) => {
+  const labels = {
+    ECONOMY: 'Económica',
+    STANDARD: 'Estándar',
+    PREMIUM: 'Premium'
+  };
+
+  return labels[qualityTier] || 'Estándar';
+};
+
+const getQualityTierSeverity = (qualityTier) => {
+  const severities = {
+    ECONOMY: 'secondary',
+    STANDARD: 'info',
+    PREMIUM: 'warn'
+  };
+
+  return severities[qualityTier] || 'info';
+};
+
+const getProfitSeverity = (unitProfit) => {
+  const profit = toNumber(unitProfit);
+
+  if (profit < 0) return 'danger';
+  if (profit === 0) return 'warning';
+
+  return 'success';
+};
+
+const getProfitLabel = (unitProfit) => {
+  const profit = toNumber(unitProfit);
+
+  if (profit < 0) return 'Pérdida';
+  if (profit === 0) return 'Sin margen';
+
+  return 'Rentable';
 };
 </script>
 
@@ -25,35 +91,155 @@ const getStockLabel = (item) => {
   <Card class="inventory-card">
     <template #header>
       <div class="image-wrapper">
-        <img :src="item.image" :alt="item.name" class="item-image" />
+        <img
+            v-if="item.image"
+            :src="item.image"
+            :alt="item.name"
+            class="item-image"
+        />
+
+        <div v-else class="image-placeholder">
+          <i class="pi pi-box"></i>
+          <span>Sin imagen</span>
+        </div>
+
+        <div class="header-tags">
+          <Tag
+              :value="item.category"
+              severity="info"
+              rounded
+          />
+
+          <Tag
+              :value="getQualityTierLabel(item.qualityTier)"
+              :severity="getQualityTierSeverity(item.qualityTier)"
+              rounded
+          />
+        </div>
       </div>
     </template>
 
     <template #content>
       <div class="item-header">
-        <Tag :value="item.category" severity="info" rounded />
-        <h3>{{ item.name }}</h3>
-        <p>{{ item.description || 'Material disponible para servicios del taller.' }}</p>
+        <div class="item-title-row">
+          <div>
+            <h3>{{ item.name }}</h3>
+            <small v-if="item.sku">SKU: {{ item.sku }}</small>
+          </div>
+
+          <Tag
+              :value="getProfitLabel(item.unitProfit)"
+              :severity="getProfitSeverity(item.unitProfit)"
+              rounded
+          />
+        </div>
+
+        <p>
+          {{
+            item.specification ||
+            item.description ||
+            'Material disponible para los servicios del taller.'
+          }}
+        </p>
       </div>
 
-      <div class="item-info">
+      <div class="product-details">
         <div>
           <span>Marca</span>
-          <strong>{{ item.brand }}</strong>
+          <strong>{{ item.brand || 'Genérica' }}</strong>
         </div>
 
         <div>
-          <span>Precio</span>
-          <strong>S/. {{ item.unitPrice.toFixed(2) }}</strong>
+          <span>Presentación</span>
+          <strong>{{ item.presentation || 'Unidad' }}</strong>
         </div>
 
         <div>
-          <span>Stock</span>
-          <strong>{{ item.stock }}</strong>
+          <span>Unidad de medida</span>
+          <strong>{{ item.unitMeasure || 'UNIT' }}</strong>
         </div>
       </div>
 
-      <div class="compatibility">
+      <div class="financial-section">
+        <div class="financial-header">
+          <div>
+            <span>Información financiera</span>
+            <small>Rentabilidad por unidad</small>
+          </div>
+
+          <Tag
+              :value="formatPercentage(item.marginPercentage)"
+              :severity="getProfitSeverity(item.unitProfit)"
+              rounded
+          />
+        </div>
+
+        <div class="financial-grid">
+          <div>
+            <span>Precio de compra</span>
+            <strong>{{ formatCurrency(item.purchasePrice) }}</strong>
+          </div>
+
+          <div>
+            <span>Precio de venta</span>
+            <strong>{{ formatCurrency(item.unitPrice) }}</strong>
+          </div>
+
+          <div class="profit-box">
+            <span>Utilidad unitaria</span>
+            <strong
+                :class="{
+                  'positive-profit': toNumber(item.unitProfit) > 0,
+                  'negative-profit': toNumber(item.unitProfit) < 0
+                }"
+            >
+              {{ formatCurrency(item.unitProfit) }}
+            </strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="stock-section">
+        <div class="stock-summary">
+          <div>
+            <span>Stock actual</span>
+            <strong>
+              {{ item.stock }}
+              {{ item.unitMeasure || 'UNIT' }}
+            </strong>
+          </div>
+
+          <Tag
+              :value="getStockLabel(item)"
+              :severity="getStockSeverity(item)"
+              rounded
+          />
+        </div>
+
+        <div class="stock-progress">
+          <div
+              class="stock-progress-value"
+              :class="getStockSeverity(item)"
+              :style="{
+                width: `${Math.min(
+                  100,
+                  (toNumber(item.stock) /
+                    Math.max(toNumber(item.minStock) * 2, 1)) *
+                    100
+                )}%`
+              }"
+          ></div>
+        </div>
+
+        <small>
+          Stock mínimo recomendado: {{ item.minStock }}
+        </small>
+      </div>
+
+      <div
+          v-if="item.compatibleVehicleBrands?.length"
+          class="compatibility"
+      >
         <span>Compatible con:</span>
 
         <div class="brand-tags">
@@ -65,16 +251,6 @@ const getStockLabel = (item) => {
               rounded
           />
         </div>
-      </div>
-
-      <div class="stock-row">
-        <Tag
-            :value="getStockLabel(item)"
-            :severity="getStockSeverity(item)"
-            rounded
-        />
-
-        <small>Stock mínimo: {{ item.minStock }}</small>
       </div>
 
       <div class="card-actions">
@@ -91,6 +267,7 @@ const getStockLabel = (item) => {
             severity="info"
             outlined
             class="edit-button"
+            aria-label="Editar producto"
             @click="$emit('edit', item)"
         />
       </div>
@@ -100,14 +277,24 @@ const getStockLabel = (item) => {
 
 <style scoped>
 .inventory-card {
+  height: 100%;
   overflow: hidden;
   border: 1px solid #e8edf5;
   border-radius: 24px;
   background: #ffffff;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+  transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+}
+
+.inventory-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
 }
 
 .image-wrapper {
+  position: relative;
   height: 190px;
   background: #eef2ff;
 }
@@ -118,63 +305,209 @@ const getStockLabel = (item) => {
   object-fit: cover;
 }
 
+.image-placeholder {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: #64748b;
+}
+
+.image-placeholder i {
+  font-size: 2.6rem;
+  color: #94a3b8;
+}
+
+.image-placeholder span {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.header-tags {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.item-header {
+  margin-bottom: 1rem;
+}
+
+.item-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
 .item-header h3 {
-  margin: .8rem 0 .35rem;
+  margin: 0;
   color: #0f172a;
   font-size: 1.2rem;
 }
 
+.item-header small {
+  display: block;
+  margin-top: 0.25rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
 .item-header p {
   min-height: 44px;
+  margin: 0.8rem 0 0;
   color: #64748b;
   line-height: 1.45;
 }
 
-.item-info {
+.product-details {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: .7rem;
-  margin: 1rem 0;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
 }
 
-.item-info div {
-  padding: .75rem;
+.product-details div {
+  padding: 0.75rem;
   border-radius: 16px;
   background: #f8fafc;
 }
 
-.item-info span,
-.compatibility span {
+.product-details span,
+.financial-grid span,
+.financial-header span,
+.stock-section span,
+.compatibility > span {
   display: block;
   color: #64748b;
-  font-size: .78rem;
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
-.item-info strong {
+.product-details strong,
+.financial-grid strong,
+.stock-section strong {
   display: block;
-  margin-top: .25rem;
+  margin-top: 0.25rem;
   color: #0f172a;
+  word-break: break-word;
+}
+
+.financial-section {
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.financial-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+
+.financial-header span {
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.financial-header small {
+  display: block;
+  margin-top: 0.2rem;
+  color: #94a3b8;
+}
+
+.financial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+.financial-grid > div {
+  padding: 0.7rem;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.profit-box {
+  border: 1px solid #e2e8f0;
+}
+
+.positive-profit {
+  color: #16a34a !important;
+}
+
+.negative-profit {
+  color: #dc2626 !important;
+}
+
+.stock-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.stock-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.stock-progress {
+  height: 8px;
+  margin: 0.8rem 0 0.55rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.stock-progress-value {
+  height: 100%;
+  min-width: 3%;
+  border-radius: inherit;
+  transition: width 0.3s ease;
+}
+
+.stock-progress-value.success {
+  background: #22c55e;
+}
+
+.stock-progress-value.warning {
+  background: #f59e0b;
+}
+
+.stock-progress-value.danger {
+  background: #ef4444;
+}
+
+.stock-section small {
+  color: #64748b;
+}
+
+.compatibility {
+  margin-top: 1rem;
 }
 
 .brand-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: .45rem;
-  margin-top: .55rem;
-}
-
-.stock-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 1rem 0;
-  color: #64748b;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
 }
 
 .card-actions {
   display: flex;
-  gap: .6rem;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
 }
 
 .stock-button {
@@ -188,8 +521,15 @@ const getStockLabel = (item) => {
 }
 
 @media (max-width: 720px) {
-  .item-info {
+  .product-details,
+  .financial-grid {
     grid-template-columns: 1fr;
+  }
+
+  .item-title-row,
+  .stock-summary,
+  .financial-header {
+    align-items: flex-start;
   }
 }
 </style>
