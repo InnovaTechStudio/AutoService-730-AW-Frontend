@@ -15,6 +15,26 @@ import { useMechanicStore } from '../../staff-coordination/application/mechanic.
 import { useTaskStore } from '../application/task.store';
 import { useWorkOrderStore } from '../application/work-order.store';
 import TaskDialog from './components/tasks/TaskDialog.vue';
+import { useCustomerStore} from "../../customer-management/application/customer.store.js";
+import { useVehicleStore} from "../../fleet-management/application/vehicle.store.js";
+import {Menu} from "primevue";
+
+const shareMenu = ref(null);
+
+const shareItems = ref([
+  {label: 'Guardar orden como PDF', icon: 'pi pi-file-pdf', command: () => exportToPDF()},
+  {label: 'Guardar informe como PDF', icon: 'pi pi-file-pdf', command: () => exportToPDF(true) // true = informe detallado
+  },
+  { separator: true },
+  {label: 'Enviar orden por correo', icon: 'pi pi-envelope', command: () => sendByEmail()},
+  {label: 'Enviar informe por correo', icon: 'pi pi-envelope', command: () => sendByEmail(true)},
+  { separator: true },
+  {label: 'Notificar por WhatsApp', icon: 'pi pi-whatsapp', command: () => shareByWhatsApp()}
+]);
+
+const toggleShareMenu = (event) => {
+  shareMenu.value.toggle(event);
+};
 
 const route = useRoute();
 const router = useRouter();
@@ -24,6 +44,8 @@ const workOrderStore = useWorkOrderStore();
 const taskStore = useTaskStore();
 const mechanicStore = useMechanicStore();
 const authStore = useAuthStore();
+const customerStore = useCustomerStore();
+const vehicleStore = useVehicleStore();
 
 const orderId = route.params.id;
 const taskDialogVisible = ref(false);
@@ -37,7 +59,6 @@ const currentOrder = computed(() =>
 const orderTasks = computed(() =>
     taskStore.tasks.filter(task => String(task.workOrderId) === String(orderId))
 );
-
 /*const calculatedTotal = computed(() => {
   let total = 0;
   orderTasks.value.forEach(task => {
@@ -65,7 +86,9 @@ const loadData = async () => {
   await Promise.all([
     workOrderStore.fetchWorkOrders(),
     taskStore.fetchAllTasks(),
-    mechanicStore.fetchMechanics()
+    mechanicStore.fetchMechanics(),
+      vehicleStore.fetchVehicles(),
+      customerStore.fetchCustomers()
   ]);
 };
 
@@ -101,14 +124,156 @@ const goBack = () => {
   }
   router.push('/work-orders');
 };
+const printOrder = () => {
+  const order = currentOrder.value;
+  if (!order) return;
+
+  // Buscar vehículo y cliente relacionados
+  const vehicle = vehicleStore.vehicles.find(v =>
+      String(v.id) === String(order.vehicleId)
+  ) || {};
+
+  const customer = customerStore.customers.find(c =>
+      String(c.id) === String(order.customerId || vehicle.customerId)
+  ) || {};
+
+  const tasks = orderTasks.value;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Orden de Trabajo #${order.trackingCode || order.id}</title>
+      <style>
+        body { font-family: Arial, Helvetica, sans-serif; margin: 40px; line-height: 1.6; color: #333; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 4px solid #0b1680; padding-bottom: 20px; }
+        .logo { font-size: 32px; font-weight: bold; color: #0b1680; margin: 0; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 25px 0; }
+        .info-box { background: #f8fafc; padding: 18px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; margin: 25px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #0b1680; color: white; }
+        .total-row { font-size: 1.4em; font-weight: bold; background-color: #f0f4ff; text-align: right; padding: 15px; }
+        .footer { margin-top: 60px; text-align: center; font-size: 0.9em; color: #666; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="logo">AutoService AW</div>
+        <h2>Orden de Trabajo #${order.trackingCode || order.id}</h2>
+        <p>Fecha: ${new Date().toLocaleDateString('es-PE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })}</p>
+      </div>
+
+      <div class="info-grid">
+        <!-- Cliente -->
+        <div class="info-box">
+          <h3>Cliente</h3>
+          <p><strong>Nombre:</strong> ${customer.fullName || 'No registrado'}</p>
+          <p><strong>DNI:</strong> ${customer.dni || 'N/A'}</p>
+          <p><strong>Teléfono:</strong> ${customer.phone || 'N/A'}</p>
+          <p><strong>Email:</strong> ${customer.email || 'N/A'}</p>
+        </div>
+
+        <!-- Vehículo -->
+        <div class="info-box">
+          <h3>Vehículo</h3>
+          <p><strong>Placa:</strong> ${vehicle.plate || 'N/A'}</p>
+          <p><strong>Marca / Modelo:</strong> ${vehicle.brand || ''} ${vehicle.model || ''}</p>
+          <p><strong>Año:</strong> ${vehicle.year || 'N/A'}</p>
+          <p><strong>Color:</strong> ${vehicle.color || 'N/A'}</p>
+        </div>
+      </div>
+
+      <h3>Descripción del Problema</h3>
+      <p style="background:#f9fafb; padding:18px; border-radius:6px; border-left:4px solid #0b1680;">
+        ${order.description || 'Sin descripción registrada.'}
+      </p>
+
+      <h3>Tareas / Servicios</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Tarea</th>
+            <th>Estado</th>
+            <th>Mano de Obra</th>
+            <th>Materiales</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tasks.map(task => `
+            <tr>
+              <td>${task.description || ''}</td>
+              <td>${task.status === 'COMPLETED' ? '✅ Completado' : '⏳ Pendiente'}</td>
+              <td>S/. ${Number(task.laborPrice || 0).toFixed(2)}</td>
+              <td>S/. ${Number(task.materialsCost || 0).toFixed(2)}</td>
+              <td><strong>S/. ${(Number(task.laborPrice || 0) + Number(task.materialsCost || 0)).toFixed(2)}</strong></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <div class="total-row">
+        <strong>Total a Pagar: S/. ${calculatedTotal.value}</strong>
+      </div>
+
+      <div class="footer">
+        Gracias por confiar en <strong>AutoService AW</strong><br>
+        Este documento es una copia impresa oficial de la orden de trabajo.
+      </div>
+    </body>
+    </html>
+  `;
+
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
+
+  setTimeout(() => printWindow.print(), 700);
+};
+const exportToPDF = (isReport = false) => {
+  printOrder();
+};
+
+const sendByEmail = (isReport = false) => {
+  const order = currentOrder.value;
+  alert(`Se abrirá el cliente de correo para enviar la orden #${order.trackingCode || order.id}`);
+};
+
+const shareByWhatsApp = () => {
+  const order = currentOrder.value;
+  const message = `Orden de Trabajo #${order.trackingCode || order.id} - Total: S/. ${calculatedTotal.value}`;
+  const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
+};
 </script>
 
 <template>
   <div v-if="currentOrder" class="detail-container">
     <div class="header-actions">
       <Button icon="pi pi-arrow-left" text :label="t('workOrderDetail.actions.back')" @click="goBack" />
+
       <h2>{{ t('workOrderDetail.title', { code: currentOrder.trackingCode || currentOrder.id }) }}</h2>
+      <div class="actions-right">
+        <Button
+            icon="pi pi-print"
+            :label="t('workOrderDetail.actions.print')"
+            class="p-button-outlined mr-2"
+            @click="printOrder" />
+
+        <Button
+            icon="pi pi-share-alt"
+            :label="t('workOrderDetail.actions.share')"
+            class="p-button-outlined"
+            @click="toggleShareMenu($event)" />
+      </div>
     </div>
+    <Menu ref="shareMenu" :model="shareItems" :popup="true" />
 
     <div class="layout-grid">
       <div class="main-column">
@@ -216,4 +381,32 @@ const goBack = () => {
 .w-full { width: 100%; }
 .admin-validation { padding-top: 1rem; border-top: 1px solid #e2e8f0; }
 @media (max-width: 768px) { .layout-grid { grid-template-columns: 1fr; } }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.header-actions .ml-auto {
+  margin-left: auto;
+}
+.actions-right {
+  margin-left: auto;
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actions-right {
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+}
 </style>

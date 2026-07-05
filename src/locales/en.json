@@ -646,7 +646,9 @@
   },
   "workOrderDetail": {
     "actions": {
-      "back": "Back"
+      "back": "Back",
+      "print": "Print",
+      "share": "Share"
     },
     "initialDescription": "Initial description",
     "tasks": {
