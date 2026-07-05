@@ -38,7 +38,7 @@
     "delete": {
       "title": "Eliminar Cliente",
       "description": "¿Está seguro de que desea eliminar este cliente?",
-      "delete": "Eliminar",
+      "confirm": "Eliminar",
       "cancel": "Cancelar"
     },
     "columns": {
@@ -210,7 +210,10 @@
     "title": "Iniciar Sesión",
     "welcome": "Bienvenido",
     "workshopName": "Nombre del Taller",
-    "workshopPlaceholder": "ej. MotorSport Juárez"
+    "workshopPlaceholder": "ej. MotorSport Juárez",
+    "forgotPassword": "¿Olvidó su contraseña?",
+    "forgotPasswordTitle": "Recuperar Contraseña",
+    "forgotPasswordDescription": "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña."
   },
   "mechanic": {
     "capacity": {

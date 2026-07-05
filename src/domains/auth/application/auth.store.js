@@ -99,6 +99,20 @@ export const useAuthStore = defineStore('auth', {
             this.token = null;
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-        }
+        },
+
+        async forgotPassword(email) {
+            this.loading = true;
+            this.error = null;
+            try {
+                await http.post('/auth/forgot-password', { email });
+                return { success: true, message: 'Se ha enviado un enlace de recuperación a tu correo.' };
+            } catch (err) {
+                this.error = err.response?.data?.message || 'No se pudo procesar la solicitud.';
+                return { success: false, message: this.error };
+            } finally {
+                this.loading = false;
+            }
+        },
     }
 });
