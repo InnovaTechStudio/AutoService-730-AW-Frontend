@@ -298,7 +298,7 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Message from 'primevue/message';
 import LanguageSwitcher from '../../../shared/presentation/language-switcher.vue';
-
+import { API_BASE_URL } from '../../../shared/infrastructure/http-common';
 /**
  * Login/Register component.
  * Handles authentication flow for workshop registration and login.
@@ -321,13 +321,11 @@ const form = ref({
   password: ''
 });
 const loginWithGoogle = () => {
-  // Redirige al backend para iniciar el flujo OAuth2 con Google
-  window.location.href = 'http://localhost:5024/api/v1/auth/google';
+  window.location.href = `${API_BASE_URL}/auth/google`;
 };
 
 const loginWithMicrosoft = () => {
-  // Redirige al backend para iniciar el flujo OAuth2 con Microsoft
-  window.location.href = 'http://localhost:5024/api/v1/auth/microsoft';
+  window.location.href = `${API_BASE_URL}/auth/microsoft`;
 };
 
 /**
@@ -1490,23 +1488,15 @@ export class Appointment {
 ====================
 FILE: ./src/domains/customer-trust/appointment-management/infrastructure/appointment.service.js
 ====================
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5024/api/v1/appointments';
+import http from '../../../../shared/infrastructure/http-common';
 
 export default {
-
     async getAll() {
-
-        const response = await axios.get(API_URL);
-
+        const response = await http.get('/appointments');
         return response.data;
     },
-
     async create(data) {
-
-        const response = await axios.post(API_URL, data);
-
+        const response = await http.post('/appointments', data);
         return response.data;
     }
 }
@@ -1521,6 +1511,9 @@ import {useAppointmentStore} from "../application/appointment.store.js";
 import {useVehicleStore} from "../../../fleet-management/application/vehicle.store.js";
 const vehicleStore = useVehicleStore();
 const appointmentStore = useAppointmentStore();
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const form = ref({
   customerId: '',
@@ -1543,7 +1536,7 @@ const saveAppointment = async () => {
 
   await appointmentStore.createAppointment(form.value);
 
-  alert('Cita registrada correctamente');
+  alert(t('appointments.successMessage'));
 };
 
 </script>
@@ -1554,30 +1547,30 @@ const saveAppointment = async () => {
 
     <div class="appointment-card">
 
-      <h1>Agendar cita</h1>
+      <h1>{{ $t('appointments.title') }}</h1>
 
       <div class="form-group">
-        <label>Tipo de servicio</label>
+        <label>{{ $t('appointments.serviceType') }}</label>
 
         <input
             v-model="form.serviceType"
-            placeholder="Ej: Cambio de aceite"
+            :placeholder="$t('appointments.serviceTypePlaceholder')"
         >
       </div>
 
       <div class="form-group">
-        <label>Descripción</label>
+        <label>{{ $t('appointments.description') }}</label>
 
         <textarea
             v-model="form.description"
-            placeholder="Describe el problema">
+            :placeholder="$t('appointments.descriptionPlaceholder')">
       </textarea>
       </div>
 
       <div class="form-row">
 
         <div class="form-group">
-          <label>Fecha</label>
+          <label>{{ $t('appointments.date') }}</label>
 
           <input
               type="date"
@@ -1585,7 +1578,7 @@ const saveAppointment = async () => {
         </div>
 
         <div class="form-group">
-          <label>Hora</label>
+          <label>{{ $t('appointments.time') }}</label>
 
           <input
               type="time"
@@ -1598,7 +1591,7 @@ const saveAppointment = async () => {
           class="save-btn"
           @click="saveAppointment">
 
-        Agendar cita
+        {{ $t('appointments.submit') }}
 
       </button>
 
@@ -1671,46 +1664,22 @@ h1{
 ====================
 FILE: ./src/domains/customer-trust/infrastructure/tracking.service.js
 ====================
-/**
- * @file tracking.service.js
- * @description **Tracking Service (Infrastructure Layer)**
- */
-
 import axios from 'axios';
+import { API_BASE_URL } from '../../../shared/infrastructure/http-common';
 
 const publicHttp = axios.create({
-    baseURL: 'http://localhost:5024/api/v1/tracking',
+    baseURL: `${API_BASE_URL}/tracking`,
     headers: { 'Content-type': 'application/json' }
 });
 
 export const TrackingService = {
-    getOrderByCode(trackingCode) {
-        return publicHttp.get(`/workorders?trackingCode=${trackingCode}`);
-    },
-
-    getVehicle(vehicleId) {
-        return publicHttp.get(`/vehicles/${vehicleId}`);
-    },
-
-    getTasksByOrder(workOrderId) {
-        return publicHttp.get(`/tasks?workOrderId=${workOrderId}`);
-    },
-
-    getCustomer(customerId) {
-        return publicHttp.get(`/customers/${customerId}`);
-    },
-
-    getWorkshop(workshopId) {
-        return publicHttp.get(`/workshops/${workshopId}`);
-    },
-
-    processPayment(workOrderId) {
-        return publicHttp.patch(`/workorders/${workOrderId}`, {
-            status: 'DELIVERED'
-        });
-    }
+    getOrderByCode(trackingCode) { return publicHttp.get(`/workorders?trackingCode=${trackingCode}`); },
+    getVehicle(vehicleId) { return publicHttp.get(`/vehicles/${vehicleId}`); },
+    getTasksByOrder(workOrderId) { return publicHttp.get(`/tasks?workOrderId=${workOrderId}`); },
+    getCustomer(customerId) { return publicHttp.get(`/customers/${customerId}`); },
+    getWorkshop(workshopId) { return publicHttp.get(`/workshops/${workshopId}`); },
+    processPayment(workOrderId) { return publicHttp.patch(`/workorders/${workOrderId}`, { status: 'DELIVERED' }); }
 };
-
 
 
 ====================
@@ -1855,7 +1824,6 @@ import Dialog from 'primevue/dialog';
 import RadioButton from 'primevue/radiobutton';
 
 import { TrackingService } from '../infrastructure/tracking.service';
-
 const { t } = useI18n();
 
 const trackingCode = ref('');
@@ -1881,7 +1849,7 @@ const paymentSuccess = ref(false);
 const searchOrder = async () => {
   const code = trackingCode.value.trim();
   if (!code) {
-    errorMsg.value = 'Por favor ingresa un código de seguimiento';
+    errorMsg.value = t('tracking.validationError');
     return;
   }
 
@@ -1917,7 +1885,7 @@ const searchOrder = async () => {
 
     // Verificar que el orden tenga los datos necesarios
     if (!orderData || !orderData.id) {
-      errorMsg.value = 'La orden no tiene un ID válido';
+      errorMsg.value = t('tracking.invalidId');
       loading.value = false;
       return;
     }
@@ -2268,31 +2236,31 @@ const getProgressValue = computed(() => {
     <div class="receipt-header">
       <div>
         <h1>{{ dynamicWorkshopName }}</h1>
-        <p>Contacto: {{ dynamicWorkshopEmail }}</p>
+        <p>{{ $t('tracking.receipt.contact') }} {{ dynamicWorkshopEmail }}</p>
       </div>
       <div class="receipt-meta">
-        <h2>COMPROBANTE</h2>
+        <h2>{{ $t('tracking.receipt.title') }}</h2>
         <p><strong>Código:</strong> {{ order.trackingCode || order.code || '---' }}</p>
-        <p><strong>Fecha Emisión:</strong> {{ new Date().toLocaleDateString() }}</p>
+        <p><strong>{{ $t('tracking.receipt.issueDate') }}</strong> {{ new Date().toLocaleDateString() }}</p>
       </div>
     </div>
 
     <hr class="receipt-divider" />
 
     <div class="receipt-section">
-      <h3>Datos del Cliente & Vehículo</h3>
+      <h3>{{ $t('tracking.receipt.customerVehicleData') }}</h3>
       <table class="receipt-table-info">
         <tbody> <!-- Envolver las filas en tbody -->
         <tr>
-          <td><strong>Cliente:</strong></td>
+          <td><strong>{{ $t('tracking.receipt.customer') }}</strong></td>
           <td>{{ customer?.fullName || '---' }}</td>
-          <td><strong>Vehículo:</strong></td>
+          <td><strong>{{ $t('tracking.receipt.vehicle') }}</strong></td>
           <td>{{ vehicle ? `${vehicle.brand} ${vehicle.model}` : '---' }}</td>
         </tr>
         <tr>
-          <td><strong>Estado Orden:</strong></td>
+          <td><strong>{{ $t('tracking.receipt.orderStatus') }}</strong></td>
           <td>{{ order.status }}</td>
-          <td><strong>Placa:</strong></td>
+          <td><strong>{{ $t('tracking.receipt.plate') }}</strong></td>
           <td>{{ vehicle?.plate || '---' }}</td>
         </tr>
         </tbody>
@@ -2300,12 +2268,12 @@ const getProgressValue = computed(() => {
     </div>
 
     <div class="receipt-section mt-4">
-      <h3>Detalle del Servicio</h3>
+      <h3>{{ $t('tracking.receipt.serviceDetail') }}</h3>
       <table class="receipt-main-table">
         <thead>
         <tr>
-          <th>Descripción de la Tarea / Materiales</th>
-          <th class="text-right">Mano de Obra</th>
+          <th>{{ $t('tracking.receipt.taskMaterialsDesc') }}</th>
+          <th class="text-right">{{ $t('tracking.receipt.labor') }}</th>
         </tr>
         </thead>
         <tbody>
@@ -2331,15 +2299,15 @@ const getProgressValue = computed(() => {
     <div class="receipt-summary">
       <div class="summary-box">
         <div class="summary-line">
-          <span>TOTAL COMPLEMENTARIO:</span>
+          <span>$t('tracking.receipt.complementaryTotal') }}</span>
           <strong>S/. {{ parseFloat(order.price).toFixed(2) }}</strong>
         </div>
       </div>
     </div>
 
     <div class="receipt-footer">
-      <p>Gracias por confiar en {{ dynamicWorkshopName }}.</p>
-      <p>Este documento es un comprobante digital de seguimiento de servicios automotrices.</p>
+      <p>{{ $t('tracking.receipt.thankYou') }} {{ dynamicWorkshopName }}.</p>
+      <p>{{ $t('tracking.receipt.footerDisclaimer') }}</p>
     </div>
   </div>
 </template>
@@ -2738,8 +2706,6 @@ defineEmits(['edit', 'view-detail']);
 
       <div class="vehicle-meta">
         <span><i class="pi pi-id-card"></i>{{ vehicle.plate }}</span>
-        <span><i class="pi pi-calendar"></i>{{ vehicle.year }}</span>
-        <span><i class="pi pi-palette"></i>{{ vehicle.color }}</span>
       </div>
 
       <div class="vehicle-progress-container">
@@ -3024,7 +2990,7 @@ const progress = computed(() => {
  */
 const getProgressByStatus = (status) => {
   if ([VEHICLE_STATUS.READY, VEHICLE_STATUS.DELIVERED, ORDER_STATUS.FINISHED, ORDER_STATUS.DELIVERED].includes(status)) return 100;
-  if ([VEHICLE_STATUS.IN_WORKSHOP, ORDER_STATUS.IN_PROGRESS].includes(status)) return 65;
+  if (status === ORDER_STATUS.IN_PROGRESS) return 65;
   if (status === ORDER_STATUS.PENDING) return 15;
   return 0;
 };
@@ -3102,7 +3068,6 @@ const goToOrder = (orderId) => router.push(`/work-orders/${orderId}`);
             <div>
               <span class="plate-badge">{{ vehicle.plate }}</span>
               <h2>{{ vehicle.brand }} {{ vehicle.model }}</h2>
-              <p>{{ vehicle.year }} · {{ vehicle.color }}</p>
             </div>
 
             <div class="progress-block">
@@ -4387,7 +4352,7 @@ const getProfitLabel = (unitProfit) => {
 
         <div v-else class="image-placeholder">
           <i class="pi pi-box"></i>
-          <span>Sin imagen</span>
+          <span>{{ $t('inventory.labels.noImage') }}</span>
         </div>
 
         <div class="header-tags">
@@ -4432,17 +4397,17 @@ const getProfitLabel = (unitProfit) => {
 
       <div class="product-details">
         <div>
-          <span>Marca</span>
+          <span>{{ $t('inventory.labels.brand') }}</span>
           <strong>{{ item.brand || 'Genérica' }}</strong>
         </div>
 
         <div>
-          <span>Presentación</span>
+          <span>{{ $t('inventory.labels.presentation') }}</span>
           <strong>{{ item.presentation || 'Unidad' }}</strong>
         </div>
 
         <div>
-          <span>Unidad de medida</span>
+          <span>{{ $t('inventory.labels.unitMeasure') }}</span>
           <strong>{{ item.unitMeasure || 'UNIT' }}</strong>
         </div>
       </div>
@@ -4450,8 +4415,8 @@ const getProfitLabel = (unitProfit) => {
       <div class="financial-section">
         <div class="financial-header">
           <div>
-            <span>Información financiera</span>
-            <small>Rentabilidad por unidad</small>
+            <span>{{ $t('inventory.labels.financialInfo') }}</span>
+            <small>{{ $t('inventory.labels.unitProfit') }}</small>
           </div>
 
           <Tag
@@ -4463,17 +4428,17 @@ const getProfitLabel = (unitProfit) => {
 
         <div class="financial-grid">
           <div>
-            <span>Precio de compra</span>
+            <span>{{ $t('inventory.labels.purchasePrice') }}</span>
             <strong>{{ formatCurrency(item.purchasePrice) }}</strong>
           </div>
 
           <div>
-            <span>Precio de venta</span>
+            <span>{{ $t('inventory.labels.salePrice') }}</span>
             <strong>{{ formatCurrency(item.unitPrice) }}</strong>
           </div>
 
           <div class="profit-box">
-            <span>Utilidad unitaria</span>
+            <span>{ $t('inventory.labels.unitProfit') }}</span>
             <strong
                 :class="{
                   'positive-profit': toNumber(item.unitProfit) > 0,
@@ -4489,7 +4454,7 @@ const getProfitLabel = (unitProfit) => {
       <div class="stock-section">
         <div class="stock-summary">
           <div>
-            <span>Stock actual</span>
+            <span>{{ $t('inventory.labels.currentStock') }}</span>
             <strong>
               {{ item.stock }}
               {{ item.unitMeasure || 'UNIT' }}
@@ -4519,7 +4484,7 @@ const getProfitLabel = (unitProfit) => {
         </div>
 
         <small>
-          Stock mínimo recomendado: {{ item.minStock }}
+          {{ $t('inventory.labels.stockMinRecommended') }} {{ item.minStock }}
         </small>
       </div>
 
@@ -4527,7 +4492,7 @@ const getProfitLabel = (unitProfit) => {
           v-if="item.compatibleVehicleBrands?.length"
           class="compatibility"
       >
-        <span>Compatible con:</span>
+        <span>{{ $t('inventory.labels.compatibleWith') }}</span>
 
         <div class="brand-tags">
           <Tag
@@ -4542,7 +4507,7 @@ const getProfitLabel = (unitProfit) => {
 
       <div class="card-actions">
         <Button
-            label="Actualizar stock"
+            :label="$t('inventory.labels.updateStock')"
             icon="pi pi-refresh"
             outlined
             class="stock-button"
@@ -5603,9 +5568,9 @@ const deleteItem = async (item) => {
         </div>
 
         <div>
-          <span>Total de productos</span>
+          <span>{{ $t('inventory.kpis.totalProducts') }}</span>
           <h2>{{ totalItems }}</h2>
-          <small>Productos diferentes registrados</small>
+          <small>{{ $t('inventory.kpis.totalProductsDesc') }}</small>
         </div>
       </div>
 
@@ -5615,9 +5580,9 @@ const deleteItem = async (item) => {
         </div>
 
         <div>
-          <span>Costo del inventario</span>
+          <span>{{ $t('inventory.kpis.inventoryCost') }}</span>
           <h2>{{ formatCurrency(inventoryPurchaseValue) }}</h2>
-          <small>Valor según precios de compra</small>
+          <small>{{ $t('inventory.kpis.inventoryCostDesc') }}</small>
         </div>
       </div>
 
@@ -5627,9 +5592,9 @@ const deleteItem = async (item) => {
         </div>
 
         <div>
-          <span>Valor potencial de venta</span>
+          <span>{{ $t('inventory.kpis.potentialValue') }}</span>
           <h2>{{ formatCurrency(inventorySaleValue) }}</h2>
-          <small>Valor según precios de venta</small>
+          <small>{{ $t('inventory.kpis.potentialValueDesc') }}</small>
         </div>
       </div>
 
@@ -5645,15 +5610,13 @@ const deleteItem = async (item) => {
         </div>
 
         <div>
-          <span>Utilidad potencial</span>
+          <span>{{ $t('inventory.kpis.potentialProfit') }}</span>
           <h2>
             {{ formatCurrency(potentialInventoryProfit) }}
           </h2>
 
           <small>
-            {{ lowStockItems }}
-            producto{{ lowStockItems === 1 ? '' : 's' }}
-            con stock bajo
+            {{ lowStockItems }} {{ $t('inventory.kpis.lowStockCount') }}
           </small>
         </div>
       </div>
@@ -5674,7 +5637,7 @@ const deleteItem = async (item) => {
           :options="brandOptions"
           optionLabel="label"
           optionValue="value"
-          placeholder="Todas las marcas"
+          :placeholder=" $t('inventory.filters.allTiers') "
           showClear
           class="filter-select"
       />
@@ -5684,13 +5647,13 @@ const deleteItem = async (item) => {
           :options="qualityTiers"
           optionLabel="label"
           optionValue="value"
-          placeholder="Todas las gamas"
+          :placeholder=" $t('inventory.filters.allTiers') "
           showClear
           class="filter-select"
       />
 
       <Button
-          label="Limpiar filtros"
+          :label=" $t('inventory.filters.clear') "
           icon="pi pi-filter-slash"
           severity="secondary"
           outlined
@@ -5798,7 +5761,7 @@ const deleteItem = async (item) => {
 
         <div class="row-grid">
           <div class="field">
-            <label>Gama o nivel de calidad</label>
+            <label>{{ $t('inventory.labels.qualityTier') }}</label>
 
             <Select
                 v-model="itemForm.qualityTier"
@@ -5809,7 +5772,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="field">
-            <label>Presentación</label>
+            <label>{{ $t('inventory.labels.presentation') }}</label>
 
             <InputText
                 v-model.trim="itemForm.presentation"
@@ -5820,7 +5783,7 @@ const deleteItem = async (item) => {
 
         <div class="row-grid">
           <div class="field">
-            <label>Unidad de medida</label>
+            <label>{{ $t('inventory.labels.unitMeasure') }}</label>
 
             <Select
                 v-model="itemForm.unitMeasure"
@@ -5831,7 +5794,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="field">
-            <label>Especificación técnica</label>
+            <label>{{ $t('inventory.labels.technicalSpec') }}</label>
 
             <InputText
                 v-model.trim="itemForm.specification"
@@ -5843,17 +5806,16 @@ const deleteItem = async (item) => {
         <div class="financial-form-section">
           <div class="section-header">
             <div>
-              <span>Información financiera</span>
+              <span>{{ $t('inventory.labels.financialInfo') }}</span>
               <small>
-                Define el costo interno y el precio cobrado
-                al cliente.
+                {{ $t('inventory.labels.financialInfoDesc') }}
               </small>
             </div>
           </div>
 
           <div class="row-grid">
             <div class="field">
-              <label>Precio de compra</label>
+              <label>{{ $t('inventory.labels.purchasePrice') }}</label>
 
               <InputNumber
                   v-model="itemForm.purchasePrice"
@@ -5885,7 +5847,7 @@ const deleteItem = async (item) => {
 
           <div class="profit-preview">
             <div>
-              <span>Utilidad por unidad</span>
+              <span>{{ $t('inventory.labels.unitProfit') }}</span>
 
               <strong
                   :class="{
@@ -5898,7 +5860,7 @@ const deleteItem = async (item) => {
             </div>
 
             <div>
-              <span>Margen estimado</span>
+              <span>{{ $t('inventory.labels.estimatedMargin') }}</span>
 
               <strong
                   :class="{
@@ -5914,7 +5876,7 @@ const deleteItem = async (item) => {
 
         <div class="row-grid">
           <div class="field">
-            <label>Stock actual</label>
+            <label>{{ $t('inventory.labels.currentStock') }}</label>
 
             <div class="stock-readonly-panel">
               <div class="stock-readonly-value">
@@ -5950,7 +5912,7 @@ const deleteItem = async (item) => {
         </div>
 
         <div class="field">
-          <label>Imagen del material</label>
+          <label>{{ $t('inventory.labels.itemImage') }}</label>
 
           <div class="file-upload-container">
             <label
@@ -5958,7 +5920,7 @@ const deleteItem = async (item) => {
                 class="file-upload-btn"
             >
               <i class="pi pi-upload"></i>
-              Seleccionar imagen
+              {{ $t('inventory.labels.selectImage') }}
             </label>
 
             <input
@@ -5980,8 +5942,7 @@ const deleteItem = async (item) => {
             </div>
 
             <small v-else>
-              Se utilizará una imagen predeterminada
-              según la categoría.
+              {{ $t('inventory.labels.defaultImageWarning') }}
             </small>
           </div>
         </div>
@@ -5994,7 +5955,7 @@ const deleteItem = async (item) => {
               class="dialog-footer-left"
           >
             <Button
-                label="Eliminar"
+                :label=" $t('inventory.labels.delete') "
                 icon="pi pi-trash"
                 severity="danger"
                 text
@@ -6003,7 +5964,7 @@ const deleteItem = async (item) => {
             />
 
             <Button
-                label="Registrar recepción"
+                :label=" $t('inventory.labels.registerReceipt') "
                 icon="pi pi-truck"
                 severity="success"
                 outlined
@@ -6035,7 +5996,7 @@ const deleteItem = async (item) => {
 
     <Dialog
         v-model:visible="displayReceiptDialog"
-        header="Registrar recepción de proveedor"
+        :header=" $t('inventory.receipt.title') "
         :modal="true"
         :closable="!receivingStock"
         :style="{
@@ -6090,7 +6051,7 @@ const deleteItem = async (item) => {
           <div class="row-grid">
             <div class="field">
               <label>
-                Cantidad recibida
+                {{ $t('inventory.receipt.receivedQuantity') }}
                 <span class="required">*</span>
               </label>
 
@@ -6104,7 +6065,7 @@ const deleteItem = async (item) => {
 
             <div class="field">
               <label>
-                Proveedor
+                {{ $t('inventory.receipt.provider') }}
                 <span class="required">*</span>
               </label>
 
@@ -6117,7 +6078,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="field">
-            <label>Número de documento</label>
+            <label>{{ $t('inventory.receipt.documentNumber') }}</label>
 
             <InputText
                 v-model.trim="receiptForm.documentNumber"
@@ -6127,7 +6088,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="field">
-            <label>Observaciones</label>
+            <label>{{ $t('inventory.receipt.notes') }}</label>
 
             <Textarea
                 v-model.trim="receiptForm.notes"
@@ -6139,7 +6100,7 @@ const deleteItem = async (item) => {
           </div>
 
           <div class="receipt-stock-preview">
-            <span>Stock después de la recepción</span>
+            <span>{{ $t('inventory.receipt.stockAfter') }}</span>
             <strong>
               {{
                 toInteger(receiptItem.stock, 0) +
@@ -6153,7 +6114,7 @@ const deleteItem = async (item) => {
       <template #footer>
         <div class="dialog-footer-actions receipt-footer">
           <Button
-              label="Cerrar"
+              :label=" $t('inventory.receipt.close') "
               text
               severity="secondary"
               :disabled="receivingStock"
@@ -6161,7 +6122,7 @@ const deleteItem = async (item) => {
           />
 
           <Button
-              label="Registrar ingreso"
+              :label=" $t('inventory.receipt.submit') "
               icon="pi pi-check"
               severity="success"
               :loading="receivingStock"
@@ -7531,7 +7492,7 @@ const readyForAdministrativeReview = computed(() =>
 const inventoryOptions = computed(() =>
     inventoryStore.items.map(item => ({
       ...item,
-      disabled: toInteger(item.stock) <= 0
+      disabled: false
     }))
 );
 
@@ -8083,7 +8044,7 @@ const getTaskSeverity = (task) => {
           </div>
 
           <Tag
-              value="Información técnica"
+              :value=" $t('tasks.dialogExt.financialInfo') "
               severity="info"
           />
         </div>
@@ -8354,13 +8315,11 @@ const getTaskSeverity = (task) => {
 
           <div>
             <strong>
-              Propuesta para cotización
+              {{ $t('tasks.dialogExt.proposalNoticeTitle') }}
             </strong>
 
             <span>
-              Define el trabajo, tiempo y materiales.
-              El administrador establecerá la mano de
-              obra, los costos y la cotización final.
+              {{ $t('tasks.dialogExt.proposalNoticeDesc') }}
             </span>
           </div>
         </div>
@@ -8451,7 +8410,6 @@ const getTaskSeverity = (task) => {
                 :options="inventoryOptions"
                 optionLabel="name"
                 optionValue="id"
-                optionDisabled="disabled"
                 filter
                 showClear
                 placeholder="Buscar repuesto..."
@@ -13905,7 +13863,7 @@ const props = defineProps({
   }
 });
 
-defineEmits([
+const emit = defineEmits([
   'update:visible',
   'save',
   'cancel'
@@ -14043,7 +14001,7 @@ watch(
 const inventoryOptions = computed(() =>
     inventoryStore.items.map(item => ({
       ...item,
-      disabled: toInteger(item.stock) <= 0
+      disabled: false
     }))
 );
 
@@ -14296,6 +14254,26 @@ watch(
       immediate: true
     }
 );
+const handleSave = () => {
+  if (!props.task.status || props.task.status === 'PENDING') {
+    props.task.adminReviewStatus = 'APPROVED';
+    props.task.customerReportStatus = 'VISIBLE';
+  }
+  emit('save');
+};
+
+watch(
+    () => props.task.estimatedTime,
+    (newTime) => {
+      if (!props.task.id && newTime > 0) {
+        const costPerMinute = 0.50;
+
+        props.task.laborCost = roundToTwoDecimals(newTime * costPerMinute);
+
+        props.task.laborPrice = roundToTwoDecimals(props.task.laborCost * 2);
+      }
+    }
+);
 </script>
 
 <template>
@@ -14509,7 +14487,6 @@ watch(
               :options="inventoryOptions"
               optionLabel="name"
               optionValue="id"
-              optionDisabled="disabled"
               filter
               showClear
               :placeholder="
@@ -14752,14 +14729,12 @@ watch(
       <Button
           :label="
             task?.id
-              ? t(
-                  'tasks.actions.saveChanges'
-                )
+              ? t('tasks.actions.saveChanges')
               : t('tasks.actions.create')
           "
           icon="pi pi-check"
           class="save-btn"
-          @click="$emit('save')"
+          @click="handleSave"
       />
     </template>
   </Dialog>
@@ -15875,7 +15850,7 @@ const fetchFinancialSummary = async () => {
     financialError.value =
         error?.response?.data?.message ||
         error?.message ||
-        'No se pudo cargar el resumen financiero.';
+        t('dashboard.financial.fetchError');
 
     console.error(
         'Error cargando el resumen financiero:',
@@ -16180,19 +16155,19 @@ const weeklyIncomeData = computed(() => {
         labels,
         datasets: [
           {
-            label: 'Ingresos',
+            label: t('dashboard.financial.chart.income'),
             data: revenues,
             backgroundColor: '#0b1680',
             borderRadius: 10
           },
           {
-            label: 'Costos',
+            label: t('dashboard.financial.chart.costs'),
             data: costs,
             backgroundColor: '#f59e0b',
             borderRadius: 10
           },
           {
-            label: 'Ganancia',
+            label: t('dashboard.financial.chart.profit'),
             data: profits,
             backgroundColor: '#16a34a',
             borderRadius: 10
@@ -16394,8 +16369,8 @@ const orderProfitability = computed(() =>
 
 const financialResultLabel = computed(() =>
     financialSummary.value.grossProfit >= 0
-        ? 'Ganancia bruta'
-        : 'Pérdida bruta'
+        ? t('dashboard.financial.grossProfit')
+        : t('dashboard.financial.grossLoss')
 );
 </script>
 
@@ -16444,14 +16419,13 @@ const financialResultLabel = computed(() =>
       <div class="section-heading">
         <div>
           <span class="section-eyebrow">
-            Rendimiento financiero
+            {{ $t('dashboard.financial.eyebrow') }}
           </span>
 
-          <h2>Ganancias, costos y pérdidas</h2>
+          <h2>{{ $t('dashboard.financial.title') }}</h2>
 
           <p>
-            Resumen calculado según las órdenes,
-            tareas, mano de obra y materiales registrados.
+            {{ $t('dashboard.financial.description') }}
           </p>
         </div>
 
@@ -16470,7 +16444,7 @@ const financialResultLabel = computed(() =>
               "
           ></i>
 
-          Actualizar
+          {{ $t('dashboard.financial.refresh') }}
         </button>
       </div>
 
@@ -16489,7 +16463,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Ingresos proyectados</span>
+            <span>{{ $t('dashboard.financial.projectedRevenue') }}</span>
             <strong>
               {{
                 formatCurrency(
@@ -16499,7 +16473,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Total estimado según órdenes registradas
+              {{ $t('dashboard.financial.projectedRevenueDesc') }}
             </small>
           </div>
         </article>
@@ -16510,7 +16484,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Ingresos realizados</span>
+            <span>{{ $t('dashboard.financial.realizedRevenue') }}</span>
             <strong>
               {{
                 formatCurrency(
@@ -16520,7 +16494,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Ingresos de servicios finalizados
+              {{ $t('dashboard.financial.realizedRevenueDesc') }}
             </small>
           </div>
         </article>
@@ -16531,7 +16505,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Ingresos pendientes</span>
+            <span>{{ $t('dashboard.financial.pendingRevenue') }}</span>
             <strong>
               {{
                 formatCurrency(
@@ -16541,7 +16515,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Importe aún pendiente de realización
+              {{ $t('dashboard.financial.pendingRevenueDesc') }}
             </small>
           </div>
         </article>
@@ -16552,7 +16526,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Costos operativos</span>
+            <span>{{ $t('dashboard.financial.operatingCost') }}</span>
             <strong>
               {{
                 formatCurrency(
@@ -16562,7 +16536,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Mano de obra y materiales utilizados
+              {{ $t('dashboard.financial.operatingCostDesc') }}
             </small>
           </div>
         </article>
@@ -16606,7 +16580,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              Margen:
+              {{ $t('dashboard.financial.margin') }}
               {{
                 formatPercentage(
                     financialSummary.marginPercentage
@@ -16622,7 +16596,7 @@ const financialResultLabel = computed(() =>
           </div>
 
           <div>
-            <span>Ticket promedio</span>
+            <span>{{ $t('dashboard.financial.averageTicket') }}</span>
 
             <strong>
               {{
@@ -16633,14 +16607,7 @@ const financialResultLabel = computed(() =>
             </strong>
 
             <small>
-              {{
-                financialSummary.profitableOrders
-              }}
-              rentables ·
-              {{
-                financialSummary.lossOrders
-              }}
-              con pérdida
+              {{ $t('dashboard.financial.ticketStats', { profitable: financialSummary.profitableOrders, loss: financialSummary.lossOrders }) }}
             </small>
           </div>
         </article>
@@ -16673,14 +16640,13 @@ const financialResultLabel = computed(() =>
       <div class="section-heading">
         <div>
           <span class="section-eyebrow">
-            Rentabilidad por orden
+            {{ $t('dashboard.profitability.eyebrow') }}
           </span>
 
-          <h2>Resultados de servicios realizados</h2>
+          <h2>{{ $t('dashboard.profitability.title') }}</h2>
 
           <p>
-            Comparación entre ingresos, costos y utilidad
-            obtenida por cada orden de trabajo.
+            {{ $t('dashboard.profitability.description') }}
           </p>
         </div>
       </div>
@@ -16692,12 +16658,12 @@ const financialResultLabel = computed(() =>
         <table class="profitability-table">
           <thead>
           <tr>
-            <th>Orden</th>
-            <th>Ingresos</th>
-            <th>Costos</th>
-            <th>Resultado</th>
-            <th>Margen</th>
-            <th>Estado</th>
+            <th>{{ $t('dashboard.profitability.columns.order') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.income') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.costs') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.result') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.margin') }}</th>
+            <th>{{ $t('dashboard.profitability.columns.status') }}</th>
           </tr>
           </thead>
 
@@ -16751,8 +16717,8 @@ const financialResultLabel = computed(() =>
                 >
                   {{
                     order.profit >= 0
-                        ? 'Rentable'
-                        : 'Con pérdida'
+                        ? $t('dashboard.profitability.status.profitable')
+                        : $t('dashboard.profitability.status.loss')
                   }}
                 </span>
             </td>
@@ -16767,11 +16733,10 @@ const financialResultLabel = computed(() =>
       >
         <i class="pi pi-chart-bar"></i>
 
-        <h3>Aún no existen resultados financieros</h3>
+        <h3>{{ $t('dashboard.profitability.empty.title') }}</h3>
 
         <p>
-          La rentabilidad por orden aparecerá cuando se
-          registren órdenes con tareas, costos y precios.
+          {{ $t('dashboard.profitability.empty.description') }}
         </p>
       </div>
     </section>
@@ -19483,59 +19448,32 @@ export default router;
 ====================
 FILE: ./src/shared/infrastructure/http-common.js
 ====================
-/**
- * Shared Axios HTTP client configuration.
- * Adds default headers and authentication token interceptor.
- */
-
 import axios from 'axios';
 
-const LOCAL_API_URL = 'http://localhost:5024/api/v1';
+const baseURL = import.meta.env.VITE_API_URL || 'https://autoservice-aw-backend.onrender.com/api/v1';
 
-const PRODUCTION_API_URL =
-    'http://localhost:5024/api/v1';
-
-/**
- * Resolves the API base URL according to the current environment.
- * VITE_API_URL can override the default URL when necessary.
- */
-const getApiBaseUrl = () => {
-    const configuredApiUrl =
-        import.meta.env.VITE_API_URL?.trim();
-
-    if (configuredApiUrl) {
-        return configuredApiUrl.replace(/\/+$/, '');
-    }
-
-    return import.meta.env.DEV
-        ? LOCAL_API_URL
-        : PRODUCTION_API_URL;
-};
+export const API_BASE_URL = baseURL;
 
 const http = axios.create({
-    baseURL: getApiBaseUrl(),
+    baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json'
     }
 });
 
-/**
- * Injects JWT token into outgoing requests.
- */
 http.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
-
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-
         return config;
     },
     (error) => Promise.reject(error)
 );
 
 export default http;
+
 
 
 ====================

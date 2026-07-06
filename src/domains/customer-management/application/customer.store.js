@@ -14,6 +14,7 @@
 import { defineStore } from 'pinia';
 import { CustomerService } from '../infrastructure/customer.service.js';
 import { Customer } from '../domain/customer.entity.js';
+import i18n from '../../../i18n.js';
 
 /**
  * Customer Management Store using Pinia.
@@ -59,8 +60,7 @@ export const useCustomerStore = defineStore('customer', {
                 this.customers.push(savedCustomer);
                 return savedCustomer;
             } catch (error) {
-                this.error = t('customers.errors.createError');
-                console.error(this.error, error);
+                this.error = i18n.global.t('customers.errors.createError');
                 throw error;
             }
         },
@@ -83,8 +83,7 @@ export const useCustomerStore = defineStore('customer', {
                     this.customers.splice(index, 1, customerFromApi);
                 }
             } catch (error) {
-                this.error = 'customers.errors.updateError';
-                console.error(this.error, error);
+                this.error = i18n.global.t('customers.errors.updateError');
                 throw error;
             }
         },

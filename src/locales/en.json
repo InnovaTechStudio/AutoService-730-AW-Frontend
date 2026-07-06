@@ -24,6 +24,7 @@
     "question": "Are you a customer of the workshop?"
   },
   "common": {
+    "emptyColumn": "No items",
     "action": "Action",
     "code": "Code",
     "language": "Language",
@@ -137,7 +138,8 @@
       }
     },
     "defaults": {
-      "vehicle": "Vehicle"
+      "vehicle": "Vehicle",
+      "plate": "No plate"
     },
     "vehicleStatus": {
       "qaReady": "Ready for Quality Control",
@@ -858,6 +860,10 @@
     "pending": "Pending",
     "in_progress": "In Progress",
     "finished": "Finished",
+    "delivered": "Delivered",
     "cancelled": "Cancelled"
+  },
+  "layout": {
+    "brand": "AutoService AW"
   }
 }

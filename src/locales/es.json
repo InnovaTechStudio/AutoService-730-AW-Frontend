@@ -24,6 +24,7 @@
     "question": "¿Es cliente del taller?"
   },
   "common": {
+    "emptyColumn": "Sin items",
     "action": "Acción",
     "code": "Código",
     "language": "Idioma",
@@ -137,7 +138,8 @@
       }
     },
     "defaults": {
-      "vehicle": "Vehículo"
+      "vehicle": "Vehículo",
+      "plate": "Sin placa"
     },
     "vehicleStatus": {
       "qaReady": "Listo para Control de Calidad",
@@ -858,6 +860,10 @@
     "pending": "Pendiente",
     "in_progress": "En Proceso",
     "finished": "Finalizado",
+    "delivered": "Entregada",
     "cancelled": "Cancelado"
+  },
+  "layout": {
+    "brand": "AutoService AW"
   }
 }
