@@ -255,7 +255,7 @@ const getProfitLabel = (unitProfit) => {
 
       <div class="card-actions">
         <Button
-            label="{{ $t('inventory.labels.updateStock') }}"
+            :label="$t('inventory.labels.updateStock')"
             icon="pi pi-refresh"
             outlined
             class="stock-button"

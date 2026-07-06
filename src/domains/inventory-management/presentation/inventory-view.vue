@@ -729,7 +729,7 @@ const deleteItem = async (item) => {
           :options="brandOptions"
           optionLabel="label"
           optionValue="value"
-          placeholder="{{ $t('inventory.filters.allTiers') }}"
+          :placeholder=" $t('inventory.filters.allTiers') "
           showClear
           class="filter-select"
       />
@@ -739,13 +739,13 @@ const deleteItem = async (item) => {
           :options="qualityTiers"
           optionLabel="label"
           optionValue="value"
-          placeholder="{{ $t('inventory.filters.allTiers') }}"
+          :placeholder=" $t('inventory.filters.allTiers') "
           showClear
           class="filter-select"
       />
 
       <Button
-          label="{{ $t('inventory.filters.clear') }}"
+          :label=" $t('inventory.filters.clear') "
           icon="pi pi-filter-slash"
           severity="secondary"
           outlined
@@ -1047,7 +1047,7 @@ const deleteItem = async (item) => {
               class="dialog-footer-left"
           >
             <Button
-                label="{{ $t('inventory.labels.delete') }}"
+                :label=" $t('inventory.labels.delete') "
                 icon="pi pi-trash"
                 severity="danger"
                 text
@@ -1056,7 +1056,7 @@ const deleteItem = async (item) => {
             />
 
             <Button
-                label="{{ $t('inventory.labels.registerReceipt') }}"
+                :label=" $t('inventory.labels.registerReceipt') "
                 icon="pi pi-truck"
                 severity="success"
                 outlined
@@ -1088,7 +1088,7 @@ const deleteItem = async (item) => {
 
     <Dialog
         v-model:visible="displayReceiptDialog"
-        header="{{ $t('inventory.receipt.title') }}"
+        :header=" $t('inventory.receipt.title') "
         :modal="true"
         :closable="!receivingStock"
         :style="{
@@ -1206,7 +1206,7 @@ const deleteItem = async (item) => {
       <template #footer>
         <div class="dialog-footer-actions receipt-footer">
           <Button
-              label="{{ $t('inventory.receipt.close') }}"
+              :label=" $t('inventory.receipt.close') "
               text
               severity="secondary"
               :disabled="receivingStock"
@@ -1214,7 +1214,7 @@ const deleteItem = async (item) => {
           />
 
           <Button
-              label="{{ $t('inventory.receipt.submit') }}"
+              :label=" $t('inventory.receipt.submit') "
               icon="pi pi-check"
               severity="success"
               :loading="receivingStock"

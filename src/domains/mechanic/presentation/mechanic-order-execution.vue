@@ -811,7 +811,7 @@ const getTaskSeverity = (task) => {
           </div>
 
           <Tag
-              value="{{ $t('tasks.dialogExt.financialInfo') }}"
+              :value=" $t('tasks.dialogExt.financialInfo') "
               severity="info"
           />
         </div>
