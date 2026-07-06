@@ -72,11 +72,19 @@ const closeSidebar = () => {
     >
 
       <div class="logo-area">
-        <h2>{{ t('layout.brand') }}</h2>
+        <img
+            src="/AutoService-logo.jpg"
+            alt="AutoService Logo"
+            class="logo"
+        />
 
-        <span class="subtitle">
-          {{ t('nav.controlPanel') }}
-        </span>
+        <div class="logo-text">
+          <h2>{{ t('layout.brand') }}</h2>
+
+          <span class="subtitle">
+            {{ t('nav.controlPanel') }}
+          </span>
+        </div>
       </div>
 
       <nav class="menu">
@@ -238,13 +246,28 @@ const closeSidebar = () => {
 }
 
 .logo-area {
-  padding: 1.8rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 1.5rem;
   border-bottom: 1px solid #1e293b;
 }
+.logo {
+  width: 48px;
+  height: 48px;
 
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
 .logo-area h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
