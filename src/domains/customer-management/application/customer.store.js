@@ -73,7 +73,7 @@ export const useCustomerStore = defineStore('customer', {
          * @returns {Promise<void>}
          */
         async updateCustomer(id, customerData) {
-            const { t } = useI18n();
+
             try {
                 const updatedCustomer = Customer(customerData);
                 const response = await CustomerService.update(id, updatedCustomer);
@@ -95,13 +95,13 @@ export const useCustomerStore = defineStore('customer', {
          * @returns {Promise<void>}
          */
         async deleteCustomer(id) {
-            const { t } = useI18n();
             try {
                 await CustomerService.delete(id);
                 this.customers = this.customers.filter(c => String(c.id) !== String(id));
             } catch (error) {
-                this.error = 'customers.errors.deleteError';
-                console.error(this.error, error);
+                this.error = i18n.global.t('customers.errors.deleteError');
+                console.error(error);
+                throw error;
             }
         }
     }
