@@ -19,13 +19,13 @@ import ProgressBar from 'primevue/progressbar';
 import Select from 'primevue/select';
 import Tag from 'primevue/tag';
 import Textarea from 'primevue/textarea';
-
 import App from './App.vue';
 import i18n from './i18n.js';
 import router from './router';
 
 import 'primeicons/primeicons.css';
 import './style.css';
+import {Tooltip} from "primevue";
 
 const app = createApp(App);
 
@@ -44,7 +44,7 @@ app.use(PrimeVue, {
         }
     }
 });
-
+app.directive('tooltip', Tooltip)
 // ── Global components ─────────────────────────────────────
 app.component('Avatar', Avatar);
 app.component('Button', Button);
