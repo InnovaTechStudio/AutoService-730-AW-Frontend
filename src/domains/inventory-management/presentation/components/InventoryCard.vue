@@ -186,7 +186,7 @@ const getProfitLabel = (unitProfit) => {
           </div>
 
           <div class="profit-box">
-            <span>{ $t('inventory.labels.unitProfit') }}</span>
+            <span>{{ $t('inventory.labels.unitProfit') }}</span>
             <strong
                 :class="{
                   'positive-profit': toNumber(item.unitProfit) > 0,
